@@ -122,12 +122,7 @@ private fun NextSong(musicState: PlaybackUiState, swatchColor: Color, onClick: (
   ) {
     Text(
       text = stringResource(R.string.next_song, musicState.nextSong.title),
-      color = Color(
-        if (LocalTheme.current.isLight) {
-          "#a8a8a8"
-        } else {
-          "#e5e5e5"
-        }.toColorInt()
+      color = Color("#a8a8a8".toColorInt()
       ),
       fontSize = 14.sp,
       textAlign = TextAlign.Center,

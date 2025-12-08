@@ -49,7 +49,6 @@ import remix.myplayer.lyric.provider.ILyricsProvider
 import remix.myplayer.misc.helper.MusicServiceRemote
 import remix.myplayer.service.playback.MusicStateSource
 import remix.myplayer.ui.nav.MessageNotifier
-import remix.myplayer.ui.theme.ThemeController
 import remix.myplayer.ui.widget.lyric.DesktopLyricOverlay
 import remix.myplayer.ui.widget.lyric.DesktopLyricUiState
 import remix.myplayer.util.Util
@@ -72,7 +71,6 @@ interface LyricManagerEntryPoint {
 class LyricManager @Inject constructor(
   @ApplicationContext
   private val context: Context,
-  private val themeController: ThemeController,
   val desktopLyricPrefs: DesktopLyricPrefs,
   val lyricPrefs: LyricPrefs,
   val lyricSearcher: LyricSearcher
@@ -278,7 +276,6 @@ class LyricManager @Inject constructor(
 
         DesktopLyricOverlay(
           this@LyricManager,
-          themeController,
           onLock = {
             isDesktopLyricLocked = !desktopLyricPrefs.locked
           },

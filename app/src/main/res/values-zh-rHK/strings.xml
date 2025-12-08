@@ -295,6 +295,8 @@
   <string name="artist_desc">藝術家降序</string>
   <string name="genre">流派</string>
   <string name="genre_desc">流派降序</string>
+  <string name="date_create">创建時間</string>
+  <string name="date_create_desc">创建時間降序</string>
   <string name="date_modify">修改時間</string>
   <string name="date_modify_desc">修改時間降序</string>
   <string name="count">播放次數</string>

@@ -41,8 +41,8 @@ object ItemsSorter {
         SortOrder.ARTIST_Z_A -> compare(o2.artist, o1.artist)
         SortOrder.ALBUM_A_Z -> compare(o1.album, o2.album)
         SortOrder.ALBUM_Z_A -> compare(o2.album, o1.album)
-        SortOrder.DATE -> o1.dateModified.compareTo(o2.dateModified)
-        SortOrder.DATE_DESC -> o2.dateModified.compareTo(o1.dateModified)
+        SortOrder.DATE -> o1.dateCreated.compareTo(o2.dateCreated)
+        SortOrder.DATE_DESC -> o2.dateCreated.compareTo(o1.dateCreated)
         SortOrder.DISPLAY_NAME_A_Z -> compare(o1.displayName, o2.displayName)
         SortOrder.DISPLAY_NAME_Z_A -> compare(o2.displayName, o1.displayName)
         else -> 0

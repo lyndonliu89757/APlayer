@@ -179,8 +179,6 @@ object PrefKeys {
     const val NAME = "aplayer-theme"
     const val PRIMARY_COLOR = "primary_color"
     const val SECONDARY_COLOR = "accent_color"
-    const val DARK_THEME = "dark_theme"
-    const val BLACK_THEME = "black_theme"
     const val COLOR_NAVIGATION = "color_navigation"
 
     override val latestVersion = 1

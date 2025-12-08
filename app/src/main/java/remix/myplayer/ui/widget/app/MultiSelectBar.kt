@@ -131,7 +131,7 @@ fun MultiSelectBar(
             text = {
               Text(
                 stringResource(R.string.select_all),
-                color = if (theme.isLight) Color.Black else Color.White,
+                color = Color.Black,
                 fontSize = 16.sp
               )
             },

@@ -48,14 +48,12 @@ import remix.myplayer.misc.clickWithRipple
 import remix.myplayer.misc.clickableWithoutRipple
 import remix.myplayer.service.Command
 import remix.myplayer.ui.dialog.ColorSpace
-import remix.myplayer.ui.theme.ThemeController
 import remix.myplayer.util.MusicUtil.makeCmdIntent
 import remix.myplayer.util.Util.sendLocalBroadcast
 
 @Composable
 fun DesktopLyricOverlay(
   lyricManager: LyricManager,
-  themeController: ThemeController,
   onLock: () -> Unit,
   onDrag: (PointerInputChange, Float) -> Unit,
   onDragEnd: () -> Unit
@@ -83,7 +81,7 @@ fun DesktopLyricOverlay(
 
   var sungColor by remember {
     val savedColor = desktopLyricPrefs.sungColor
-    mutableStateOf(if (savedColor != 0) Color(savedColor) else themeController.appTheme.primary)
+    mutableStateOf(Color(savedColor))
   }
 
   val unSungColor = Color(desktopLyricPrefs.unSungColor)

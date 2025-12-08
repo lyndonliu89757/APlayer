@@ -27,47 +27,47 @@ import remix.myplayer.viewmodel.settingViewModel
 
 @Composable
 fun PlayingContainer(content: @Composable () -> Unit) {
-  val settingState by settingViewModel.settingsState.collectAsStateWithLifecycle()
+    val settingState by settingViewModel.settingsState.collectAsStateWithLifecycle()
 
-  val theme = LocalTheme.current
-  if (settingState.playingScreen.background == SettingPrefs.BACKGROUND_ADAPTIVE_COLOR) {
-    val context = LocalContext.current
-    val swatch by playbackViewModel.swatch.collectAsStateWithLifecycle()
+    val theme = LocalTheme.current
+    if (settingState.playingScreen.background == SettingPrefs.BACKGROUND_ADAPTIVE_COLOR) {
+        val context = LocalContext.current
+        val swatch by playbackViewModel.swatch.collectAsStateWithLifecycle()
 
-    val initialColor = Color(
-      ThemeUtil.resolveColor(
-        context,
-        R.attr.colorSurface,
-        if (theme.isLight) Color.White.value.toInt() else Color.Black.value.toInt()
-      )
-    )
-    val color = remember { Animatable(initialValue = initialColor) }
-
-    Column(
-      modifier = Modifier
-        .fillMaxSize()
-        .navigationBarsPadding()
-        .background(
-          brush = Brush.verticalGradient(colors = listOf(color.value, initialColor)),
-          shape = RectangleShape
+        val initialColor = Color(
+            ThemeUtil.resolveColor(
+                context,
+                R.attr.colorSurface,
+                Color.White.value.toInt()
+            )
         )
-    ) {
-      Spacer(Modifier.statusBarsPadding())
-      content()
-    }
+        val color = remember { Animatable(initialValue = initialColor) }
 
-    LaunchedEffect(swatch) {
-      color.snapTo(initialColor)
-      color.animateTo(Color(swatch.rgb), animationSpec = tween(1000))
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .navigationBarsPadding()
+                .background(
+                    brush = Brush.verticalGradient(colors = listOf(color.value, initialColor)),
+                    shape = RectangleShape
+                )
+        ) {
+            Spacer(Modifier.statusBarsPadding())
+            content()
+        }
+
+        LaunchedEffect(swatch) {
+            color.snapTo(initialColor)
+            color.animateTo(Color(swatch.rgb), animationSpec = tween(1000))
+        }
+    } else {
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .navigationBarsPadding()
+        ) {
+            Spacer(Modifier.statusBarsPadding())
+            content()
+        }
     }
-  } else {
-    Column(
-      modifier = Modifier
-        .fillMaxSize()
-        .navigationBarsPadding()
-    ) {
-      Spacer(Modifier.statusBarsPadding())
-      content()
-    }
-  }
 }

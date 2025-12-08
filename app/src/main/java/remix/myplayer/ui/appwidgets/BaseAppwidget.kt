@@ -9,6 +9,7 @@ import android.content.Intent
 import android.content.res.ColorStateList
 import android.os.Build
 import android.widget.RemoteViews
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
 import com.bumptech.glide.Glide
 import com.bumptech.glide.request.target.AppWidgetTarget
@@ -198,7 +199,7 @@ abstract class BaseAppwidget
     )
     // 轨道颜色
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-      val tint = ColorStateList.valueOf(service.themeController.appTheme.primary.toArgb())
+      val tint = ColorStateList.valueOf(Color(0xff698cf6).toArgb())
       remoteViews.setColorStateList(R.id.appwidget_seekbar, "setProgressTintList", tint)
     }
   }

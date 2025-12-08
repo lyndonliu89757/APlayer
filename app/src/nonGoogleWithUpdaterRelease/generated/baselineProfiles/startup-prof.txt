@@ -66073,10 +66073,6 @@ Lremix/myplayer/viewmodel/WebDavViewModel_HiltModules_BindsModule_Binds_LazyMapK
 SPLremix/myplayer/viewmodel/WebDavViewModel_HiltModules_BindsModule_Binds_LazyMapKey;-><clinit>()V
 Lremix/myplayer/viewmodel/WebDavViewModel_HiltModules_KeyModule_Provide_LazyMapKey;
 SPLremix/myplayer/viewmodel/WebDavViewModel_HiltModules_KeyModule_Provide_LazyMapKey;-><clinit>()V
-Lremix/myplayer/viewmodel/settings/ColorSettings;
-SPLremix/myplayer/viewmodel/settings/ColorSettings;-><clinit>()V
-SPLremix/myplayer/viewmodel/settings/ColorSettings;-><init>(JJLjava/lang/String;ZZ)V
-SPLremix/myplayer/viewmodel/settings/ColorSettings;-><init>(JJLjava/lang/String;ZZLkotlin/jvm/internal/DefaultConstructorMarker;)V
 Lremix/myplayer/viewmodel/settings/CommonSettings;
 SPLremix/myplayer/viewmodel/settings/CommonSettings;-><clinit>()V
 SPLremix/myplayer/viewmodel/settings/CommonSettings;-><init>(IZILjava/lang/String;Ljava/util/Set;Ljava/util/Set;IZZ)V

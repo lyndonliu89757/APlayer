@@ -27,15 +27,6 @@ data class PlaySettings(
 )
 
 @Stable
-data class ColorSettings(
-  val primaryColor: Color,
-  val secondaryColor: Color,
-  val darkTheme: String,
-  val blackTheme: Boolean,
-  val coloredNaviBar: Boolean,
-)
-
-@Stable
 data class LibrarySettings(
   val songSortOrder: String,
   val albumSortOrder: String,
@@ -86,7 +77,6 @@ data class NotificationSettings(
 data class SettingsState(
   val common: CommonSettings,
   val play: PlaySettings,
-  val color: ColorSettings,
   val library: LibrarySettings,
   val playingScreen: PlayingScreenSettings,
   val cover: CoverSettings,

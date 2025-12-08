@@ -95,7 +95,7 @@ internal fun PlayingSeekbarWithText(
       )
 
       Text(
-        text = time.remaining,
+        text = Util.getTime(duration),
         fontSize = 12.sp,
         maxLines = 1,
         modifier = Modifier.width(36.dp),
@@ -118,11 +118,7 @@ internal fun PlayingSeekbarWithText(
 internal val playingTrackBackgroundColor: Color
   @Composable
   get() = Color(
-    if (LocalTheme.current.isLight) {
-      "#efeeed"
-    } else {
-      "#343438"
-    }.toColorInt()
+      "#efeeed".toColorInt()
   )
 
 private data class Time(val elapsed: String, val remaining: String)

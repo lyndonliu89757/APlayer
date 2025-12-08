@@ -296,6 +296,8 @@
   <string name="artist_desc">Artist desc</string>
   <string name="genre">Genre</string>
   <string name="genre_desc">Genre desc</string>
+  <string name="date_create">Date Created</string>
+  <string name="date_create_desc">Date Created desc</string>
   <string name="date_modify">Date Modified</string>
   <string name="date_modify_desc">Date Modified desc</string>
   <string name="count">Play count</string>
@@ -393,12 +395,9 @@
   <string name="force_sort_tip">Force sort songs, albums, artists and playlists by Pinyin\nMay make load time much longer</string>
   <string name="accent_color">Accent color</string>
   <string name="accent_color_tip">Customize your favorite color for Aplayer</string>
-  <string name="dark_theme">Dark theme</string>
   <string name="always_off">Always off</string>
   <string name="always_on">Always on</string>
   <string name="follow_system">Follow system</string>
-  <string name="black_theme">Black theme</string>
-  <string name="black_theme_tip">Use the pure black theme when dark theme is enabled</string>
 
   <string name="md_back_label">Back</string>
   <string name="md_done_label">Done</string>

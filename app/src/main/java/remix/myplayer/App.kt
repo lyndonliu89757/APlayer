@@ -21,7 +21,6 @@ import remix.myplayer.misc.helper.LanguageHelper.setApplicationLanguage
 import remix.myplayer.misc.helper.LanguageHelper.setLocal
 import remix.myplayer.misc.manager.APlayerActivityManager
 import remix.myplayer.ui.appshortcuts.DynamicShortcutManager
-import remix.myplayer.ui.screen.hackTabMinWidth
 import remix.myplayer.util.Util
 import timber.log.Timber
 import javax.inject.Inject
@@ -62,8 +61,6 @@ class App : MultiDexApplication() {
     }
 
     registerActivityLifecycleCallbacks(APlayerActivityManager())
-
-    hackTabMinWidth()
   }
 
   private fun checkMigration() {

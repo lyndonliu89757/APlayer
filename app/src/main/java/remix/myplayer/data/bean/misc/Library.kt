@@ -35,8 +35,8 @@ data class Library(
         R.string.album_desc,
         R.string.artist,
         R.string.artist_desc,
-        R.string.date_modify,
-        R.string.date_modify_desc
+        R.string.date_create,
+        R.string.date_create_desc
       )
 
       TAG_ALBUM -> listOf(

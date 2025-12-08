@@ -296,6 +296,8 @@
   <string name="artist_desc">演出者降序</string>
   <string name="genre">流派</string>
   <string name="genre_desc">流派降序</string>
+  <string name="date_create">创建時間</string>
+  <string name="date_create_desc">创建時間降序</string>
   <string name="date_modify">修改時間</string>
   <string name="date_modify_desc">修改時間降序</string>
   <string name="count">播放次數</string>
@@ -393,7 +395,6 @@
   <string name="force_sort_tip">強制將曲目、專輯、演出者、播放清單按拼音排序\n可能使載入時間大幅度延長</string>
   <string name="accent_color">強調色</string>
   <string name="accent_color_tip">選擇你喜歡的強調色</string>
-  <string name="dark_theme">深色主題</string>
   <string name="always_off">總是關閉</string>
   <string name="always_on">總是開啟</string>
   <string name="follow_system">跟隨系統</string>

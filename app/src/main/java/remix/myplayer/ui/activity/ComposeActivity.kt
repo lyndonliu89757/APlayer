@@ -21,8 +21,6 @@ import remix.myplayer.ui.nav.LocalNavController
 import remix.myplayer.ui.nav.playingScreenDeepLink
 import remix.myplayer.ui.theme.APlayerTheme
 import remix.myplayer.ui.theme.LocalTheme
-import remix.myplayer.ui.theme.LocalThemeController
-import remix.myplayer.ui.theme.ThemeController
 import remix.myplayer.util.MusicUtil
 import remix.myplayer.util.ThemeUtil
 import remix.myplayer.viewmodel.LibraryViewModel
@@ -30,7 +28,6 @@ import remix.myplayer.viewmodel.MainViewModel
 import remix.myplayer.viewmodel.PlaybackViewModel
 import remix.myplayer.viewmodel.ProvideViewModels
 import timber.log.Timber
-import javax.inject.Inject
 
 @AndroidEntryPoint
 class ComposeActivity : BaseMusicActivity() {
@@ -38,9 +35,6 @@ class ComposeActivity : BaseMusicActivity() {
   private val libraryViewModel: LibraryViewModel by viewModels()
   private val playbackViewModel: PlaybackViewModel by viewModels()
   private val mainViewModel: MainViewModel by viewModels()
-
-  @Inject
-  lateinit var themeController: ThemeController
 
   override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)
@@ -55,7 +49,7 @@ class ComposeActivity : BaseMusicActivity() {
       )
     )
     setContent {
-      AppCompositionLocalProvider(themeController) {
+      AppCompositionLocalProvider() {
         val theme = LocalTheme.current
         val color = if (theme.coloredNaviBar) {
           theme.primary
@@ -105,12 +99,9 @@ class ComposeActivity : BaseMusicActivity() {
 
 @Composable
 fun AppCompositionLocalProvider(
-  themeController: ThemeController,
   content: @Composable (() -> Unit)
 ) {
   CompositionLocalProvider(
-    LocalThemeController provides themeController,
-    LocalTheme provides themeController.appTheme,
     LocalNavController provides rememberNavController()
   ) {
     ProvideViewModels {

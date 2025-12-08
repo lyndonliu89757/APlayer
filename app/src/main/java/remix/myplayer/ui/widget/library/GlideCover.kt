@@ -1,6 +1,6 @@
 package remix.myplayer.ui.widget.library
 
-import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -27,7 +27,7 @@ fun GlideCover(
 ) {
   var coverModifier = modifier
   if (circle) {
-    coverModifier = modifier.clip(CircleShape)
+    coverModifier = modifier.clip(RoundedCornerShape(8))
   }
   val placeHolder = if (album) LocalTheme.current.albumPlaceHolder else LocalTheme.current.artistPlaceHolder
   GlideImage(

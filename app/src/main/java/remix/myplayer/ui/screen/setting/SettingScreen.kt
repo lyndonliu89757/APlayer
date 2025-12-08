@@ -14,11 +14,6 @@ import remix.myplayer.R
 import remix.myplayer.misc.helper.EQHelper
 import remix.myplayer.ui.nav.LocalNavController
 import remix.myplayer.ui.nav.RouteAbout
-import remix.myplayer.ui.screen.setting.logic.color.BlackThemeLogic
-import remix.myplayer.ui.screen.setting.logic.color.ColoredNaviBarLogic
-import remix.myplayer.ui.screen.setting.logic.color.DarkThemeLogic
-import remix.myplayer.ui.screen.setting.logic.color.PrimaryColorLogic
-import remix.myplayer.ui.screen.setting.logic.color.SecondaryColorLogic
 import remix.myplayer.ui.screen.setting.logic.common.BlackListLogic
 import remix.myplayer.ui.screen.setting.logic.common.BreakPointLogic
 import remix.myplayer.ui.screen.setting.logic.common.ExportPlayListLogic
@@ -67,8 +62,6 @@ fun SettingScreen() {
         CommonPreferences()
 
         PlayPreferences()
-
-        ColorPreferences()
 
         LibraryPreferences()
 
@@ -124,22 +117,6 @@ private fun PlayPreferences() {
   PlayFadeLogic()
 
   AutoPlayLogic()
-}
-
-@Composable
-private fun ColorPreferences() {
-  SettingTitle(R.string.color)
-
-  DarkThemeLogic()
-
-  BlackThemeLogic()
-
-  PrimaryColorLogic()
-
-  SecondaryColorLogic()
-
-  ColoredNaviBarLogic()
-
 }
 
 @Composable

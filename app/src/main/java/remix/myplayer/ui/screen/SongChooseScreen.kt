@@ -67,7 +67,7 @@ fun SongChooseScreen(id: Long, name: String, vm: LibraryViewModel = libraryViewM
         title = {
           Text(
             stringResource(R.string.choose_song),
-            color = theme.textPrimaryReverse,
+            color = theme.textPrimary,
             fontSize = 16.sp
           )
         },
@@ -83,7 +83,7 @@ fun SongChooseScreen(id: Long, name: String, vm: LibraryViewModel = libraryViewM
           ) {
             Text(
               stringResource(R.string.cancel),
-              color = theme.textPrimaryReverse,
+              color = theme.textPrimary,
               fontSize = 14.sp
             )
           }
@@ -106,7 +106,7 @@ fun SongChooseScreen(id: Long, name: String, vm: LibraryViewModel = libraryViewM
           ) {
             Text(
               stringResource(R.string.confirm),
-              color = theme.textPrimaryReverse,
+              color = theme.textPrimary,
               fontSize = 14.sp
             )
           }

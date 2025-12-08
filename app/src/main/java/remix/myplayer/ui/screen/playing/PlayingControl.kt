@@ -61,7 +61,7 @@ import remix.myplayer.util.Util
 import remix.myplayer.util.Util.sendLocalBroadcast
 import remix.myplayer.viewmodel.playbackViewModel
 
-private val itemRes = mapOf(
+val PlayModeMap = mapOf(
   MODE_LOOP to Pair(R.drawable.play_btn_loop, R.string.model_normal),
   MODE_SHUFFLE to Pair(R.drawable.play_btn_shuffle, R.string.model_random),
   MODE_REPEAT to Pair(R.drawable.play_btn_loop_one, R.string.model_repeat)
@@ -83,12 +83,10 @@ internal fun PlayingControl(
     val swatchColor = Color(swatch.rgb)
     val playMode = playbackUiState.playMode
     ControlButton(onClick = {
-      val newMode = if (playMode == MODE_REPEAT) MODE_LOOP else playMode + 1
-      MessageNotifier.show(itemRes[newMode]!!.second)
       Util.sendCMDLocalBroadcast(Command.CHANGE_MODEL)
     }) {
       Image(
-        painter = painterResource(itemRes[playMode]!!.first),
+        painter = painterResource(PlayModeMap[playMode]!!.first),
         contentDescription = "PlayingMode",
         colorFilter = ColorFilter.tint(swatchColor.copy(0.5f))
       )

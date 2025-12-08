@@ -2,11 +2,6 @@
 
   <style name="Theme.APlayer" parent="@style/Theme.APlayer.Base" tools:ignore="ResourceCycle"/>
 
-  <style name="Theme.APlayer.Dark" parent="@style/Theme.APlayer.Base.Dark"/>
-
-  <style name="Theme.APlayer.Black" parent="@style/Theme.APlayer.Base.Black"/>
-
-
   <style name="Theme.APlayer.Notification" parent="@android:style/TextAppearance.StatusBar.EventContent" />
 
   <style name="Theme.APlayer.Notification.Title" parent="@android:style/TextAppearance.StatusBar.EventContent.Title" />
@@ -42,18 +37,6 @@
   <style name="PlayerActivityStyle" parent="@style/AppTheme">
 <!--    <item name="android:windowIsTranslucent">true</item>-->
 <!--    <item name="android:windowBackground">@color/transparent</item>-->
-    <item name="android:windowAnimationStyle">@style/PlayerActivityAnim</item>
-  </style>
-
-  <style name="PlayerActivityStyle.Black" parent="@style/Theme.APlayer.Black">
-<!--    <item name="android:windowIsTranslucent">true</item>-->
-<!--    <item name="android:windowBackground">@color/transparent</item>-->
-    <item name="android:windowAnimationStyle">@style/PlayerActivityAnim</item>
-  </style>
-
-  <style name="PlayerActivityStyle.Dark" parent="@style/Theme.APlayer.Dark">
-    <item name="android:windowIsTranslucent">true</item>
-    <item name="android:windowBackground">@color/transparent</item>
     <item name="android:windowAnimationStyle">@style/PlayerActivityAnim</item>
   </style>
 

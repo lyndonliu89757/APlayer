@@ -13,11 +13,6 @@
      alt="Get it on Google Play"
      height="80">](https://play.google.com/store/apps/details?id=remix.myplayer)
 
-## 截图
-<img src="/pictures/Screenshot_20180112-112950.png" alt="screenshot" title="screenshot" width="270" height="486" /><img src="/pictures/Screenshot_20180112-113007.png" alt="screenshot" title="screenshot" width="270" height="486" />  <img src="/pictures/Screenshot_20180112-113128.png" alt="screenshot" title="screenshot" width="270" height="486" /><br><br>
-<img src="/pictures/Screenshot_20180112-113144.png" alt="screenshot" title="screenshot" width="270" height="486" />  <img src="/pictures/Screenshot_20180112-143937.png" alt="screenshot" title="screenshot" width="270" height="486" />  <img src="/pictures/Screenshot_20180112-113550.png" alt="screenshot" title="screenshot" width="270" height="486" /> <br><br>
-<img src="/pictures/Screenshot_20180112-113637.png" alt="screenshot" title="screenshot" width="270" height="486" />  <img src="/pictures/Screenshot_20180112-113707.png" alt="screenshot" title="screenshot" width="270" height="486" />  <img src="/pictures/Screenshot_20180112-113820.png" alt="screenshot" title="screenshot" width="270" height="486" />  <img src="/pictures/Screenshot_20180112-113855.png" alt="screenshot" title="screenshot" width="270" height="486" />  
-
 
 ## 特点
 - 首页Tab可配置，最多支持五个,包括歌曲、艺术家、专辑、文件夹、播放列表、远程(webdav)

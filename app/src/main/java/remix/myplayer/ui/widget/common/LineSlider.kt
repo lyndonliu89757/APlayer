@@ -56,7 +56,7 @@ val defaultLineSliderProperties
   get() = LineSliderProperties(
     trackHeight = 4.dp,
     trackProgressColor = LocalTheme.current.primary,
-    trackBackgroundColor = Color((if (LocalTheme.current.isLight) "#ffe0e0e0" else "#ff424242").toColorInt()),
+    trackBackgroundColor = Color("#ffe0e0e0".toColorInt()),
     thumbWidth = 12.dp,
     thumbHeight = 12.dp,
     thumbShape = CircleShape,
@@ -163,7 +163,7 @@ private fun TrackPreview() {
       valueRange = 0f..255f
     ),
     progress = Color.Red,
-    background = Color((if (LocalTheme.current.isLight) "#ffe0e0e0" else "#ff424242").toColorInt())
+    background = Color("#ffe0e0e0".toColorInt())
   )
 }
 

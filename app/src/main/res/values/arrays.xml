@@ -7,12 +7,6 @@
   <integer name="DialogAnimDuration">300</integer>
   <integer name="LockScreenRightOutDuration">250</integer>
 
-  <string-array name="dark_theme">
-    <item>@string/always_off</item>
-    <item>@string/always_on</item>
-    <item>@string/follow_system</item>
-  </string-array>
-
   <string-array name="player_background">
     <item>@string/now_playing_screen_theme</item>
     <item>@string/now_playing_screen_cover</item>

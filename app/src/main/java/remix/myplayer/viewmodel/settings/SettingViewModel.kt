@@ -2,7 +2,6 @@ package remix.myplayer.viewmodel.settings
 
 import android.app.Activity
 import android.content.Context
-import androidx.compose.ui.graphics.Color
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -37,7 +36,6 @@ import remix.myplayer.ui.dialog.ReNamePlayListState
 import remix.myplayer.ui.dialog.SongDetailState
 import remix.myplayer.ui.dialog.SongEditState
 import remix.myplayer.ui.dialog.runWithLoading
-import remix.myplayer.ui.theme.ThemeController
 import javax.inject.Inject
 
 @HiltViewModel
@@ -47,7 +45,6 @@ class SettingViewModel @Inject constructor(
   private val songRepo: SongRepository,
   val settingPrefs: SettingPrefs,
   val lyricPrefs: LyricPrefs,
-  val themeController: ThemeController,
   val lyricManager: LyricManager
 ) : ViewModel() {
 
@@ -82,13 +79,6 @@ class SettingViewModel @Inject constructor(
       crossFade = settingPrefs.crossFade,
       autoPlay = settingPrefs.autoPlay,
       speed = settingPrefs.speed,
-    ),
-    color = ColorSettings(
-      primaryColor = themeController.appTheme.primary,
-      secondaryColor = themeController.appTheme.secondary,
-      darkTheme = themeController.dark,
-      blackTheme = themeController.black,
-      coloredNaviBar = themeController.appTheme.coloredNaviBar
     ),
     library = LibrarySettings(
       songSortOrder = settingPrefs.songSortOrder,
@@ -222,32 +212,6 @@ class SettingViewModel @Inject constructor(
   fun setSpeed(speed: String) {
     settingPrefs.speed = speed
     _settingsState.update { it.copy(play = it.play.copy(speed = speed)) }
-  }
-
-  // -------- Color 分组 ----------
-  fun setPrimaryColor(color: Color) {
-    themeController.setPrimary(color)
-    _settingsState.update { it.copy(color = it.color.copy(primaryColor = color)) }
-  }
-
-  fun setSecondaryColor(color: Color) {
-    themeController.setSecondary(color)
-    _settingsState.update { it.copy(color = it.color.copy(secondaryColor = color)) }
-  }
-
-  fun setDarkTheme(option: String) {
-    themeController.dark = option
-    _settingsState.update { it.copy(color = it.color.copy(darkTheme = option)) }
-  }
-
-  fun setBlackTheme(enabled: Boolean) {
-    themeController.black = enabled
-    _settingsState.update { it.copy(color = it.color.copy(blackTheme = enabled)) }
-  }
-
-  fun setColoredNaviBar(enabled: Boolean) {
-    themeController.setColoredNaviBar(enabled)
-    _settingsState.update { it.copy(color = it.color.copy(coloredNaviBar = enabled)) }
   }
 
   // 统一设置排序

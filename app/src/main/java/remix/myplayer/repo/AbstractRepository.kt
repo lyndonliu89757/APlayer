@@ -122,7 +122,7 @@ abstract class AbstractRepository(private val settingPrefs: SettingPrefs) {
         }
       },
       track = cursor.getLong(cursor.getColumnIndex(AudioColumns.TRACK)).toString(),
-      dateModified = cursor.getLong(cursor.getColumnIndex(AudioColumns.DATE_MODIFIED))
+      dateCreated = cursor.getLong(cursor.getColumnIndex(AudioColumns.DATE_ADDED))
     )
   }
 

@@ -63,240 +63,242 @@ import java.util.concurrent.TimeUnit
 
 @Composable
 fun WebDavDetailScreen(webDav: WebDav) {
-  val nav = LocalNavController.current
-  val webDavVM = webDavViewModel
-  val playbackVM = playbackViewModel
-  val settingVM = settingViewModel
-  val scope = rememberCoroutineScope()
+    val nav = LocalNavController.current
+    val webDavVM = webDavViewModel
+    val playbackVM = playbackViewModel
+    val settingVM = settingViewModel
+    val scope = rememberCoroutineScope()
 
-  val resourceState by webDavVM.webDavResState.collectAsStateWithLifecycle()
-  var url by rememberSaveable {
-    mutableStateOf(webDav.lastUrl)
-  }
-  var davResources by remember {
-    mutableStateOf<List<DavResource>>(emptyList())
-  }
-  var refreshTrigger by remember {
-    mutableIntStateOf(0)
-  }
-
-  val sardine = remember {
-    OkHttpSardine(
-      OkHttpClient.Builder()
-        .connectTimeout(20L, TimeUnit.SECONDS)
-        .readTimeout(20L, TimeUnit.SECONDS)
-        .writeTimeout(20L, TimeUnit.SECONDS)
-        .build()
-    ).apply {
-      setCredentials(webDav.account, webDav.pwd)
+    val resourceState by webDavVM.webDavResState.collectAsStateWithLifecycle()
+    var url by rememberSaveable {
+        mutableStateOf(webDav.lastUrl)
     }
-  }
-
-  fun handleBack() {
-    if (webDav.server == url) { // 根路径
-      nav.popBackStack()
-      return
+    var davResources by remember {
+        mutableStateOf<List<DavResource>>(emptyList())
+    }
+    var refreshTrigger by remember {
+        mutableIntStateOf(0)
     }
 
-    var newUrl = url.removeSuffix("/")
-    newUrl = newUrl.take(newUrl.lastIndexOf('/'))
-    url = newUrl
-  }
+    val sardine = remember {
+        OkHttpSardine(
+            OkHttpClient.Builder()
+                .connectTimeout(20L, TimeUnit.SECONDS)
+                .readTimeout(20L, TimeUnit.SECONDS)
+                .writeTimeout(20L, TimeUnit.SECONDS)
+                .build()
+        ).apply {
+            setCredentials(webDav.account, webDav.pwd)
+        }
+    }
 
-  BackPressHandler {
-    handleBack()
-  }
+    fun handleBack() {
+        if (webDav.server == url) { // 根路径
+            nav.popBackStack()
+            return
+        }
 
-  Scaffold(
-    topBar = {
-      CommonAppBar(
-        title = webDav.alias,
-        onBack = {
-          handleBack()
+        var newUrl = url.removeSuffix("/")
+        newUrl = newUrl.take(newUrl.lastIndexOf('/'))
+        url = newUrl
+    }
+
+    BackPressHandler {
+        handleBack()
+    }
+
+    Scaffold(
+        topBar = {
+            CommonAppBar(
+                title = webDav.alias,
+                onBack = {
+                    handleBack()
+                },
+                actions = listOf(AppBarAction(R.drawable.ic_close_white_24dp, "WebDetailClose") {
+                    nav.popBackStack()
+                })
+            )
         },
-        actions = listOf(AppBarAction(R.drawable.ic_close_white_24dp, "WebDetailClose") {
-          nav.popBackStack()
-        })
-      )
-    },
-    containerColor = LocalTheme.current.mainBackground
-  ) { contentPadding ->
-    val showLoading = resourceState is DataUiState.Loading
+        containerColor = LocalTheme.current.mainBackground
+    ) { contentPadding ->
+        val showLoading = resourceState is DataUiState.Loading
 
-    LaunchedEffect(resourceState) {
-      when (resourceState) {
-        is DataUiState.Success -> {
-          davResources = resourceState.get()
-          webDavVM.updateLastUrl(webDav, url)
-        }
-
-        is DataUiState.Error -> {
-          nav.popBackStack()
-          MessageNotifier.show(R.string.load_failed)
-        }
-
-        else -> {}
-      }
-    }
-
-    Column(modifier = Modifier.padding(contentPadding)) {
-      Box(modifier = Modifier.weight(1f)) {
-        LazyColumn(modifier = Modifier.fillMaxSize()) {
-          items(davResources, key = { it.path }) { resource ->
-            WebDavDetailItem(
-              resource,
-              onClick = {
-                if (resource.isDirectory) {
-                  // 进入下级目录
-                  url = webDav.base().plus(resource.path)
-                } else {
-                  // 过滤列表内所有音乐并设置为播放列表
-                  if (davResources.isEmpty()) {
-                    return@WebDavDetailItem
-                  }
-                  var select: Song.Remote? = null
-                  val remotes = davResources
-                    .filter { it.isAudio() }
-                    .map {
-                      val remote = Song.Remote(
-                        title = it.name.substringBeforeLast('.'),
-                        data = webDav.base().plus(it.path),
-                        size = it.contentLength,
-                        dateModified = it.creation?.time ?: 0,
-                        account = webDav.account,
-                        pwd = webDav.pwd
-                      )
-                      if (it == resource) {
-                        select = remote
-                      }
-                      remote
-                    }
-                  MusicServiceRemote.setPlayQueue(
-                    remotes,
-                    MusicUtil.makeCmdIntent(Command.PLAY_AT)
-                      .putExtra(MusicService.EXTRA_POSITION, remotes.indexOfFirst {
-                        it.data == select?.data
-                      })
-                  )
+        LaunchedEffect(resourceState) {
+            when (resourceState) {
+                is DataUiState.Success -> {
+                    davResources = resourceState.get()
+                    webDavVM.updateLastUrl(webDav, url)
                 }
-              },
-              onMenuClick = {
-                val song = Song.Remote(
-                  title = resource.name.substringBeforeLast('.'),
-                  data = webDav.base().plus(resource.path),
-                  size = resource.contentLength,
-                  dateModified = resource.creation?.time ?: 0,
-                  account = webDav.account,
-                  pwd = webDav.pwd
-                )
-                when (it) {
-                  R.string.add_to_next_song -> {
-                    Util.sendLocalBroadcast(
-                      MusicUtil.makeCmdIntent(Command.ADD_TO_NEXT_SONG)
-                        .putExtra(MusicService.EXTRA_SONG, song)
+
+                is DataUiState.Error -> {
+                    nav.popBackStack()
+                    MessageNotifier.show(R.string.load_failed)
+                }
+
+                else -> {}
+            }
+        }
+
+        Column(modifier = Modifier.padding(contentPadding)) {
+            Box(modifier = Modifier.weight(1f)) {
+                LazyColumn(modifier = Modifier.fillMaxSize()) {
+                    items(davResources, key = { it.path }) { resource ->
+                        WebDavDetailItem(
+                            resource,
+                            onClick = {
+                                if (resource.isDirectory) {
+                                    // 进入下级目录
+                                    url = webDav.base().plus(resource.path)
+                                } else {
+                                    // 过滤列表内所有音乐并设置为播放列表
+                                    if (davResources.isEmpty()) {
+                                        return@WebDavDetailItem
+                                    }
+                                    var select: Song.Remote? = null
+                                    val remotes = davResources
+                                        .filter { it.isAudio() }
+                                        .map {
+                                            val remote = Song.Remote(
+                                                title = it.name.substringBeforeLast('.'),
+                                                data = webDav.base().plus(it.path),
+                                                size = it.contentLength,
+                                                dateCreated = it.creation?.time ?: 0,
+                                                account = webDav.account,
+                                                pwd = webDav.pwd
+                                            )
+                                            if (it == resource) {
+                                                select = remote
+                                            }
+                                            remote
+                                        }
+                                    MusicServiceRemote.setPlayQueue(
+                                        remotes,
+                                        MusicUtil.makeCmdIntent(Command.PLAY_AT)
+                                            .putExtra(
+                                                MusicService.EXTRA_POSITION,
+                                                remotes.indexOfFirst {
+                                                    it.data == select?.data
+                                                })
+                                    )
+                                }
+                            },
+                            onMenuClick = {
+                                val song = Song.Remote(
+                                    title = resource.name.substringBeforeLast('.'),
+                                    data = webDav.base().plus(resource.path),
+                                    size = resource.contentLength,
+                                    dateCreated = resource.creation?.time ?: 0,
+                                    account = webDav.account,
+                                    pwd = webDav.pwd
+                                )
+                                when (it) {
+                                    R.string.add_to_next_song -> {
+                                        Util.sendLocalBroadcast(
+                                            MusicUtil.makeCmdIntent(Command.ADD_TO_NEXT_SONG)
+                                                .putExtra(MusicService.EXTRA_SONG, song)
+                                        )
+                                    }
+
+                                    R.string.add_to_play_queue -> {
+                                        playbackVM.insertToQueue(listOf(song))
+                                    }
+
+                                    R.string.song_detail -> {
+                                        scope.runWithLoading {
+                                            withContext(Dispatchers.IO) {
+                                                MusicService.retrieveRemoteSong(song, song)
+                                            }
+                                            settingVM.showSongDetailDialog(song)
+                                        }
+                                    }
+
+                                    R.string.delete -> {
+                                        scope.runWithLoading {
+                                            withContext(Dispatchers.IO) {
+                                                sardine.delete(webDav.base().plus(resource.path))
+                                            }
+                                            refreshTrigger++
+                                        }
+                                    }
+                                }
+                            })
+                    }
+                }
+
+                if (showLoading) {
+                    LinearProgressIndicator(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .align(Alignment.TopCenter),
+                        color = LocalTheme.current.primary
                     )
-                  }
-
-                  R.string.add_to_play_queue -> {
-                    playbackVM.insertToQueue(listOf(song))
-                  }
-
-                  R.string.song_detail -> {
-                    scope.runWithLoading {
-                      withContext(Dispatchers.IO) {
-                        MusicService.retrieveRemoteSong(song, song)
-                      }
-                      settingVM.showSongDetailDialog(song)
-                    }
-                  }
-
-                  R.string.delete -> {
-                    scope.runWithLoading {
-                      withContext(Dispatchers.IO) {
-                        sardine.delete(webDav.base().plus(resource.path))
-                      }
-                      refreshTrigger++
-                    }
-                  }
                 }
-              })
-          }
+            }
+            BottomBar()
         }
-
-        if (showLoading) {
-          LinearProgressIndicator(
-            modifier = Modifier
-              .fillMaxWidth()
-              .align(Alignment.TopCenter),
-            color = LocalTheme.current.primary
-          )
-        }
-      }
-      BottomBar()
     }
-  }
 
-  LaunchedEffect(url, refreshTrigger) {
-    webDavVM.loadDavRes(sardine, url)
-  }
+    LaunchedEffect(url, refreshTrigger) {
+        webDavVM.loadDavRes(sardine, url)
+    }
 }
 
 @Composable
 private fun WebDavDetailItem(
-  davResource: DavResource,
-  onClick: () -> Unit,
-  onMenuClick: (Int) -> Unit
+    davResource: DavResource,
+    onClick: () -> Unit,
+    onMenuClick: (Int) -> Unit
 ) {
-  val theme = LocalTheme.current
+    val theme = LocalTheme.current
 
-  Row(
-    modifier = Modifier
-      .fillMaxWidth()
-      .height(64.dp)
-      .clickWithRipple(false) {
-        onClick()
-      },
-    verticalAlignment = Alignment.CenterVertically
-  ) {
-    val isAudio = davResource.isAudio()
-    val icon = if (davResource.isDirectory) {
-      R.drawable.ic_folder_24dp
-    } else if (isAudio) {
-      R.drawable.ic_audio_file_24dp
-    } else {
-      R.drawable.ic_lab_profile_24dp
-    }
-
-    Icon(
-      modifier = Modifier
-        .padding(start = 12.dp),
-      painter = painterResource(icon),
-      contentDescription = "IconWebDavDetailItem",
-      tint = theme.icon()
-    )
-
-    Column(
-      modifier = Modifier
-        .padding(horizontal = 12.dp)
-        .weight(1f),
-      horizontalAlignment = Alignment.Start, verticalArrangement = Arrangement.Center
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(64.dp)
+            .clickWithRipple(false) {
+                onClick()
+            },
+        verticalAlignment = Alignment.CenterVertically
     ) {
-      TextPrimary(davResource.name)
-      Spacer(Modifier.height(4.dp))
-      TextSecondary(davResource.path)
-    }
+        val isAudio = davResource.isAudio()
+        val icon = if (davResource.isDirectory) {
+            R.drawable.ic_folder_24dp
+        } else if (isAudio) {
+            R.drawable.ic_audio_file_24dp
+        } else {
+            R.drawable.ic_lab_profile_24dp
+        }
 
-    val list = arrayListOf(R.string.delete)
-    if (davResource.isAudio()) {
-      list.addAll(
-        0,
-        listOf(
-          R.string.add_to_next_song,
-          R.string.add_to_play_queue,
-          R.string.song_detail,
+        Icon(
+            modifier = Modifier
+                .padding(start = 12.dp),
+            painter = painterResource(icon),
+            contentDescription = "IconWebDavDetailItem",
+            tint = theme.icon()
         )
-      )
+
+        Column(
+            modifier = Modifier
+                .padding(horizontal = 12.dp)
+                .weight(1f),
+            horizontalAlignment = Alignment.Start, verticalArrangement = Arrangement.Center
+        ) {
+            TextPrimary(davResource.name)
+            Spacer(Modifier.height(4.dp))
+            TextSecondary(davResource.path)
+        }
+
+        val list = arrayListOf(R.string.delete)
+        if (davResource.isAudio()) {
+            list.addAll(
+                0,
+                listOf(
+                    R.string.add_to_next_song,
+                    R.string.add_to_play_queue,
+                    R.string.song_detail,
+                )
+            )
+        }
+        PopupButton(list, contentDescription = "WebDavDetailPopupButton", onMenuClick = onMenuClick)
     }
-    PopupButton(list, contentDescription = "WebDavDetailPopupButton", onMenuClick = onMenuClick)
-  }
 }
