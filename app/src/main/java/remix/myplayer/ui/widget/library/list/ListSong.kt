@@ -23,8 +23,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.bumptech.glide.integration.compose.ExperimentalGlideComposeApi
-import remix.myplayer.data.bean.mp3.APlayerModel
-import remix.myplayer.data.bean.mp3.Song
+import remix.myplayer.data.model.audio.APlayerModel
+import remix.myplayer.data.model.audio.Song
 import remix.myplayer.ui.theme.LocalTheme
 import remix.myplayer.ui.theme.highLightText
 import remix.myplayer.ui.widget.common.TextPrimary
@@ -76,11 +76,11 @@ fun ListSong(
     ) {
       if (num != null) {
         TextPrimary(
-          if (num > 99) "99+" else num.toString(),
+          if (num > 999) "999+" else num.toString(),
           textAlign = TextAlign.Center,
           modifier = Modifier
-            .width(36.dp)
-            .padding(start = 4.dp)
+            .width(40.dp)
+            .padding(horizontal = 4.dp)
         )
       } else {
         Spacer(modifier = Modifier.width(16.dp))

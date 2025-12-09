@@ -6,11 +6,9 @@ import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
 import androidx.compose.animation.togetherWith
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.pager.PagerState
 import androidx.compose.foundation.pager.rememberPagerState
@@ -23,6 +21,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.ModalNavigationDrawer
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.TopAppBarScrollBehavior
@@ -32,43 +31,35 @@ import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.saveable.rememberSaveable
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.unit.dp
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.bumptech.glide.integration.compose.ExperimentalGlideComposeApi
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.launch
-import remix.myplayer.R
-import androidx.compose.material3.Text
-import androidx.compose.ui.text.font.FontWeight
-import remix.myplayer.data.bean.misc.Library
-import remix.myplayer.ui.dialog.InputDialog
-import remix.myplayer.ui.dialog.rememberDialogState
+import remix.myplayer.data.model.misc.Library
+import remix.myplayer.ui.dialog.CreatePlayListDialog
 import remix.myplayer.ui.nav.LocalNavController
-import remix.myplayer.ui.nav.RouteSongChoose
 import remix.myplayer.ui.theme.LocalTheme
 import remix.myplayer.ui.widget.app.BottomBar
 import remix.myplayer.ui.widget.app.Drawer
 import remix.myplayer.ui.widget.app.FAButton
 import remix.myplayer.ui.widget.app.MultiSelectBar
 import remix.myplayer.ui.widget.app.ViewPager
-import remix.myplayer.ui.widget.common.TextPrimary
 import remix.myplayer.ui.widget.common.defaultAppBarActions
 import remix.myplayer.ui.widget.popup.ScreenPopupButton
 import remix.myplayer.viewmodel.libraryViewModel
 import remix.myplayer.viewmodel.mainViewModel
 import remix.myplayer.viewmodel.settingViewModel
+import remix.myplayer.viewmodel.webDavViewModel
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalGlideComposeApi::class)
 @Composable
@@ -134,47 +125,27 @@ fun HomeScreen() {
         }
       },
       floatingActionButton = {
-        val showFb by remember {
+        val selectLibrary by remember {
           derivedStateOf {
-            pagerState.currentPage == libraries.indexOfFirst {
-              it.tag == Library.TAG_PLAYLIST
-            }
+            libraries[pagerState.currentPage]
           }
         }
 
-        var text by rememberSaveable {
-          mutableStateOf("")
-        }
-        val dialogState = rememberDialogState(false)
+        CreatePlayListDialog()
 
-        InputDialog(
-          dialogState = dialogState,
-          title = stringResource(R.string.new_playlist),
-          positive = stringResource(R.string.create),
-          text = text,
-          onDismissRequest = {
-            text = ""
-          },
-          onValueChange = {
-            text = it
-          }
-        ) {
-          libraryVM.insertPlayList(it) { id ->
-            if (id > 0) {
-              navController.navigate("$RouteSongChoose/${id}/$it")
-            }
-          }
-        }
-
-        FAButton(showFb) {
+        val webDavVM = webDavViewModel
+        FAButton(selectLibrary.tag == Library.TAG_PLAYLIST || selectLibrary.tag == Library.TAG_REMOTE) {
           if (mainVM.multiSelectState.value.isShowing()) {
             return@FAButton
           }
 
-          text =
-            "${context.getString(R.string.local_list)}${libraryVM.playLists.value.size}"
-          dialogState.show()
+          if (selectLibrary.tag == Library.TAG_PLAYLIST) {
+            libraryVM.showCreatePlaylistDialog()
+          } else if (selectLibrary.tag == Library.TAG_REMOTE) {
+            webDavVM.showAddWebDavDialog()
+          }
         }
+
       })
     { contentPadding ->
       HomeContent(contentPadding, pagerState, libraries)
@@ -188,14 +159,14 @@ private fun HomeContent(
   pagerState: PagerState,
   libraries: List<Library>,
 ) {
-  val scrollToTopEvent = remember { MutableSharedFlow<Unit>() }
+  val scrollToCurrentEvent = remember { MutableSharedFlow<Unit>() }
 
   Column(modifier = Modifier.padding(contentPadding)) {
     ViewPager(
       modifier = Modifier.weight(1f),
       libraries = libraries,
       pagerState = pagerState,
-      scrollToTopEvent = scrollToTopEvent
+      scrollToCurrentEvent = scrollToCurrentEvent
     )
 
     BottomBar()

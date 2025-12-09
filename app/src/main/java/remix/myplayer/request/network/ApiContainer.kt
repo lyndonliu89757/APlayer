@@ -1,13 +1,10 @@
 package remix.myplayer.request.network
 
-import dagger.hilt.EntryPoint
-import dagger.hilt.InstallIn
-import dagger.hilt.components.SingletonComponent
 import okhttp3.ResponseBody
 import remix.myplayer.BuildConfig
-import remix.myplayer.data.bean.github.Release
-import remix.myplayer.data.bean.lastfm.LastFmAlbum
-import remix.myplayer.data.bean.lastfm.LastFmArtist
+import remix.myplayer.data.model.github.Release
+import remix.myplayer.data.model.lastfm.LastFmAlbum
+import remix.myplayer.data.model.lastfm.LastFmArtist
 import retrofit2.Response
 import retrofit2.http.GET
 import retrofit2.http.Path
@@ -34,13 +31,6 @@ interface GithubApi {
 }
 
 interface LastFMApi {
-  @EntryPoint
-  @InstallIn(SingletonComponent::class)
-  interface LastFMApiEntryPoint {
-
-    fun lastFMApi(): LastFMApi
-  }
-
   @GET("$BASE_QUERY_PARAMETERS&method=album.getinfo")
   suspend fun searchLastFMAlbum(
     @Query("album") albumName: String?,

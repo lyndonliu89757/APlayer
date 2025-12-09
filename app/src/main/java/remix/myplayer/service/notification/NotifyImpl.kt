@@ -10,9 +10,7 @@ import androidx.core.app.NotificationCompat
 import com.bumptech.glide.Glide
 import com.bumptech.glide.request.target.CustomTarget
 import com.bumptech.glide.request.transition.Transition
-import com.bumptech.glide.signature.ObjectKey
 import remix.myplayer.R
-import remix.myplayer.glide.UriFetcher
 import remix.myplayer.service.Command
 import remix.myplayer.service.MusicService
 import remix.myplayer.util.ColorUtil
@@ -85,7 +83,6 @@ class NotifyImpl(context: MusicService) : Notify(context) {
       .load(song)
       .override(size, size)
       .centerCrop()
-      .signature(ObjectKey(UriFetcher.albumVersion))
       .into(object : CustomTarget<Bitmap>() {
         override fun onResourceReady(resource: Bitmap, transition: Transition<in Bitmap>?) {
           if (song.id == playbackState.song.id) {

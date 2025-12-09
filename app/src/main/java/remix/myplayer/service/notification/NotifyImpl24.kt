@@ -11,10 +11,8 @@ import androidx.core.app.NotificationCompat.PRIORITY_MAX
 import com.bumptech.glide.Glide
 import com.bumptech.glide.request.target.CustomTarget
 import com.bumptech.glide.request.transition.Transition
-import com.bumptech.glide.signature.ObjectKey
 import remix.myplayer.R
-import remix.myplayer.data.bean.mp3.Song
-import remix.myplayer.glide.UriFetcher
+import remix.myplayer.data.model.audio.Song
 import remix.myplayer.service.Command
 import remix.myplayer.service.MusicService
 import remix.myplayer.service.MusicService.Companion.EXTRA_CONTROL
@@ -40,7 +38,6 @@ NotifyImpl24(context: MusicService) : Notify(context) {
       .asBitmap()
       .load(song)
       .centerCrop()
-      .signature(ObjectKey(UriFetcher.albumVersion))
       .override(size, size)
       .into(object : CustomTarget<Bitmap>() {
         override fun onResourceReady(resource: Bitmap, transition: Transition<in Bitmap>?) {

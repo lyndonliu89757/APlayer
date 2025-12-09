@@ -8,13 +8,7 @@ import androidx.compose.ui.layout.ContentScale
 import com.bumptech.glide.integration.compose.ExperimentalGlideComposeApi
 import com.bumptech.glide.integration.compose.GlideImage
 import com.bumptech.glide.integration.compose.placeholder
-import com.bumptech.glide.signature.ObjectKey
-import remix.myplayer.data.bean.mp3.APlayerModel
-import remix.myplayer.data.bean.mp3.Artist
-import remix.myplayer.data.db.room.entity.PlayList
-import remix.myplayer.glide.UriFetcher.albumVersion
-import remix.myplayer.glide.UriFetcher.artistVersion
-import remix.myplayer.glide.UriFetcher.playListVersion
+import remix.myplayer.data.model.audio.APlayerModel
 import remix.myplayer.ui.theme.LocalTheme
 
 @OptIn(ExperimentalGlideComposeApi::class)
@@ -29,7 +23,8 @@ fun GlideCover(
   if (circle) {
     coverModifier = modifier.clip(RoundedCornerShape(8))
   }
-  val placeHolder = if (album) LocalTheme.current.albumPlaceHolder else LocalTheme.current.artistPlaceHolder
+  val placeHolder =
+    if (album) LocalTheme.current.albumPlaceHolder else LocalTheme.current.artistPlaceHolder
   GlideImage(
     model = model,
     failure = placeholder(placeHolder),
@@ -37,12 +32,5 @@ fun GlideCover(
     contentDescription = null,
     contentScale = ContentScale.Crop,
     modifier = coverModifier
-  ) {
-    return@GlideImage when (model) {
-      is Artist -> it.signature(ObjectKey(artistVersion))
-      is PlayList -> it.signature(ObjectKey(playListVersion))
-      else -> it
-        .signature(ObjectKey(albumVersion))
-    }
-  }
+  )
 }

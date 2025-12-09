@@ -12,7 +12,6 @@ import android.graphics.Bitmap
 import android.graphics.drawable.BitmapDrawable
 import android.graphics.drawable.Drawable
 import android.media.AudioManager
-import android.media.MediaMetadataRetriever
 import android.os.Binder
 import android.os.Build
 import android.os.Bundle
@@ -40,8 +39,8 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import remix.myplayer.App
 import remix.myplayer.R
-import remix.myplayer.data.bean.mp3.Song
-import remix.myplayer.data.bean.mp3.Song.Companion.EMPTY_SONG
+import remix.myplayer.data.model.audio.Song
+import remix.myplayer.data.model.audio.Song.Companion.EMPTY_SONG
 import remix.myplayer.data.prefs.PrefKeys
 import remix.myplayer.data.prefs.SettingPrefs
 import remix.myplayer.data.prefs.SettingPrefs.Companion.LOCKSCREEN_APLAYER
@@ -66,6 +65,7 @@ import remix.myplayer.misc.tryLaunch
 import remix.myplayer.repo.HistoryRepository
 import remix.myplayer.repo.PlayListRepository
 import remix.myplayer.repo.SongRepository
+import remix.myplayer.repo.usecase.FetchMetaDataUseCase
 import remix.myplayer.service.notification.Notify
 import remix.myplayer.service.notification.NotifyImpl
 import remix.myplayer.service.notification.NotifyImpl24
@@ -129,6 +129,9 @@ class MusicService : BaseService(),
 
   @Inject
   lateinit var historyRepository: HistoryRepository
+
+  @Inject
+  lateinit var fetchMetaDataUseCase: FetchMetaDataUseCase
 
   private val stateSource = MusicStateSource
 
@@ -600,7 +603,7 @@ class MusicService : BaseService(),
     if (song is Song.Remote) {
       launch {
         withContext(Dispatchers.IO) {
-          retrieveRemoteSong(song, song)
+          fetchMetaDataUseCase(song)
         }
         pushPlaybackUiState()
       }
@@ -1615,65 +1618,6 @@ class MusicService : BaseService(),
       } catch (e: OutOfMemoryError) {
         e.printStackTrace()
         null
-      }
-    }
-
-    fun retrieveRemoteSong(song: Song.Remote, targetSong: Song.Remote) {
-      Timber.v("retrieveRemoteSong: ${song.data}")
-
-      if (!targetSong.metaFetchState.compareAndSet(0, 1)) {
-        return
-      }
-
-      val start = System.currentTimeMillis()
-      val metadataRetriever = MediaMetadataRetriever()
-      try {
-        metadataRetriever.setDataSource(song.data, song.headers)
-        val title =
-          metadataRetriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_TITLE)
-            ?: song.title
-        val album =
-          metadataRetriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_ALBUM) ?: ""
-        val artist =
-          metadataRetriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_ARTIST) ?: ""
-        val duration =
-          metadataRetriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_DURATION)
-            ?.toLong() ?: 0L
-        val year =
-          metadataRetriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_YEAR) ?: ""
-        val genre =
-          metadataRetriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_GENRE) ?: ""
-        val track =
-          metadataRetriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_NUM_TRACKS) ?: ""
-        val dateCreated = if (song.dateCreated > 0) {
-          song.dateCreated
-        } else {
-          metadataRetriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_DATE)
-            ?.toLongOrNull() ?: 0
-        }
-        targetSong.bitRate =
-          metadataRetriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_BITRATE) ?: ""
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-          targetSong.sampleRate =
-            metadataRetriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_BITS_PER_SAMPLE)
-              ?: ""
-        }
-
-        targetSong.updateMetaData(
-          title,
-          album,
-          artist,
-          duration,
-          year,
-          genre,
-          track,
-          dateCreated
-        )
-      } catch (e: Exception) {
-        Timber.v("fail to retrieveRemoteSong data: ${song.data} detail: $e")
-      } finally {
-        Timber.v("retrieveRemoteSong spend:${System.currentTimeMillis() - start} ${song.data}")
-        metadataRetriever.release()
       }
     }
   }

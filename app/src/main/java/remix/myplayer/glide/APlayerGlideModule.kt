@@ -17,7 +17,7 @@ import com.bumptech.glide.load.engine.executor.GlideExecutor
 import com.bumptech.glide.module.AppGlideModule
 import com.bumptech.glide.request.RequestListener
 import com.bumptech.glide.request.target.Target
-import remix.myplayer.data.bean.mp3.APlayerModel
+import remix.myplayer.data.model.audio.APlayerModel
 import java.io.InputStream
 
 @GlideModule
@@ -25,18 +25,24 @@ class APlayerGlideModule : AppGlideModule() {
 
   override fun registerComponents(context: Context, glide: Glide, registry: Registry) {
     registry.append(Uri::class.java, InputStream::class.java, EmbeddedLoader.Factory())
-    registry.append(APlayerModel::class.java, InputStream::class.java, APlayerUriLoader.Factory())
+    registry.append(
+      APlayerModel::class.java,
+      InputStream::class.java,
+      APlayerUriLoader.Factory(context)
+    )
   }
 
   override fun applyOptions(context: Context, builder: GlideBuilder) {
     super.applyOptions(context, builder)
     builder.setLogLevel(Log.ERROR)
-    builder.setDiskCacheExecutor(GlideExecutor.newSourceBuilder()
+    builder.setDiskCacheExecutor(
+      GlideExecutor.newSourceBuilder()
         .setName("custom-disk-cache")
         .setThreadCount(1)
         .setThreadTimeoutMillis(10000)
         .setUncaughtThrowableStrategy(GlideExecutor.UncaughtThrowableStrategy.LOG)
-        .build())
+        .build()
+    )
   }
 }
 

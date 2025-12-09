@@ -1,4 +1,4 @@
-package remix.myplayer.data.bean.mp3
+package remix.myplayer.data.model.audio
 
 import android.content.ContentUris
 import android.media.MediaMetadataRetriever
@@ -183,7 +183,7 @@ sealed class Song(
     result = 31 * result + year.hashCode()
     result = 31 * result + (track?.hashCode() ?: 0)
     result = 31 * result + _duration.hashCode()
-    result = 31 * result + _genre.hashCode()
+    result = 31 * result + (_genre?.hashCode() ?: 0)
     return result
   }
 
