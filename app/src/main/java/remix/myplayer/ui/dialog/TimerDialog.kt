@@ -70,7 +70,6 @@ fun TimerDialog() {
   NormalDialog(
     dialogState = timerVM.dialogState,
     titleRes = R.string.timer,
-    titleAlignment = Alignment.CenterHorizontally,
     onPositive = {
       timerVM.toggle()
     },

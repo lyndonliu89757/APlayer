@@ -67,8 +67,8 @@ fun PlayingDropDownMenu(
     listOf(
       R.string.song_edit,
       R.string.song_detail,
-      R.string.collect,
-      R.string.add_to_playlist,
+//      R.string.collect,
+//      R.string.add_to_playlist,
       R.string.sleep_timer,
       R.string.eq,
       R.string.lyric,

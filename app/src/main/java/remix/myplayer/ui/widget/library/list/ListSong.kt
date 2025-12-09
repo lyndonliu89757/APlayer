@@ -35,88 +35,88 @@ import remix.myplayer.ui.widget.popup.SongPopupButton
 @OptIn(ExperimentalGlideComposeApi::class)
 @Composable
 fun ListSong(
-    modifier: Modifier = Modifier,
-    song: Song,
-    modelParent: APlayerModel,
-    selected: Boolean,
-    playing: Boolean,
-    onClickSong: () -> Unit,
-    onLongClickSong: () -> Unit,
-    num: Int? = null,
+  modifier: Modifier = Modifier,
+  song: Song,
+  modelParent: APlayerModel,
+  selected: Boolean,
+  playing: Boolean,
+  onClickSong: () -> Unit,
+  onLongClickSong: () -> Unit,
+  num: Int? = null,
 ) {
-    val theme = LocalTheme.current
+  val theme = LocalTheme.current
 
-    Box(
-        modifier = modifier
-            .fillMaxWidth()
-            .height(IntrinsicSize.Min)
-            .combinedClickable(
-                interactionSource = remember { MutableInteractionSource() },
-                indication = ripple(color = theme.ripple),
-                onClick = { onClickSong() },
-                onLongClick = { onLongClickSong() }
-            )
-            .background(if (selected) theme.select else theme.background),
-        contentAlignment = Alignment.CenterStart
-    ) {
-        if (playing) {
-            Box(
-                modifier = Modifier
-                    .width(4.dp)
-                    .fillMaxHeight()
-                    .padding(vertical = 8.dp)
-                    .background(theme.highLightText())
-            )
-        }
-
-        Row(
-            modifier = modifier
-                .fillMaxWidth(),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            if (num != null) {
-                TextPrimary(
-                    if (num > 99) "99+" else num.toString(),
-                    textAlign = TextAlign.Center,
-                    modifier = Modifier
-                        .width(36.dp)
-                        .padding(start = 4.dp)
-                )
-            } else {
-                Spacer(modifier = Modifier.width(16.dp))
-            }
-
-            GlideCover(
-                model = song,
-                modifier = Modifier
-                    .size(40.dp)
-            )
-
-            Column(
-                verticalArrangement = Arrangement.Center,
-                horizontalAlignment = Alignment.Start,
-                modifier = Modifier
-                    .weight(1f)
-                    .padding(start = 16.dp, end = 8.dp)
-            ) {
-                TextPrimary(song.displayName)
-                Spacer(modifier = Modifier.height(4.dp))
-                TextSecondary(
-                    String.format(
-                        "%s《%s》%s",
-                        song.artist,
-                        song.album,
-                        if (song.year == "0") "" else song.year
-                    )
-                )
-            }
-
-            SongPopupButton(
-                modifier = Modifier,
-                song = song,
-                parent = modelParent
-            )
-        }
+  Box(
+    modifier = modifier
+      .fillMaxWidth()
+      .height(IntrinsicSize.Min)
+      .combinedClickable(
+        interactionSource = remember { MutableInteractionSource() },
+        indication = ripple(color = theme.ripple),
+        onClick = { onClickSong() },
+        onLongClick = { onLongClickSong() }
+      )
+      .background(if (selected) theme.select else theme.background),
+    contentAlignment = Alignment.CenterStart
+  ) {
+    if (playing) {
+      Box(
+        modifier = Modifier
+          .width(4.dp)
+          .fillMaxHeight()
+          .padding(vertical = 8.dp)
+          .background(theme.highLightText())
+      )
     }
+
+    Row(
+      modifier = modifier
+        .fillMaxWidth(),
+      verticalAlignment = Alignment.CenterVertically
+    ) {
+      if (num != null) {
+        TextPrimary(
+          if (num > 99) "99+" else num.toString(),
+          textAlign = TextAlign.Center,
+          modifier = Modifier
+            .width(36.dp)
+            .padding(start = 4.dp)
+        )
+      } else {
+        Spacer(modifier = Modifier.width(16.dp))
+      }
+
+      GlideCover(
+        model = song,
+        modifier = Modifier
+          .size(40.dp)
+      )
+
+      Column(
+        verticalArrangement = Arrangement.Center,
+        horizontalAlignment = Alignment.Start,
+        modifier = Modifier
+          .weight(1f)
+          .padding(start = 16.dp, end = 8.dp)
+      ) {
+        TextPrimary(song.displayName)
+        Spacer(modifier = Modifier.height(4.dp))
+        TextSecondary(
+          String.format(
+            "%s《%s》%s",
+            song.artist,
+            song.album,
+            if (song.year == "0") "" else song.year
+          )
+        )
+      }
+
+      SongPopupButton(
+        modifier = Modifier,
+        song = song,
+        parent = modelParent
+      )
+    }
+  }
 
 }

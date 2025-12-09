@@ -13,6 +13,9 @@
 [<img src="https://play.google.com/intl/en_us/badges/images/generic/en-play-badge.png"
      alt="Get it on Google Play"
      height="80">](https://play.google.com/store/apps/details?id=remix.myplayer)
+[<img src="https://gitlab.com/IzzyOnDroid/repo/-/raw/master/assets/IzzyOnDroid.png"
+     alt="Get it at IzzyOnDroid"
+     height="80">](https://apt.izzysoft.de/packages/remix.myplayer)
 
 ## Feature
 - Configurable tabs,include song,artist,album,folder,playlist,remote(webdav)

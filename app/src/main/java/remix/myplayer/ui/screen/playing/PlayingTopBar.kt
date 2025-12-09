@@ -21,6 +21,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.palette.graphics.Palette
@@ -59,31 +60,14 @@ internal fun PlayingTopBar(song: Song, swatch: Palette.Swatch) {
       verticalArrangement = Arrangement.Center,
       horizontalAlignment = Alignment.CenterHorizontally
     ) {
-      val title = song.title
-      val artist = song.artist
-      val album = song.album
-
-      val detail = when {
-        artist == "" -> {
-          song.album
-        }
-
-        album == "" -> {
-          song.artist
-        }
-
-        else -> {
-          String.format("%s-%s", song.artist, song.album)
-        }
-      }
-
       Text(
-        if (title.isEmpty()) stringResource(R.string.unknown_song) else title,
+        song.displayName.ifEmpty { stringResource(R.string.unknown_song) },
         color = titleColor,
         fontSize = 16.sp,
+        fontWeight = FontWeight.Bold,
         maxLines = 1
       )
-      Text(detail, color = bodyColor, fontSize = 14.sp, maxLines = 1)
+      Text(String.format("《%s》", song.album), color = bodyColor, fontSize = 14.sp, fontWeight = FontWeight.Bold, maxLines = 1)
     }
 
     var expanded by remember { mutableStateOf(false) }

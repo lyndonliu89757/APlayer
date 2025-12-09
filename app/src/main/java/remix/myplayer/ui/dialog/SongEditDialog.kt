@@ -2,6 +2,7 @@ package remix.myplayer.ui.dialog
 
 import androidx.activity.compose.LocalActivity
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
@@ -79,7 +80,7 @@ fun SongEditDialog() {
     },
     custom = {
       ProvideTextStyle(TextStyle(color = LocalTheme.current.textPrimary, fontSize = 18.sp)) {
-        LazyColumn(modifier = Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(18.dp)) {
+        LazyColumn(verticalArrangement = Arrangement.spacedBy(8.dp)) {
           item {
             EditField(title, R.string.song_name_input_hint, isError = title.isEmpty()) {
               title = it
@@ -159,10 +160,12 @@ fun EditField(
     label = {
       TextPrimary(stringResource(labelRes))
     },
-    modifier = Modifier.semantics {
-      if (contentType != null) {
-        this.contentType = contentType
-      }
-    }
+    modifier = Modifier
+      .semantics {
+        if (contentType != null) {
+          this.contentType = contentType
+        }
+      },
+    textStyle = TextStyle(fontSize = 14.sp)
   )
 }

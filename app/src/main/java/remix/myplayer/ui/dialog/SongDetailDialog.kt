@@ -45,8 +45,8 @@ fun SongDetailDialog() {
     negative = null,
     custom = {
       LazyColumn(
-        verticalArrangement = Arrangement.spacedBy(20.dp),
-        modifier = Modifier.padding(top = 18.dp)
+        verticalArrangement = Arrangement.spacedBy(16.dp),
+        modifier = Modifier.padding(top = 16.dp)
       ) {
         item {
           DetailItem(R.string.song_path, song.data, true)
@@ -97,6 +97,7 @@ private fun DetailItem(titleRes: Int, content: String, selectable: Boolean = fal
   Row {
     Text(
       stringResource(titleRes),
+      modifier = Modifier.padding(end = 6.dp),
       fontSize = 16.sp,
       fontWeight = FontWeight.Bold,
       color = LocalTheme.current.textSecondary

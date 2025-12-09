@@ -48,7 +48,6 @@ fun NormalDialog(
   cancelOutside: Boolean = true,
   containerPadding: Dp = 20.dp,
   titleRes: Int? = null,
-  titleAlignment: Alignment.Horizontal = Alignment.Start,
   contentRes: Int? = null,
   itemRes: List<Int>? = null,
   custom: @Composable (ColumnScope.() -> Unit)? = null,
@@ -66,7 +65,6 @@ fun NormalDialog(
     autoDismiss = autoDismiss,
     cancelOutside = cancelOutside,
     title = if (titleRes != null) stringResource(titleRes) else null,
-    titleAlignment = titleAlignment,
     content = if (contentRes != null) stringResource(contentRes) else null,
     items = itemRes?.map { stringResource(it) },
     custom = custom,
@@ -92,7 +90,6 @@ fun NormalDialog(
   // space between title,content,items,buttons
   contentSpacer: Dp = 16.dp,
   title: String? = null,
-  titleAlignment: Alignment.Horizontal = Alignment.Start,
   content: String? = null,
   items: List<String>? = null,
   custom: @Composable (ColumnScope.() -> Unit)? = null,
@@ -112,14 +109,91 @@ fun NormalDialog(
       modifier = Modifier.padding(containerPadding),
       verticalArrangement = Arrangement.spacedBy(contentSpacer)
     ) {
-      if (title != null) {
+      Row(
+        modifier = Modifier.fillMaxWidth(),
+        verticalAlignment = Alignment.CenterVertically
+      ) {
+        // 标题
         TextPrimary(
-          title,
+          title ?: "",
           fontSize = 18.sp,
           fontWeight = FontWeight.Bold,
-          maxLine = Int.MAX_VALUE,
-          modifier = Modifier.align(titleAlignment)
+          maxLine = 1,
         )
+
+        if (positive != null || neutral != null || negative != null) {
+          Row(
+            modifier = Modifier.weight(1f),
+            horizontalArrangement = Arrangement.End,
+          ) {
+            val buttonPadding = 4.dp
+            val buttonFontSize = 15.sp
+            val buttonWeight = FontWeight.SemiBold
+
+            if (!neutral.isNullOrEmpty()) {
+              TextPrimary(
+                neutral,
+                modifier = Modifier
+                  .clickable(
+                    onClick = {
+                      if (autoDismiss) {
+                        dialogState.dismiss()
+                      }
+                      onNeutral?.invoke()
+                    }
+                  )
+                  .padding(buttonPadding),
+                textAlign = TextAlign.Center,
+                fontWeight = buttonWeight,
+                fontSize = buttonFontSize
+              )
+
+              Spacer(modifier = Modifier.width(4.dp))
+            }
+
+            // 取消
+            if (!negative.isNullOrEmpty()) {
+              TextPrimary(
+                negative,
+                textAlign = TextAlign.Center,
+                modifier = Modifier
+                  .clickable(
+                    onClick = {
+                      if (autoDismiss) {
+                        dialogState.dismiss()
+                      }
+                      onNegative?.invoke()
+                    }
+                  )
+                  .padding(buttonPadding),
+                fontWeight = buttonWeight,
+                fontSize = buttonFontSize
+              )
+
+              Spacer(modifier = Modifier.width(4.dp))
+            }
+            // 确认
+            if (!positive.isNullOrEmpty()) {
+              TextPrimary(
+                positive,
+                textAlign = TextAlign.Center,
+                modifier = Modifier
+                  .clickable(
+                    onClick = {
+                      if (autoDismiss) {
+                        dialogState.dismiss()
+                      }
+                      onPositive?.invoke()
+                    }
+                  )
+                  .padding(buttonPadding),
+                fontWeight = buttonWeight,
+                fontSize = buttonFontSize
+              )
+            }
+
+          }
+        }
       }
 
       if (content != null) {
@@ -199,87 +273,6 @@ fun NormalDialog(
         }
       } else if (custom != null) {
         custom()
-      }
-
-      if (positive != null || neutral != null || negative != null) {
-        Row(
-          modifier = Modifier
-            .fillMaxWidth(),
-          verticalAlignment = Alignment.CenterVertically
-        ) {
-          val buttonPadding = 6.dp
-          val buttonFontSize = 15.sp
-          val buttonWeight = FontWeight.SemiBold
-
-          Box(
-            contentAlignment = Alignment.CenterStart,
-            modifier = Modifier
-              .weight(1f)
-          ) {
-            TextPrimary(
-              neutral ?: "",
-              modifier = Modifier
-                .clickable(
-                  enabled = !neutral.isNullOrEmpty(),
-                  onClick = {
-                    if (autoDismiss) {
-                      dialogState.dismiss()
-                    }
-                    onNeutral?.invoke()
-                  }
-                )
-                .padding(buttonPadding),
-              textAlign = TextAlign.Center,
-              fontWeight = buttonWeight,
-              fontSize = buttonFontSize
-            )
-          }
-
-          Spacer(modifier = Modifier.width(4.dp))
-
-          Row(
-            modifier = Modifier.weight(1f),
-            horizontalArrangement = Arrangement.End,
-            verticalAlignment = Alignment.CenterVertically
-          ) {
-            TextPrimary(
-              negative ?: "",
-              textAlign = TextAlign.Center,
-              modifier = Modifier
-                .clickable(
-                  enabled = !negative.isNullOrEmpty(),
-                  onClick = {
-                    if (autoDismiss) {
-                      dialogState.dismiss()
-                    }
-                    onNegative?.invoke()
-                  }
-                )
-                .padding(buttonPadding)
-                .weight(1f),
-              fontWeight = buttonWeight,
-              fontSize = buttonFontSize
-            )
-            TextPrimary(
-              positive ?: "",
-              textAlign = TextAlign.Center,
-              modifier = Modifier
-                .clickable(
-                  enabled = !positive.isNullOrEmpty(),
-                  onClick = {
-                    if (autoDismiss) {
-                      dialogState.dismiss()
-                    }
-                    onPositive?.invoke()
-                  }
-                )
-                .padding(buttonPadding)
-                .weight(1f),
-              fontWeight = buttonWeight,
-              fontSize = buttonFontSize
-            )
-          }
-        }
       }
     }
   }

@@ -710,12 +710,12 @@ object Util {
       val audioFile = AudioFileIO.read(File(request.path))
 
       val tag = audioFile.tagOrCreateAndSetDefault
-      for ((key, value) in request.fieldMap) {
-        try {
+      try {
+        for ((key, value) in request.fieldMap) {
           tag.setField(key, value)
-        } catch (e: Exception) {
-          Timber.v("setField($key, $value) failed: $e")
         }
+      } catch (e: Exception) {
+        Timber.v("set tag failed: $e")
       }
 
       audioFile.commit()
@@ -727,8 +727,8 @@ object Util {
         context.contentResolver.notifyChange(uri, null)
       }
 
-      withContext(Dispatchers.Main) {
-        MessageNotifier.show(R.string.save_success)
-      }
+//      withContext(Dispatchers.Main) {
+//        MessageNotifier.show(R.string.save_success)
+//      }
     }
 }

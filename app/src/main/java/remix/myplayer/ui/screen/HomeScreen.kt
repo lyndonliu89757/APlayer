@@ -73,201 +73,201 @@ import remix.myplayer.viewmodel.settingViewModel
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalGlideComposeApi::class)
 @Composable
 fun HomeScreen() {
-    val mainVM = mainViewModel
-    val libraryVM = libraryViewModel
-    val navController = LocalNavController.current
-    val context = LocalContext.current
+  val mainVM = mainViewModel
+  val libraryVM = libraryViewModel
+  val navController = LocalNavController.current
+  val context = LocalContext.current
 
-    val libraries by settingViewModel.allLibraries.collectAsStateWithLifecycle()
+  val libraries by settingViewModel.allLibraries.collectAsStateWithLifecycle()
 
-    val multiSelectState by mainVM.multiSelectState.collectAsStateWithLifecycle()
-    val drawerState = rememberDrawerState(DrawerValue.Closed)
-    val pagerState = rememberPagerState { libraries.size }
-    val scope = rememberCoroutineScope()
+  val multiSelectState by mainVM.multiSelectState.collectAsStateWithLifecycle()
+  val drawerState = rememberDrawerState(DrawerValue.Closed)
+  val pagerState = rememberPagerState { libraries.size }
+  val scope = rememberCoroutineScope()
 
-    BackPressHandler(enabled = drawerState.isOpen || multiSelectState.isShowing()) {
-        if (drawerState.isOpen) {
-            scope.launch {
-                drawerState.close()
-            }
-        } else if (multiSelectState.isShowing()) {
-            mainVM.closeMultiSelect()
-        }
+  BackPressHandler(enabled = drawerState.isOpen || multiSelectState.isShowing()) {
+    if (drawerState.isOpen) {
+      scope.launch {
+        drawerState.close()
+      }
+    } else if (multiSelectState.isShowing()) {
+      mainVM.closeMultiSelect()
+    }
+  }
+
+  ModalNavigationDrawer(
+    drawerState = drawerState,
+    drawerContent = { Drawer(drawerState, pagerState) }) {
+
+    val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior()
+
+    val showMultiSelect by remember {
+      derivedStateOf {
+        multiSelectState.isShowInLibrary()
+      }
     }
 
-    ModalNavigationDrawer(
-        drawerState = drawerState,
-        drawerContent = { Drawer(drawerState, pagerState) }) {
-
-        val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior()
-
-        val showMultiSelect by remember {
-            derivedStateOf {
-                multiSelectState.isShowInLibrary()
+    Scaffold(
+      Modifier
+        .fillMaxSize()
+        .nestedScroll(scrollBehavior.nestedScrollConnection),
+      containerColor = LocalTheme.current.libraryBackground,
+      topBar = {
+        AnimatedContent(
+          targetState = showMultiSelect,
+          transitionSpec = {
+            if (targetState) {
+              slideInVertically() togetherWith slideOutVertically { height -> height / 2 }
+            } else {
+              slideInVertically { height -> height } togetherWith slideOutVertically()
             }
+          }
+        ) { isMultiSelect ->
+          if (!isMultiSelect) {
+            HomeAppBar(scrollBehavior, drawerState)
+          } else {
+            MultiSelectBar(
+              state = multiSelectState,
+              scrollBehavior = scrollBehavior,
+            )
+          }
+        }
+      },
+      floatingActionButton = {
+        val showFb by remember {
+          derivedStateOf {
+            pagerState.currentPage == libraries.indexOfFirst {
+              it.tag == Library.TAG_PLAYLIST
+            }
+          }
         }
 
-        Scaffold(
-            Modifier
-                .fillMaxSize()
-                .nestedScroll(scrollBehavior.nestedScrollConnection),
-            containerColor = LocalTheme.current.libraryBackground,
-            topBar = {
-                AnimatedContent(
-                    targetState = showMultiSelect,
-                    transitionSpec = {
-                        if (targetState) {
-                            slideInVertically() togetherWith slideOutVertically { height -> height / 2 }
-                        } else {
-                            slideInVertically { height -> height } togetherWith slideOutVertically()
-                        }
-                    }
-                ) { isMultiSelect ->
-                    if (!isMultiSelect) {
-                        HomeAppBar(scrollBehavior, drawerState)
-                    } else {
-                        MultiSelectBar(
-                            state = multiSelectState,
-                            scrollBehavior = scrollBehavior,
-                        )
-                    }
-                }
-            },
-            floatingActionButton = {
-                val showFb by remember {
-                    derivedStateOf {
-                        pagerState.currentPage == libraries.indexOfFirst {
-                            it.tag == Library.TAG_PLAYLIST
-                        }
-                    }
-                }
-
-                var text by rememberSaveable {
-                    mutableStateOf("")
-                }
-                val dialogState = rememberDialogState(false)
-
-                InputDialog(
-                    dialogState = dialogState,
-                    title = stringResource(R.string.new_playlist),
-                    positive = stringResource(R.string.create),
-                    text = text,
-                    onDismissRequest = {
-                        text = ""
-                    },
-                    onValueChange = {
-                        text = it
-                    }
-                ) {
-                    libraryVM.insertPlayList(it) { id ->
-                        if (id > 0) {
-                            navController.navigate("$RouteSongChoose/${id}/$it")
-                        }
-                    }
-                }
-
-                FAButton(showFb) {
-                    if (mainVM.multiSelectState.value.isShowing()) {
-                        return@FAButton
-                    }
-
-                    text =
-                        "${context.getString(R.string.local_list)}${libraryVM.playLists.value.size}"
-                    dialogState.show()
-                }
-            })
-        { contentPadding ->
-            HomeContent(contentPadding, pagerState, libraries)
+        var text by rememberSaveable {
+          mutableStateOf("")
         }
+        val dialogState = rememberDialogState(false)
+
+        InputDialog(
+          dialogState = dialogState,
+          title = stringResource(R.string.new_playlist),
+          positive = stringResource(R.string.create),
+          text = text,
+          onDismissRequest = {
+            text = ""
+          },
+          onValueChange = {
+            text = it
+          }
+        ) {
+          libraryVM.insertPlayList(it) { id ->
+            if (id > 0) {
+              navController.navigate("$RouteSongChoose/${id}/$it")
+            }
+          }
+        }
+
+        FAButton(showFb) {
+          if (mainVM.multiSelectState.value.isShowing()) {
+            return@FAButton
+          }
+
+          text =
+            "${context.getString(R.string.local_list)}${libraryVM.playLists.value.size}"
+          dialogState.show()
+        }
+      })
+    { contentPadding ->
+      HomeContent(contentPadding, pagerState, libraries)
     }
+  }
 }
 
 @Composable
 private fun HomeContent(
-    contentPadding: PaddingValues,
-    pagerState: PagerState,
-    libraries: List<Library>,
+  contentPadding: PaddingValues,
+  pagerState: PagerState,
+  libraries: List<Library>,
 ) {
-    val scrollToTopEvent = remember { MutableSharedFlow<Unit>() }
+  val scrollToTopEvent = remember { MutableSharedFlow<Unit>() }
 
-    Column(modifier = Modifier.padding(contentPadding)) {
-        ViewPager(
-            modifier = Modifier.weight(1f),
-            libraries = libraries,
-            pagerState = pagerState,
-            scrollToTopEvent = scrollToTopEvent
-        )
+  Column(modifier = Modifier.padding(contentPadding)) {
+    ViewPager(
+      modifier = Modifier.weight(1f),
+      libraries = libraries,
+      pagerState = pagerState,
+      scrollToTopEvent = scrollToTopEvent
+    )
 
-        BottomBar()
-    }
+    BottomBar()
+  }
 }
 
 @Composable
 fun BackPressHandler(
-    enabled: Boolean = true,
-    onBackPressed: () -> Unit
+  enabled: Boolean = true,
+  onBackPressed: () -> Unit
 ) {
-    val dispatcher = LocalOnBackPressedDispatcherOwner.current?.onBackPressedDispatcher
-    val backCallback = remember {
-        object : OnBackPressedCallback(enabled) {
-            override fun handleOnBackPressed() {
-                onBackPressed()
-            }
-        }
+  val dispatcher = LocalOnBackPressedDispatcherOwner.current?.onBackPressedDispatcher
+  val backCallback = remember {
+    object : OnBackPressedCallback(enabled) {
+      override fun handleOnBackPressed() {
+        onBackPressed()
+      }
     }
+  }
 
-    LaunchedEffect(enabled) {
-        backCallback.isEnabled = enabled
-    }
+  LaunchedEffect(enabled) {
+    backCallback.isEnabled = enabled
+  }
 
-    DisposableEffect(dispatcher) {
-        dispatcher?.addCallback(backCallback)
-        onDispose {
-            backCallback.remove()
-        }
+  DisposableEffect(dispatcher) {
+    dispatcher?.addCallback(backCallback)
+    onDispose {
+      backCallback.remove()
     }
+  }
 }
 
 @Composable
 @OptIn(ExperimentalMaterial3Api::class)
 fun HomeAppBar(
-    scrollBehavior: TopAppBarScrollBehavior,
-    drawerState: DrawerState
+  scrollBehavior: TopAppBarScrollBehavior,
+  drawerState: DrawerState
 ) {
-    val library by settingViewModel.currentLibrary.collectAsStateWithLifecycle()
-    val scope = rememberCoroutineScope()
+  val library by settingViewModel.currentLibrary.collectAsStateWithLifecycle()
+  val scope = rememberCoroutineScope()
 
-    TopAppBar(
-        scrollBehavior = scrollBehavior,
-        colors = TopAppBarDefaults.topAppBarColors(
-            containerColor = LocalTheme.current.background,
-            scrolledContainerColor = LocalTheme.current.background,
-            titleContentColor = Color.Black,
-            navigationIconContentColor = Color.Black,
-            actionIconContentColor = Color.Black,
-        ),
-        title = {
-            Text(stringResource(library.stringRes), fontSize = 15.sp, fontWeight = FontWeight.Bold, maxLines = 1)
-        },
-        navigationIcon = {
-            IconButton(onClick = { scope.launch { drawerState.open() } }) {
-                Icon(Icons.Filled.Menu, contentDescription = "Menu")
-            }
-        },
-        actions = {
-            if (library.tag != Library.TAG_FOLDER && library.tag != Library.TAG_REMOTE) {
-                ScreenPopupButton(library)
-            }
+  TopAppBar(
+    scrollBehavior = scrollBehavior,
+    colors = TopAppBarDefaults.topAppBarColors(
+      containerColor = LocalTheme.current.background,
+      scrolledContainerColor = LocalTheme.current.background,
+      titleContentColor = Color.Black,
+      navigationIconContentColor = Color.Black,
+      actionIconContentColor = Color.Black,
+    ),
+    title = {
+      Text(stringResource(library.stringRes), fontSize = 15.sp, fontWeight = FontWeight.Bold, maxLines = 1)
+    },
+    navigationIcon = {
+      IconButton(onClick = { scope.launch { drawerState.open() } }) {
+        Icon(Icons.Filled.Menu, contentDescription = "Menu")
+      }
+    },
+    actions = {
+      if (library.tag != Library.TAG_FOLDER && library.tag != Library.TAG_REMOTE) {
+        ScreenPopupButton(library)
+      }
 
-            defaultAppBarActions.map { it ->
-                IconButton(onClick = {
-                    it.action()
-                }) {
-                    Icon(
-                        painter = painterResource(it.icon),
-                        contentDescription = it.contentDescription
-                    )
-                }
-            }
-        })
+      defaultAppBarActions.map { it ->
+        IconButton(onClick = {
+          it.action()
+        }) {
+          Icon(
+            painter = painterResource(it.icon),
+            contentDescription = it.contentDescription
+          )
+        }
+      }
+    })
 }

@@ -41,134 +41,134 @@ import remix.myplayer.viewmodel.settingViewModel
 
 @Composable
 fun SongPopupButton(
-    modifier: Modifier = Modifier,
-    song: Song,
-    parent: APlayerModel
+  modifier: Modifier = Modifier,
+  song: Song,
+  parent: APlayerModel
 ) {
-    var expanded by remember { mutableStateOf(false) }
-    Box(
-        contentAlignment = Alignment.Center,
-        modifier = modifier
-            .clickWithRipple {
-                expanded = !expanded
-            }
-            .size(dimensionResource(id = R.dimen.item_list_btn_size))
-    ) {
-        SongDropdownMenu(expanded, song, parent) {
-            expanded = false
-        }
-
-        Image(
-            modifier = Modifier.size(20.dp),
-            painter = painterResource(R.drawable.icon_player_more),
-            contentDescription = "song button",
-            colorFilter = ColorFilter.tint(Color.Gray)
-        )
+  var expanded by remember { mutableStateOf(false) }
+  Box(
+    contentAlignment = Alignment.Center,
+    modifier = modifier
+      .clickWithRipple {
+        expanded = !expanded
+      }
+      .size(dimensionResource(id = R.dimen.item_list_btn_size))
+  ) {
+    SongDropdownMenu(expanded, song, parent) {
+      expanded = false
     }
+
+    Image(
+      modifier = Modifier.size(20.dp),
+      painter = painterResource(R.drawable.icon_player_more),
+      contentDescription = "song button",
+      colorFilter = ColorFilter.tint(Color.Gray)
+    )
+  }
 }
 
 @Composable
 private fun SongDropdownMenu(
-    expanded: Boolean,
-    song: Song,
-    parent: APlayerModel,
-    onDismissRequest: () -> Unit
+  expanded: Boolean,
+  song: Song,
+  parent: APlayerModel,
+  onDismissRequest: () -> Unit
 ) {
-    val menuItems =
-        listOf(
-            R.string.add_to_next_song,
-            R.string.add_to_play_queue,
-            R.string.add_to_playlist,
-            R.string.song_detail,
-            R.string.song_edit,
-            R.string.set_album_cover,
-            R.string.collect,
-            R.string.share,
-            R.string.ring,
-            R.string.delete
-        )
-    val activity = LocalActivity.current as? BaseActivity
-    val settingVM = settingViewModel
-    val playbackVM = playbackViewModel
-    val libraryVM = libraryViewModel
-    val nav = LocalNavController.current
+  val menuItems =
+    listOf(
+      R.string.add_to_next_song,
+//      R.string.add_to_play_queue,
+//      R.string.add_to_playlist,
+      R.string.song_detail,
+      R.string.song_edit,
+//      R.string.set_album_cover,
+//      R.string.collect,
+      R.string.share,
+//      R.string.ring,
+      R.string.delete
+    )
+  val activity = LocalActivity.current as? BaseActivity
+  val settingVM = settingViewModel
+  val playbackVM = playbackViewModel
+  val libraryVM = libraryViewModel
+  val nav = LocalNavController.current
 
-    DropdownMenu(
-        modifier = Modifier.wrapContentSize(Alignment.TopEnd),
-        expanded = expanded,
-        // TODO
+  DropdownMenu(
+    modifier = Modifier.wrapContentSize(Alignment.TopEnd),
+    expanded = expanded,
+    // TODO
 //    offset = DpOffset(0.dp, -dimensionResource(R.dimen.item_list_btn_size)),
-        containerColor = LocalTheme.current.dialogBackground,
-        onDismissRequest = onDismissRequest
-    ) {
-        menuItems.forEachIndexed { _, res ->
-            DropdownMenuItem(
-                text = { Text(stringResource(res), color = LocalTheme.current.textPrimary) },
-                onClick = {
-                    onDismissRequest()
+    containerColor = LocalTheme.current.dialogBackground,
+    onDismissRequest = onDismissRequest
+  ) {
+    menuItems.forEachIndexed { _, res ->
+      DropdownMenuItem(
+        text = { Text(stringResource(res), color = LocalTheme.current.textPrimary) },
+        onClick = {
+          onDismissRequest()
 
-                    if (activity == null) {
-                        return@DropdownMenuItem
-                    }
+          if (activity == null) {
+            return@DropdownMenuItem
+          }
 
-                    when (res) {
-                        R.string.add_to_next_song -> {
-                            Util.sendLocalBroadcast(
-                                MusicUtil.makeCmdIntent(Command.ADD_TO_NEXT_SONG)
-                                    .putExtra(EXTRA_SONG, song)
-                            )
-                        }
+          when (res) {
+            R.string.add_to_next_song -> {
+              Util.sendLocalBroadcast(
+                MusicUtil.makeCmdIntent(Command.ADD_TO_NEXT_SONG)
+                  .putExtra(EXTRA_SONG, song)
+              )
+            }
 
-                        R.string.add_to_playlist -> {
-                            settingVM.showAddSongToPlayListDialog(listOf(song.id), "")
-                        }
+            R.string.add_to_playlist -> {
+              settingVM.showAddSongToPlayListDialog(listOf(song.id), "")
+            }
 
-                        R.string.add_to_play_queue -> {
-                            playbackVM.insertToQueue(listOf(song))
-                        }
+            R.string.add_to_play_queue -> {
+              playbackVM.insertToQueue(listOf(song))
+            }
 
-                        R.string.song_detail -> {
-                            settingVM.showSongDetailDialog(song)
-                        }
+            R.string.song_detail -> {
+              settingVM.showSongDetailDialog(song)
+            }
 
-                        R.string.song_edit -> {
-                            if (song.isLocal()) {
-                                settingVM.showSongEditDialog(song)
-                            }
-                        }
+            R.string.song_edit -> {
+              if (song.isLocal()) {
+                settingVM.showSongEditDialog(song)
+              }
+            }
 
-                        R.string.set_album_cover -> {
-                            nav.navigate("${RouteCrop}/${song.albumId}/${Constants.ALBUM}")
-                        }
+            R.string.set_album_cover -> {
+              nav.navigate("${RouteCrop}/${song.albumId}/${Constants.ALBUM}")
+            }
 
-                        R.string.collect -> {
-                            val favorite =
-                                libraryVM.playLists.value.firstOrNull { it.isFavorite() }
-                                    ?: return@DropdownMenuItem
+            R.string.collect -> {
+              val favorite =
+                libraryVM.playLists.value.firstOrNull { it.isFavorite() }
+                  ?: return@DropdownMenuItem
 
-                            libraryVM.addSongsToPlayList(listOf(song.id), favorite.name)
-                        }
+              libraryVM.addSongsToPlayList(listOf(song.id), favorite.name)
+            }
 
-                        R.string.ring -> {
-                            MusicUtil.setRing(activity, song.id)
-                        }
+            R.string.ring -> {
+              MusicUtil.setRing(activity, song.id)
+            }
 
-                        R.string.share -> {
-                            activity.startActivity(
-                                Intent.createChooser(
-                                    Util.createShareSongFileIntent(song, activity),
-                                    null
-                                )
-                            )
-                        }
+            R.string.share -> {
+              activity.startActivity(
+                Intent.createChooser(
+                  Util.createShareSongFileIntent(song, activity),
+                  null
+                )
+              )
+            }
 
-                        R.string.delete -> {
-                            settingVM.showDeleteSongDialog(listOf(song), parent = parent)
-                        }
-                    }
-                }
-            )
+            R.string.delete -> {
+              settingVM.showDeleteSongDialog(listOf(song), parent = parent)
+            }
+          }
         }
+      )
     }
+  }
 
 }
