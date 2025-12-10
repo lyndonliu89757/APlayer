@@ -482,6 +482,8 @@
   <string name="play_cross_fade">淡入淡出</string>
   <string name="play_cross_fade_tip">播放、暂停时使用淡入淡出效果</string>
 
+  <string name="split">分割</string>
+
   <plurals name="song_num">
     <item quantity="other">%d首</item>
   </plurals>

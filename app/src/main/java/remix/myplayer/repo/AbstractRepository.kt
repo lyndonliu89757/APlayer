@@ -10,8 +10,8 @@ import remix.myplayer.data.prefs.SettingPrefs
 import remix.myplayer.util.Util
 
 abstract class AbstractRepository(private val settingPrefs: SettingPrefs) {
-    protected val forceSort: Boolean
-        get() = settingPrefs.forceSort
+  protected val forceSort: Boolean
+    get() = settingPrefs.forceSort
 
   val baseSelection: String
     get() {
@@ -92,23 +92,11 @@ abstract class AbstractRepository(private val settingPrefs: SettingPrefs) {
     }
     return Song.Local(
       id = cursor.getLong(cursor.getColumnIndex(AudioColumns._ID)),
-      displayName = Util.processInfo(
-        cursor.getString(cursor.getColumnIndex(AudioColumns.DISPLAY_NAME)),
-        Util.TYPE_DISPLAYNAME
-      ),
-      title = Util.processInfo(
-        cursor.getString(cursor.getColumnIndex(AudioColumns.TITLE)),
-        Util.TYPE_SONG
-      ),
-      album = Util.processInfo(
-        cursor.getString(cursor.getColumnIndex(AudioColumns.ALBUM)),
-        Util.TYPE_ALBUM
-      ),
+      displayName = Util.processInfo(cursor.getString(cursor.getColumnIndex(AudioColumns.DISPLAY_NAME)), Util.InfoType.DISPLAY_NAME),
+      title = Util.processInfo(cursor.getString(cursor.getColumnIndex(AudioColumns.TITLE)), Util.InfoType.SONG),
+      album = Util.processInfo(cursor.getString(cursor.getColumnIndex(AudioColumns.ALBUM)), Util.InfoType.ALBUM),
       albumId = cursor.getLong(cursor.getColumnIndex(AudioColumns.ALBUM_ID)),
-      artist = Util.processInfo(
-        cursor.getString(cursor.getColumnIndex(AudioColumns.ARTIST)),
-        Util.TYPE_ARTIST
-      ),
+      artist = Util.processInfo(cursor.getString(cursor.getColumnIndex(AudioColumns.ARTIST)), Util.InfoType.ARTIST),
       artistId = cursor.getLong(cursor.getColumnIndex(AudioColumns.ARTIST_ID)),
       _duration = cursor.getLong(cursor.getColumnIndex(AudioColumns.DURATION)),
       data = cursor.getString(cursor.getColumnIndex(AudioColumns.DATA)),

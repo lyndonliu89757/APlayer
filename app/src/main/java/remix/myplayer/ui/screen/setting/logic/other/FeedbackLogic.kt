@@ -25,6 +25,7 @@ import remix.myplayer.ui.dialog.rememberDialogState
 import remix.myplayer.ui.nav.MessageNotifier
 import remix.myplayer.ui.screen.setting.ArrowPreference
 import remix.myplayer.util.Util
+import remix.myplayer.util.Util.startActivitySafely
 import timber.log.Timber
 import java.io.File
 
@@ -105,6 +106,6 @@ fun send(context: Context, scope: CoroutineScope, sendLog: Boolean) {
       emailIntent.data = "mailto:rRemix.me@gmail.com".toUri()
     }
 
-    Util.startActivitySafely(context, emailIntent)
+    context.startActivitySafely(emailIntent)
   })
 }

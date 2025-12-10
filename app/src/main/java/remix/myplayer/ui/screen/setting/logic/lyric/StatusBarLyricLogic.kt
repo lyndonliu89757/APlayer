@@ -16,7 +16,7 @@ import remix.myplayer.viewmodel.settingViewModel
 @Composable
 fun StatusBarLyricLogic() {
   val context = LocalContext.current
-  if (!isSupportStatusBarLyric(context)) {
+  if (!context.isSupportStatusBarLyric()) {
     return
   }
 

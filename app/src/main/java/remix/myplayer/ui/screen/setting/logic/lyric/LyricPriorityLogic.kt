@@ -29,6 +29,7 @@ import remix.myplayer.ui.dialog.rememberDialogState
 import remix.myplayer.ui.nav.MessageNotifier
 import remix.myplayer.ui.screen.setting.NormalPreference
 import remix.myplayer.util.Util
+import remix.myplayer.util.Util.vibrate
 import remix.myplayer.viewmodel.settingViewModel
 import remix.myplayer.viewmodel.settings.SettingViewModel
 import sh.calvin.reorderable.ReorderableItem
@@ -69,7 +70,7 @@ fun LyricPriorityLogic() {
           add(to.index, removeAt(from.index))
         }
 
-        Util.vibrate(context, 50)
+        context.vibrate(50)
       }
 
       LazyColumn(
@@ -83,10 +84,10 @@ fun LyricPriorityLogic() {
                 .height(48.dp)
                 .draggableHandle(
                   onDragStarted = {
-                    Util.vibrate(context, 50)
+                    context.vibrate(50)
                   },
                   onDragStopped = {
-                    Util.vibrate(context, 50)
+                    context.vibrate(50)
                   },
                 ),
               contentAlignment = Alignment.CenterStart

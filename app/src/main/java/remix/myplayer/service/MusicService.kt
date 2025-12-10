@@ -90,6 +90,7 @@ import remix.myplayer.util.Util
 import remix.myplayer.util.Util.isAppOnForeground
 import remix.myplayer.util.Util.registerLocalReceiver
 import remix.myplayer.util.Util.unregisterLocalReceiver
+import remix.myplayer.util.Util.unregisterSafely
 import timber.log.Timber
 import javax.inject.Inject
 
@@ -693,8 +694,8 @@ class MusicService : BaseService(),
     unregisterLocalReceiver(controlReceiver)
     unregisterLocalReceiver(musicEventReceiver)
     unregisterLocalReceiver(widgetReceiver)
-    Util.unregisterReceiver(this, headSetReceiver)
-    Util.unregisterReceiver(this, screenReceiver)
+    headSetReceiver.unregisterSafely(this)
+    screenReceiver.unregisterSafely(this)
 
     getSharedPreferences(PrefKeys.Setting.NAME, MODE_PRIVATE)
       .unregisterOnSharedPreferenceChangeListener(this)

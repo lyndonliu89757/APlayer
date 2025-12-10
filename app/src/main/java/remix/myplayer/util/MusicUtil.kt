@@ -25,6 +25,7 @@ import remix.myplayer.data.model.audio.Song
 import remix.myplayer.repo.SongRepositoryEntryPoint
 import remix.myplayer.service.MusicService
 import remix.myplayer.ui.nav.MessageNotifier
+import remix.myplayer.util.Util.startActivitySafely
 import java.io.File
 
 object MusicUtil {
@@ -200,7 +201,7 @@ object MusicUtil {
             val intent = Intent(Settings.ACTION_MANAGE_WRITE_SETTINGS)
             intent.data = ("package:" + context.packageName).toUri()
             intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-            Util.startActivitySafely(context, intent)
+            context.startActivitySafely(intent)
           }
         }
       }

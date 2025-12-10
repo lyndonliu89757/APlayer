@@ -23,6 +23,8 @@ import remix.myplayer.ui.dialog.DialogState
 import remix.myplayer.ui.dialog.runWithLoadingResult
 import remix.myplayer.ui.nav.MessageNotifier
 import remix.myplayer.util.Util
+import remix.myplayer.util.Util.installApk
+import remix.myplayer.util.Util.vibrate
 import timber.log.Timber
 import javax.inject.Inject
 
@@ -76,7 +78,7 @@ class MainViewModel @Inject constructor(
       if (path.isNullOrEmpty()) {
         return@launch
       }
-      Util.installApk(context, path)
+      context.installApk(path)
     }
   }
 
@@ -108,7 +110,7 @@ class MainViewModel @Inject constructor(
     _multiSelectState.updateIf(
       condition = { it.where != where && !it.isShowing() },
       transform = {
-        Util.vibrate(context, 50)
+        context.vibrate(50)
         it.copy(
           where = where,
           selectedModels = listOf(initialSelect)

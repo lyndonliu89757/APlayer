@@ -42,6 +42,7 @@ import remix.myplayer.ui.widget.common.TextPrimary
 import remix.myplayer.ui.widget.common.TextSecondary
 import remix.myplayer.ui.widget.library.GlideCover
 import remix.myplayer.util.Util
+import remix.myplayer.util.Util.vibrate
 import remix.myplayer.viewmodel.libraryViewModel
 import sh.calvin.reorderable.ReorderableItem
 import sh.calvin.reorderable.rememberReorderableLazyListState
@@ -114,10 +115,10 @@ fun CustomSortScreen(id: Long) {
               .background(LocalTheme.current.mainBackground)
               .draggableHandle(
                 onDragStarted = {
-                  Util.vibrate(context, 50)
+                  context.vibrate(50)
                 },
                 onDragStopped = {
-                  Util.vibrate(context, 50)
+                  context.vibrate(50)
                 }
               ),
             verticalAlignment = Alignment.CenterVertically

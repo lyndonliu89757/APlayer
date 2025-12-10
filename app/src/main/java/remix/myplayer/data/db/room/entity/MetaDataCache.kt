@@ -13,7 +13,7 @@ data class MetaDataCache(
   val album: String,
   val duration: Long,
   val fileSize: Long,
-  val lastModified: Long,
+  val dateCreated: Long,
   val year: String,
   val genre: String,
   val track: String,
@@ -31,7 +31,7 @@ data class MetaDataCache(
       year = year,
       genre = genre,
       track = track,
-      dateModified = lastModified,
+      dateCreated = dateCreated,
       account = account,
       pwd = pwd
     ).apply {

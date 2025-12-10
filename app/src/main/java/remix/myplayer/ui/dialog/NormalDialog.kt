@@ -136,9 +136,6 @@ fun NormalDialog(
                 modifier = Modifier
                   .clickable(
                     onClick = {
-                      if (autoDismiss) {
-                        dialogState.dismiss()
-                      }
                       onNeutral?.invoke()
                     }
                   )

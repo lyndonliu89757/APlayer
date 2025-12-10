@@ -24,6 +24,7 @@ import remix.myplayer.misc.floatpermission.FloatWindowManager
 import remix.myplayer.ui.nav.MessageNotifier
 import remix.myplayer.ui.screen.setting.SwitchPreference
 import remix.myplayer.util.Util
+import remix.myplayer.util.Util.startActivitySafely
 import remix.myplayer.viewmodel.settingViewModel
 
 @Composable
@@ -115,7 +116,7 @@ private fun requestOverlayPermission(context: Context) {
       data = "package:${context.packageName}".toUri()
       addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
     }
-    Util.startActivitySafely(context, intent)
+    context.startActivitySafely(intent)
   }
   MessageNotifier.show(R.string.plz_give_float_permission)
 }

@@ -198,7 +198,7 @@ private fun ListSong(song: Song, checked: Boolean, onCheckedChange: (Boolean) ->
 
 @Preview(showBackground = true)
 @Composable
-fun SongChooseScreenPreview() {
+fun SongChooserScreenPreview() {
   APlayerTheme {
     SongChooserScreen(0, "")
   }

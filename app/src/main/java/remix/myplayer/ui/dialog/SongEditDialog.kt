@@ -2,7 +2,6 @@ package remix.myplayer.ui.dialog
 
 import androidx.activity.compose.LocalActivity
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
@@ -77,6 +76,14 @@ fun SongEditDialog() {
     titleRes = R.string.song_edit,
     onPositive = {
       requestSaveAudioTag()
+    },
+    neutralRes = R.string.split,
+    onNeutral = {
+      val arr = song.displayName.split(" - ")
+      if (arr.size == 2) {
+        artist = arr[0]
+        title = arr[1]
+      }
     },
     custom = {
       ProvideTextStyle(TextStyle(color = LocalTheme.current.textPrimary, fontSize = 18.sp)) {

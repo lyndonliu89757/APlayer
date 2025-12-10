@@ -60,7 +60,7 @@ class FetchMetaDataUseCase @Inject constructor(
         cache.year,
         cache.genre,
         cache.track,
-        cache.lastModified
+        cache.dateCreated
       )
       song.metaFetchState.set(2)
       return true
@@ -100,8 +100,8 @@ class FetchMetaDataUseCase @Inject constructor(
         metadataRetriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_GENRE) ?: ""
       val track =
         metadataRetriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_NUM_TRACKS) ?: ""
-      val dateModified = if (song.dateModified > 0) {
-        song.dateModified
+      val dateCreated = if (song.dateCreated > 0) {
+        song.dateCreated
       } else {
         metadataRetriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_DATE)
           ?.toLongOrNull() ?: 0
@@ -122,7 +122,7 @@ class FetchMetaDataUseCase @Inject constructor(
         year,
         genre,
         track,
-        dateModified
+        dateCreated
       )
       song.metaFetchState.set(2)
       metaDataCacheDao.insert(
@@ -133,7 +133,7 @@ class FetchMetaDataUseCase @Inject constructor(
           album = album,
           duration = duration,
           fileSize = song.size,
-          lastModified = dateModified,
+          dateCreated = dateCreated,
           year = year,
           genre = genre,
           track = track

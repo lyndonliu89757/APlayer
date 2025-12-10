@@ -7,6 +7,7 @@ import android.app.RecoverableSecurityException
 import android.app.Service
 import android.content.ActivityNotFoundException
 import android.content.BroadcastReceiver
+import android.content.ContentUris
 import android.content.ContentValues
 import android.content.Context
 import android.content.Intent
@@ -21,11 +22,9 @@ import android.net.ConnectivityManager
 import android.net.Uri
 import android.os.Build
 import android.os.Environment
-import android.os.Parcelable
 import android.os.Vibrator
 import android.provider.MediaStore
 import android.provider.Settings
-import android.text.TextUtils
 import android.view.View
 import android.view.inputmethod.InputMethodManager
 import android.widget.Toast
@@ -40,7 +39,6 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.jaudiotagger.audio.AudioFileIO
 import org.jaudiotagger.tag.FieldKey
-import remix.myplayer.App
 import remix.myplayer.App.Companion.context
 import remix.myplayer.R
 import remix.myplayer.data.model.audio.Song
@@ -50,613 +48,463 @@ import remix.myplayer.ui.activity.base.BaseActivity
 import remix.myplayer.ui.activity.base.PendingWriteRequest
 import remix.myplayer.ui.nav.MessageNotifier
 import timber.log.Timber
-import java.io.BufferedReader
 import java.io.ByteArrayOutputStream
 import java.io.Closeable
 import java.io.File
-import java.io.FileReader
 import java.io.IOException
 import java.security.MessageDigest
 import java.security.NoSuchAlgorithmException
 import java.util.EnumMap
 
 /**
- * Created by Remix on 2015/11/30.
- */
-/**
- * 通用工具类
+ * 通用工具类 - 优化版本
+ * 使用Kotlin特性简化代码，提高可读性和可维护性
  */
 object Util {
 
-  /**
-   * 注册本地Receiver
-   */
-  fun registerLocalReceiver(receiver: BroadcastReceiver?, filter: IntentFilter?) {
-    LocalBroadcastManager.getInstance(context).registerReceiver(receiver!!, filter!!)
-  }
+  // 常量定义
+  private const val DOUBLE_CLICK_INTERVAL = 500L
+  private const val MD5_ALGORITHM = "MD5"
+
+  // 使用枚举替代魔法数字，提高类型安全性 [3](@ref)
+  enum class InfoType { SONG, ARTIST, ALBUM, DISPLAY_NAME }
+
+  private var mLastClickTime: Long = 0
+
+  // region 扩展函数 - 将常用功能改为扩展函数形式 [2,4](@ref)
 
   /**
-   * 注销本地Receiver
+   * Context的扩展函数：注册本地广播接收器
    */
-  fun unregisterLocalReceiver(receiver: BroadcastReceiver?) {
-    LocalBroadcastManager.getInstance(context).unregisterReceiver(receiver!!)
-  }
-
-  @JvmStatic
-  fun sendLocalBroadcast(intent: Intent?) {
-    LocalBroadcastManager.getInstance(context).sendBroadcast(intent!!)
-  }
-
-  fun sendCMDLocalBroadcast(cmd: Int) {
-    LocalBroadcastManager.getInstance(context).sendBroadcast(MusicUtil.makeCmdIntent(cmd))
+  fun Context.registerLocalReceiver(receiver: BroadcastReceiver, filter: IntentFilter) {
+    LocalBroadcastManager.getInstance(this).registerReceiver(receiver, filter)
   }
 
   /**
-   * 注销Receiver
+   * Context的扩展函数：注销本地广播接收器
    */
-  fun unregisterReceiver(context: Context?, receiver: BroadcastReceiver?) {
+  fun Context.unregisterLocalReceiver(receiver: BroadcastReceiver) {
+    LocalBroadcastManager.getInstance(this).unregisterReceiver(receiver)
+  }
+
+  /**
+   * Context的扩展函数：发送本地广播
+   */
+  fun Context.sendLocalBroadcast(intent: Intent) {
+    LocalBroadcastManager.getInstance(this).sendBroadcast(intent)
+  }
+
+  /**
+   * Context的扩展函数：发送CMD本地广播
+   */
+  fun Context.sendCMDLocalBroadcast(cmd: Int) {
+    LocalBroadcastManager.getInstance(this).sendBroadcast(MusicUtil.makeCmdIntent(cmd))
+  }
+
+  /**
+   * BroadcastReceiver的扩展函数：安全注销
+   */
+  fun BroadcastReceiver.unregisterSafely(context: Context?) {
     try {
-      context?.unregisterReceiver(receiver)
+      context?.unregisterReceiver(this)
     } catch (e: Exception) {
+      // 忽略注销异常
     }
   }
 
   /**
-   * 判断app是否运行在前台
+   * Context的扩展函数：振动功能
+   */
+  fun Context.vibrate(milliseconds: Long) {
+    try {
+      val vibrator = getSystemService(Service.VIBRATOR_SERVICE) as? Vibrator
+      vibrator?.vibrate(milliseconds)
+    } catch (ignore: Exception) {
+      // 忽略振动异常
+    }
+  }
+
+  /**
+   * File的扩展函数：安全删除
+   */
+  fun File.deleteSafely(): Boolean {
+    val tmpPath = "${parent ?: return false}${File.separator}${System.currentTimeMillis()}"
+    val tmpFile = File(tmpPath)
+    return renameTo(tmpFile) && tmpFile.delete()
+  }
+
+  /**
+   * Closeable的扩展函数：安全关闭
+   */
+  fun Closeable?.closeSafely() {
+    if (this == null) return
+    if (this is Cursor && isClosed) return
+
+    try {
+      close()
+    } catch (e: Exception) {
+      Timber.e(e, "Closeable close failed")
+    }
+  }
+
+  /**
+   * String的扩展函数：打开URL
+   */
+  fun String?.openUrl() {
+    if (isNullOrEmpty()) return
+
+    val uri = Uri.parse(this)
+    Intent(Intent.ACTION_VIEW, uri).apply {
+      addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+      context.startActivity(this)
+    }
+  }
+
+  /**
+   * View的扩展函数：隐藏键盘
+   */
+  fun View.hideKeyboard(): Boolean = try {
+    val imm = context.getSystemService(Context.INPUT_METHOD_SERVICE) as? InputMethodManager
+    imm?.hideSoftInputFromWindow(windowToken, 0) ?: false
+  } catch (e: Exception) {
+    Timber.e(e, "Hide keyboard failed")
+    false
+  }
+
+  // endregion
+
+  // region 顶级函数优化 [2](@ref)
+
+  /**
+   * 发送本地广播 - 简化版本
+   */
+  fun sendLocalBroadcast(intent: Intent) {
+    context.sendLocalBroadcast(intent)
+  }
+
+  /**
+   * 发送CMD本地广播 - 简化版本
+   */
+  fun sendCMDLocalBroadcast(cmd: Int) {
+    context.sendCMDLocalBroadcast(cmd)
+  }
+
+  /**
+   * 判断应用是否在前台，使用更简洁的写法 [7](@ref)
    */
   val isAppOnForeground: Boolean
-    get() {
-      try {
-        val activityManager = context
-          .getSystemService(Context.ACTIVITY_SERVICE) as ActivityManager? ?: return false
-        val packageName = context.packageName
-        val appProcesses: MutableList<RunningAppProcessInfo> = activityManager.runningAppProcesses
-          ?: return false
-        for (appProcess in appProcesses) {
-          if (appProcess.processName == packageName &&
-            appProcess.importance == RunningAppProcessInfo.IMPORTANCE_FOREGROUND
-          ) {
-            return true
-          }
-        }
-      } catch (e: Exception) {
-        Timber.w("isAppOnForeground(), ex: %s", e.message)
-        return APlayerActivityManager.isAppForeground
-      }
-      return false
+    get() = runCatching {
+      val activityManager = context.getSystemService(Context.ACTIVITY_SERVICE) as? ActivityManager
+      val packageName = context.packageName
+
+      activityManager?.runningAppProcesses?.firstOrNull { process ->
+        process.processName == packageName &&
+            process.importance == RunningAppProcessInfo.IMPORTANCE_FOREGROUND
+      } != null
+    }.getOrElse {
+      Timber.w("isAppOnForeground failed: ${it.message}")
+      APlayerActivityManager.isAppForeground
     }
 
   /**
-   * 震动
+   * 计算目录大小，使用函数式编程简化 [7](@ref)
    */
-  fun vibrate(context: Context?, milliseconds: Long) {
-    if (context == null) {
-      return
+  fun getFolderSize(file: File?): Long = file?.let { targetFile ->
+    when {
+      targetFile.isFile -> targetFile.length()
+      targetFile.isDirectory -> targetFile.listFiles()?.sumOf { getFolderSize(it) } ?: 0L
+      else -> 0L
     }
-    try {
-      val vibrator = context.getSystemService(Service.VIBRATOR_SERVICE) as Vibrator
-      vibrator.vibrate(milliseconds)
-    } catch (ignore: Exception) {
-    }
-  }
+  } ?: 0L
 
   /**
-   * 获得目录大小
-   */
-  fun getFolderSize(file: File?): Long {
-    var size: Long = 0
-    try {
-      val fileList = file?.listFiles() ?: return size
-      for (i in fileList.indices) {
-        // 如果下面还有文件
-        size = if (fileList[i].isDirectory) {
-          size + getFolderSize(fileList[i])
-        } else {
-          size + fileList[i].length()
-        }
-      }
-    } catch (e: Exception) {
-      e.printStackTrace()
-    }
-    return size
-  }
-
-  /**
-   * 删除某个目录
+   * 递归删除目录，使用扩展函数和函数式编程 [1](@ref)
    */
   fun deleteFilesByDirectory(directory: File?) {
-    if (directory == null) {
-      return
-    }
-    if (directory.isFile) {
-      deleteFileSafely(directory)
-      return
-    }
-    if (directory.isDirectory) {
-      val childFile = directory.listFiles()
-      if (childFile == null || childFile.isEmpty()) {
-        deleteFileSafely(directory)
-        return
-      }
-      for (f in childFile) {
-        deleteFilesByDirectory(f)
-      }
-      deleteFileSafely(directory)
-    }
-  }
-
-  /**
-   * 安全删除文件 小米、华为等手机极有可能在删除一个文件后再创建同名文件出现bug
-   */
-  fun deleteFileSafely(file: File?): Boolean {
-    if (file != null) {
-      val tmpPath = (file.parent ?: return false) + File.separator + System.currentTimeMillis()
-      val tmp = File(tmpPath)
-      return file.renameTo(tmp) && tmp.delete()
-    }
-    return false
-  }
-
-  /**
-   * 防止修改字体大小
-   */
-  fun setFontSize(Application: App) {
-    val resource = Application.resources
-    val c = resource.configuration
-    c.fontScale = 1.0f
-    resource.updateConfiguration(c, resource.displayMetrics)
-  }
-
-  /**
-   * 获得歌曲格式
-   */
-  fun getType(mimeType: String): String {
-    return when {
-      mimeType == MediaFormat.MIMETYPE_AUDIO_MPEG -> {
-        "mp3"
-      }
-
-      mimeType == MediaFormat.MIMETYPE_AUDIO_FLAC -> {
-        "flac"
-      }
-
-      mimeType == MediaFormat.MIMETYPE_AUDIO_AAC -> {
-        "aac"
-      }
-
-      mimeType.contains("ape") -> {
-        "ape"
-      }
-
-      else -> {
-        try {
-          if (mimeType.contains("audio/")) {
-            mimeType.substring(6, mimeType.length - 1)
-          } else {
-            mimeType
-          }
-        } catch (e: Exception) {
-          mimeType
+    directory?.takeIf { it.exists() }?.let { targetDir ->
+      when {
+        targetDir.isFile -> targetDir.deleteSafely()
+        targetDir.isDirectory -> {
+          targetDir.listFiles()?.forEach { deleteFilesByDirectory(it) }
+          targetDir.deleteSafely()
         }
       }
     }
   }
 
   /**
-   * 转换时间
-   *
-   * @return 00:00格式的时间
+   * 获取音频文件类型，使用when表达式简化 [7](@ref)
+   */
+  fun getType(mimeType: String): String = when {
+    mimeType == MediaFormat.MIMETYPE_AUDIO_MPEG -> "mp3"
+    mimeType == MediaFormat.MIMETYPE_AUDIO_FLAC -> "flac"
+    mimeType == MediaFormat.MIMETYPE_AUDIO_AAC -> "aac"
+    mimeType.contains("ape") -> "ape"
+    mimeType.startsWith("audio/") -> mimeType.substringAfter("audio/")
+    else -> mimeType
+  }
+
+  /**
+   * 格式化时间显示，使用字符串模板简化 [7](@ref)
    */
   fun getTime(duration: Long): String {
-    val minute = duration.toInt() / 1000 / 60
-    val second = (duration / 1000).toInt() % 60
-    //如果分钟数小于10
-    return if (minute < 10) {
-      if (second < 10) {
-        "0$minute:0$second"
-      } else {
-        "0$minute:$second"
-      }
-    } else {
-      if (second < 10) {
-        "$minute:0$second"
-      } else {
-        "$minute:$second"
-      }
-    }
+    val minute = duration / 1000 / 60
+    val second = (duration / 1000) % 60
+
+    val minuteStr = if (minute < 10) "0$minute" else "$minute"
+    val secondStr = if (second < 10) "0$second" else "$second"
+
+    return "$minuteStr:$secondStr"
   }
 
   /**
-   * 检测 响应某个意图的Activity 是否存在
+   * 检查Intent是否可用
    */
-  fun isIntentAvailable(context: Context, intent: Intent?): Boolean {
+  fun isIntentAvailable(context: Context, intent: Intent): Boolean {
     val packageManager = context.packageManager
-    val list = packageManager.queryIntentActivities(
-      intent!!,
-      PackageManager.MATCH_DEFAULT_ONLY
-    )
-    return list != null && list.size > 0
+    return packageManager.queryIntentActivities(intent, PackageManager.MATCH_DEFAULT_ONLY).isNotEmpty()
   }
 
   /**
-   * 启动 Activity，失败时 toast
+   * 安全启动Activity，使用扩展函数风格 [4](@ref)
    */
-  fun startActivitySafely(context: Context, intent: Intent) {
-    try {
-      context.startActivity(intent)
-    } catch (e: ActivityNotFoundException) {
-      MessageNotifier.show(R.string.activity_not_found_tip)
-    }
+  fun Context.startActivitySafely(intent: Intent) = try {
+    startActivity(intent)
+  } catch (e: ActivityNotFoundException) {
+    MessageNotifier.show(R.string.activity_not_found_tip)
   }
 
-  fun startActivityForResultSafely(
-    activity: Activity,
-    intent: Intent,
-    requestCode: Int
-  ) {
-    try {
-      activity.startActivityForResult(intent, requestCode)
-    } catch (e: ActivityNotFoundException) {
-      MessageNotifier.show(R.string.activity_not_found_tip)
-    }
+  fun Activity.startActivityForResultSafely(intent: Intent, requestCode: Int) = try {
+    startActivityForResult(intent, requestCode)
+  } catch (e: ActivityNotFoundException) {
+    MessageNotifier.show(R.string.activity_not_found_tip)
   }
 
   /**
-   * 判断网路是否连接
+   * 网络连接状态检查
    */
   val isNetWorkConnected: Boolean
     get() {
-      val connectivityManager = context
-        .getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager?
-      if (connectivityManager != null) {
-        val netWorkInfo = connectivityManager.activeNetworkInfo
-        if (netWorkInfo != null) {
-          return netWorkInfo.isAvailable && netWorkInfo.isConnected
-        }
-      }
-      return false
+      val connectivityManager = context.getSystemService(Context.CONNECTIVITY_SERVICE) as? ConnectivityManager
+      val netWorkInfo = connectivityManager?.activeNetworkInfo
+      return netWorkInfo?.isAvailable == true && netWorkInfo.isConnected
     }
 
   /**
-   * 删除歌曲
-   *
-   * @param path 歌曲路径
-   * @return 是否删除成功
+   * 处理歌曲信息，使用枚举参数提高类型安全性 [3](@ref)
    */
-  fun deleteFile(path: String?): Boolean {
-    val file = File(path ?: return false)
-    return file.exists() && file.delete()
-  }
-
-  /**
-   * 处理歌曲名、歌手名或者专辑名
-   *
-   * @param origin 原始数据
-   * @param type 处理类型 0:歌曲名 1:歌手名 2:专辑名 3:文件名
-   * @return
-   */
-  const val TYPE_SONG = 0
-  const val TYPE_ARTIST = 1
-  const val TYPE_ALBUM = 2
-  const val TYPE_DISPLAYNAME = 3
-  fun processInfo(origin: String?, type: Int): String {
-    return if (type == TYPE_SONG) {
-      if (origin == null || origin == "") {
-        context.getString(R.string.unknown_song)
-      } else {
-//                return origin.lastIndexOf(".") > 0 ? origin.substring(0, origin.lastIndexOf(".")) : origin;
-        origin
-      }
-    } else if (type == TYPE_DISPLAYNAME) {
-      if (origin == null || origin == "") {
-        context.getString(R.string.unknown_song)
-      } else {
-        if (origin.lastIndexOf(".") > 0) origin.substring(0, origin.lastIndexOf(".")) else origin
-      }
-    } else {
-      if (origin == null || origin == "") {
-        context
-          .getString(if (type == TYPE_ARTIST) R.string.unknown_artist else R.string.unknown_album)
-      } else {
-        origin
-      }
+  fun processInfo(origin: String?, type: InfoType): String = when {
+    origin.isNullOrEmpty() -> when (type) {
+      InfoType.SONG, InfoType.DISPLAY_NAME -> context.getString(R.string.unknown_song)
+      InfoType.ARTIST -> context.getString(R.string.unknown_artist)
+      InfoType.ALBUM -> context.getString(R.string.unknown_album)
     }
+
+    type == InfoType.DISPLAY_NAME -> {
+      val lastDotIndex = origin.lastIndexOf(".")
+      if (lastDotIndex > 0) origin.substring(0, lastDotIndex) else origin
+    }
+
+    else -> origin
   }
 
   /**
-   * 判断是否连续点击
-   *
-   * @return
+   * 防止快速连续点击，使用更精确的时间判断 [7](@ref)
    */
-  private var mLastClickTime: Long = 0
-  private const val INTERVAL = 500
   val isFastDoubleClick: Boolean
     get() {
-      val time = System.currentTimeMillis()
-      val timeInterval = time - mLastClickTime
-      if (timeInterval in 1 until INTERVAL) {
-        return true
-      }
-      mLastClickTime = time
-      return false
+      val currentTime = System.currentTimeMillis()
+      val timeInterval = currentTime - mLastClickTime
+      val isFastClick = timeInterval in 1 until DOUBLE_CLICK_INTERVAL
+      mLastClickTime = currentTime
+      return isFastClick
     }
 
   /**
-   * 返回关键词的MD值
+   * 生成MD5哈希值，使用更函数式的写法
    */
-  @JvmStatic
-  fun hashKeyForDisk(key: String): String {
-    val cacheKey: String = try {
-      val mDigest = MessageDigest.getInstance("MD5")
-      mDigest.update(key.toByteArray())
-      bytesToHexString(mDigest.digest())
-    } catch (e: NoSuchAlgorithmException) {
-      key.hashCode().toString()
-    }
-    return cacheKey
+  fun hashKeyForDisk(key: String): String = try {
+    MessageDigest.getInstance(MD5_ALGORITHM).digest(key.toByteArray()).toHexString()
+  } catch (e: NoSuchAlgorithmException) {
+    key.hashCode().toString()
   }
 
-  private fun bytesToHexString(bytes: ByteArray): String {
-    val sb = StringBuilder()
-    for (i in bytes.indices) {
-      val hex = Integer.toHexString(0xFF and bytes[i].toInt())
-      if (hex.length == 1) {
-        sb.append('0')
-      }
-      sb.append(hex)
-    }
-    return sb.toString()
+  private fun ByteArray.toHexString(): String = joinToString("") { byte ->
+    Integer.toHexString(0xFF and byte.toInt()).padStart(2, '0')
   }
 
   /**
-   * 浏览器打开指定地址
+   * 判断WiFi是否连接
    */
-  fun openUrl(url: String?) {
-    if (TextUtils.isEmpty(url)) {
-      return
-    }
-    val uri = Uri.parse(url)
-    val it = Intent(Intent.ACTION_VIEW, uri)
-    it.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-    context.startActivity(it)
+  fun Context.isWifiConnected(): Boolean {
+    val activeNetInfo = (getSystemService(Context.CONNECTIVITY_SERVICE) as? ConnectivityManager)?.activeNetworkInfo
+    return activeNetInfo?.type == ConnectivityManager.TYPE_WIFI
   }
 
   /**
-   * 判断wifi是否打开
+   * 获取应用元数据
    */
-  fun isWifi(context: Context): Boolean {
-    val activeNetInfo = (context
-      .getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager).activeNetworkInfo
-    return activeNetInfo != null && activeNetInfo.type == ConnectivityManager.TYPE_WIFI
-  }
-
-  /**
-   * 获取app当前的渠道号或application中指定的meta-data
-   *
-   * @return 如果没有获取成功(没有对应值 ， 或者异常)，则返回值为空
-   */
-  fun getAppMetaData(key: String?): String? {
-    if (TextUtils.isEmpty(key)) {
-      return null
-    }
-    var channelNumber: String? = null
-    try {
-      val packageManager = context.packageManager
-      if (packageManager != null) {
-        val applicationInfo =
-          packageManager.getApplicationInfo(context.packageName, PackageManager.GET_META_DATA)
-        if (applicationInfo != null) {
-          if (applicationInfo.metaData != null) {
-            channelNumber = applicationInfo.metaData.getString(key)
-          }
-        }
-      }
-    } catch (e: PackageManager.NameNotFoundException) {
-      e.printStackTrace()
-    }
-    return channelNumber
-  }
-
-  fun createShareSongFileIntent(song: Song, context: Context): Intent {
-    return try {
-      val parcelable: Parcelable = FileProvider.getUriForFile(
-        context,
-        context.packageName + ".fileprovider",
-        File(song.data)
+  fun getAppMetaData(key: String?): String? = key?.takeIf { it.isNotEmpty() }?.let { metaKey ->
+    runCatching {
+      val appInfo = context.packageManager.getApplicationInfo(
+        context.packageName,
+        PackageManager.GET_META_DATA
       )
-      Intent()
-        .setAction(Intent.ACTION_SEND)
-        .putExtra(
-          Intent.EXTRA_STREAM,
-          parcelable
-        )
-        .addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
-        .setType("audio/*")
-    } catch (e: IllegalArgumentException) {
-      //the path is most likely not like /storage/emulated/0/... but something like /storage/28C7-75B0/...
-      e.printStackTrace()
-      Toast.makeText(context, context.getString(R.string.cant_share_song), Toast.LENGTH_SHORT)
-        .show()
-      Intent()
-    }
+      appInfo.metaData?.getString(metaKey)
+    }.getOrNull()
   }
 
-  fun createShareImageFileIntent(file: File, context: Context): Intent {
-    return try {
-      val parcelable: Parcelable = FileProvider.getUriForFile(
-        context,
-        context.packageName + ".fileprovider",
-        file
-      )
-      Intent()
-        .setAction(Intent.ACTION_SEND)
-        .putExtra(
-          Intent.EXTRA_STREAM,
-          parcelable
-        )
-        .addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
-        .setType("image/*")
-    } catch (e: IllegalArgumentException) {
-      e.printStackTrace()
-      Toast.makeText(context, context.getString(R.string.cant_share_song), Toast.LENGTH_SHORT)
-        .show()
-      Intent()
+  // endregion
+
+  // region 共享和文件操作
+
+  /**
+   * 创建分享歌曲文件的Intent，使用apply作用域函数简化 [7](@ref)
+   */
+  fun createShareSongFileIntent(song: Song, context: Context): Intent = runCatching {
+    val uri = FileProvider.getUriForFile(
+      context,
+      "${context.packageName}.fileprovider",
+      File(song.data)
+    )
+    Intent(Intent.ACTION_SEND).apply {
+      putExtra(Intent.EXTRA_STREAM, uri)
+      addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+      type = "audio/*"
     }
+  }.getOrElse {
+    Timber.e(it, "Create share song intent failed")
+    Toast.makeText(context, R.string.cant_share_song, Toast.LENGTH_SHORT).show()
+    Intent()
   }
 
-  @JvmStatic
-  fun closeSafely(closeable: Closeable?) {
-    if (closeable != null) {
-      if (closeable is Cursor && closeable.isClosed) {
-        return
-      }
-      try {
-        closeable.close()
-      } catch (e: Exception) {
-        e.printStackTrace()
-      }
+  /**
+   * 创建分享图片文件的Intent
+   */
+  fun createShareImageFileIntent(file: File, context: Context): Intent = runCatching {
+    val uri = FileProvider.getUriForFile(
+      context,
+      "${context.packageName}.fileprovider",
+      file
+    )
+    Intent(Intent.ACTION_SEND).apply {
+      putExtra(Intent.EXTRA_STREAM, uri)
+      addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+      type = "image/*"
     }
+  }.getOrElse {
+    Timber.e(it, "Create share image intent failed")
+    Toast.makeText(context, R.string.cant_share_song, Toast.LENGTH_SHORT).show()
+    Intent()
   }
 
-  fun installApk(context: Context, path: String) {
+  /**
+   * 安装APK文件
+   */
+  fun Context.installApk(path: String) {
     val apkFile = File(path)
-    val apkUri = ("file://${apkFile.absolutePath}").toUri()
-    val intent: Intent = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-      val apkUri = FileProvider.getUriForFile(
-        context,
-        "${context.packageName}.fileprovider",
-        apkFile
-      )
-      Intent(Intent.ACTION_INSTALL_PACKAGE).setData(apkUri)
-        .setFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
-        .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+    val intent = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+      val apkUri = FileProvider.getUriForFile(this, "${packageName}.fileprovider", apkFile)
+      Intent(Intent.ACTION_INSTALL_PACKAGE).apply {
+        data = apkUri
+        addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION or Intent.FLAG_ACTIVITY_NEW_TASK)
+      }
     } else {
-      Intent(Intent.ACTION_VIEW).setDataAndType(
-        apkUri,
-        "application/vnd.android.package-archive"
-      )
-        .setFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+      Intent(Intent.ACTION_VIEW).apply {
+        setDataAndType(apkFile.absolutePath.toUri(), "application/vnd.android.package-archive")
+        addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+      }
     }
-    context.startActivity(intent)
+    startActivity(intent)
   }
 
   /**
-   * 获取进程号对应的进程名
-   *
-   * @param pid 进程号
-   * @return 进程名
+   * 获取进程名
    */
-  fun getProcessName(pid: Int): String? {
-    var reader: BufferedReader? = null
-    try {
-      reader = BufferedReader(FileReader("/proc/$pid/cmdline"))
-      var processName = reader.readLine()
-      if (!TextUtils.isEmpty(processName)) {
-        processName = processName.trim { it <= ' ' }
-      }
-      return processName
-    } catch (throwable: Throwable) {
-      throwable.printStackTrace()
-    } finally {
-      try {
-        reader?.close()
-      } catch (exception: IOException) {
-        exception.printStackTrace()
-      }
-    }
-    return null
-  }
+  fun getProcessName(pid: Int): String? = runCatching {
+    File("/proc/$pid/cmdline").bufferedReader().use { it.readLine()?.trim() }
+  }.getOrNull()
 
   /**
    * 判断是否支持状态栏歌词
    */
-  fun isSupportStatusBarLyric(context: Context): Boolean {
-    return RomUtils.checkIsMeizuRom() || Settings.System.getInt(
-      context.contentResolver,
-      "status_bar_show_lyric",
-      0
-    ) != 0 || RomUtils.checkIsbaolong24Rom() || RomUtils.checkIsexTHmUIRom()
+  fun Context.isSupportStatusBarLyric(): Boolean =
+    RomUtils.checkIsMeizuRom() ||
+        Settings.System.getInt(contentResolver, "status_bar_show_lyric", 0) != 0 ||
+        RomUtils.checkIsbaolong24Rom() ||
+        RomUtils.checkIsexTHmUIRom()
+
+  /**
+   * HTML转纯文本
+   */
+  fun String.htmlToText(): String =
+    HtmlCompat.fromHtml(this, HtmlCompat.FROM_HTML_MODE_LEGACY).toString()
+
+  // endregion
+
+  // region 协程相关操作 [5](@ref)
+
+  /**
+   * 保存图片到相册
+   */
+  suspend fun Context.saveToAlbum(resId: Int, fileName: String) = withContext(Dispatchers.IO) {
+    runCatching {
+      val bitmap = BitmapFactory.decodeResource(resources, resId)
+      val picturesDir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES)
+      val file = File(picturesDir, fileName).apply {
+        if (exists()) delete()
+        createNewFile()
+      }
+
+      val values = ContentValues().apply {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+          put(MediaStore.MediaColumns.RELATIVE_PATH, Environment.DIRECTORY_PICTURES)
+        } else {
+          put(MediaStore.MediaColumns.DATA, file.absolutePath)
+        }
+        put(MediaStore.Images.ImageColumns.TITLE, fileName)
+        put(MediaStore.Images.ImageColumns.DISPLAY_NAME, fileName)
+        put(MediaStore.Images.ImageColumns.MIME_TYPE, "image/png")
+        put(MediaStore.Images.ImageColumns.WIDTH, bitmap.width)
+        put(MediaStore.Images.ImageColumns.HEIGHT, bitmap.height)
+      }
+
+      contentResolver.insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, values)?.let { uri ->
+        contentResolver.openOutputStream(uri)?.use { outputStream ->
+          ByteArrayOutputStream().use { bos ->
+            bitmap.compress(Bitmap.CompressFormat.PNG, 90, bos)
+            outputStream.write(bos.toByteArray())
+          }
+        }
+      }
+
+      MessageNotifier.show(R.string.save_success)
+    }.onFailure {
+      Timber.e(it, "Save to album failed")
+    }
   }
 
   /**
-   * HTML 转纯文本
-   *
-   * 用于处理 QQ 歌词中的“&apos;”等
+   * 请求保存音频标签
    */
-  fun htmlToText(source: String?): String {
-    return HtmlCompat.fromHtml(source!!, HtmlCompat.FROM_HTML_MODE_LEGACY).toString()
-  }
-
-  fun hideKeyboard(view: View?): Boolean {
-    if (view == null) {
-      return false
-    }
-    try {
-      val imm = view.context.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
-      return if (!imm.isActive) {
-        false
-      } else imm.hideSoftInputFromWindow(view.windowToken, 0)
-    } catch (e: Exception) {
-      e.printStackTrace()
-    }
-    return false
-  }
-
-  suspend fun saveToAlbum(context: Context, resId: Int, fileName: String) {
-    val bitmap = BitmapFactory.decodeResource(context.resources, resId)
-    val file =
-      File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES), fileName)
-
-    withContext(Dispatchers.IO) {
-      if (file.exists()) {
-        file.delete()
-      }
-
-      file.createNewFile()
-    }
-
-    val values = ContentValues()
-    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-      values.put(
-        MediaStore.MediaColumns.RELATIVE_PATH,
-        Environment.DIRECTORY_PICTURES
-      )
-    } else {
-      values.put(MediaStore.MediaColumns.DATA, file.absolutePath)
-    }
-    values.put(MediaStore.Images.ImageColumns.TITLE, fileName)
-    values.put(MediaStore.Images.ImageColumns.DISPLAY_NAME, fileName)
-    values.put(MediaStore.Images.ImageColumns.MIME_TYPE, "image/png")
-    values.put(MediaStore.Images.ImageColumns.WIDTH, bitmap.width)
-    values.put(MediaStore.Images.ImageColumns.HEIGHT, bitmap.height)
-
-    val insertUri =
-      context.contentResolver.insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, values) ?: return
-
-    context.contentResolver.openOutputStream(insertUri)?.use {
-      ByteArrayOutputStream().use { bos ->
-        bitmap.compress(Bitmap.CompressFormat.PNG, 90, bos)
-        it.write(bos.toByteArray())
-      }
-    }
-
-    Timber.v("insertUri: $insertUri")
-    MessageNotifier.show(R.string.save_success)
-  }
-
   fun requestSaveAudioTag(
-    activity: BaseActivity, song: Song,
-    newTitle: String, newAlbum: String, newArtist: String,
-    newGenre: String, newYear: String, newTrackNum: String
+    activity: BaseActivity,
+    song: Song,
+    newTitle: String,
+    newAlbum: String,
+    newArtist: String,
+    newGenre: String,
+    newYear: String,
+    newTrackNum: String
   ) {
-    val fieldMap = EnumMap<FieldKey, String>(FieldKey::class.java)
-
-    fieldMap[FieldKey.TITLE] = newTitle
-    fieldMap[FieldKey.ALBUM] = newAlbum
-    fieldMap[FieldKey.ARTIST] = newArtist
-    fieldMap[FieldKey.GENRE] = newGenre
-    fieldMap[FieldKey.YEAR] = newYear
-    fieldMap[FieldKey.TRACK] = newTrackNum
+    val fieldMap = EnumMap<FieldKey, String>(FieldKey::class.java).apply {
+      put(FieldKey.TITLE, newTitle)
+      put(FieldKey.ALBUM, newAlbum)
+      put(FieldKey.ARTIST, newArtist)
+      put(FieldKey.GENRE, newGenre)
+      put(FieldKey.YEAR, newYear)
+      put(FieldKey.TRACK, newTrackNum)
+    }
 
     val request = PendingWriteRequest(song.data, fieldMap)
 
@@ -671,64 +519,66 @@ object Util {
         ).build()
       )
     } else {
-      // TODO test
       activity.lifecycleScope.launch {
         try {
           saveAudioTag(activity, request)
         } catch (e: Exception) {
-          try {
-            var songFD =
-              activity.contentResolver.openFileDescriptor(
-                song.contentUri,
-                "w"
-              )!! // test if we can write
-            songFD.close()
-          } catch (securityException: SecurityException) {
-
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q && securityException is RecoverableSecurityException) {
-              activity.pendingWriteRequest = request
-              activity.writeSongLauncher.launch(
-                IntentSenderRequest.Builder(
-                  securityException.userAction.actionIntent.intentSender,
-                ).build()
-              )
-              return@launch
-            }
-
-            throw securityException
-          }
-
-          Timber.v("Fail to save tag: $e")
-          MessageNotifier.show(R.string.save_error_arg)
+          handleSaveAudioTagException(activity, request, e)
         }
       }
     }
   }
 
-  suspend fun saveAudioTag(context: Context, request: PendingWriteRequest) =
-    withContext(Dispatchers.IO) {
-      val audioFile = AudioFileIO.read(File(request.path))
+  private fun handleSaveAudioTagException(activity: BaseActivity, request: PendingWriteRequest, e: Exception) {
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q && e is RecoverableSecurityException) {
+      activity.pendingWriteRequest = request
+      activity.writeSongLauncher.launch(
+        IntentSenderRequest.Builder(e.userAction.actionIntent.intentSender).build()
+      )
+    } else {
+      Timber.e(e, "Save audio tag failed")
+      MessageNotifier.show(R.string.save_error_arg)
+    }
+  }
 
-      val tag = audioFile.tagOrCreateAndSetDefault
-      try {
-        for ((key, value) in request.fieldMap) {
-          tag.setField(key, value)
-        }
-      } catch (e: Exception) {
-        Timber.v("set tag failed: $e")
+  /**
+   * 保存音频标签
+   */
+  suspend fun saveAudioTag(context: Context, request: PendingWriteRequest) = withContext(Dispatchers.IO) {
+    runCatching {
+      val audioFileObj = AudioFileIO.read(File(request.path))
+      val tag = audioFileObj.tagOrCreateAndSetDefault
+
+      request.fieldMap.forEach { (key, value) ->
+        Timber.v("Setting field: $key to value: $value")
+        tag.setField(key, value)
       }
 
-      audioFile.commit()
-      MediaScannerConnection.scanFile(
-        context,
-        arrayOf(request.path), null
-      ) { _, uri ->
-//        context.contentResolver.notifyChange(Audio.Media.EXTERNAL_CONTENT_URI, null)
+      audioFileObj.commit()
+      // 通知媒体库更新
+      MediaScannerConnection.scanFile(context, arrayOf(request.path), null) { _, uri ->
         context.contentResolver.notifyChange(uri, null)
       }
-
-//      withContext(Dispatchers.Main) {
-//        MessageNotifier.show(R.string.save_success)
-//      }
+    }.onFailure {
+      Timber.e(it, "Save audio tag failed for path: ${request.path}")
+      throw it
     }
+  }
+
+  // endregion
+
+  // region 兼容性保留方法
+  // 为了向后兼容，保留原有的静态方法
+
+  @JvmStatic
+  fun registerLocalReceiver(receiver: BroadcastReceiver?, filter: IntentFilter?) {
+    receiver?.let { context.registerLocalReceiver(it, filter!!) }
+  }
+
+  @JvmStatic
+  fun unregisterLocalReceiver(receiver: BroadcastReceiver?) {
+    receiver?.let { context.unregisterLocalReceiver(it) }
+  }
+
+  // endregion
 }

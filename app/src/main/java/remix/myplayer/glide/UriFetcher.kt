@@ -30,7 +30,7 @@ import remix.myplayer.request.netease.NetEaseClient
 import remix.myplayer.request.network.LastFMApi
 import remix.myplayer.util.Constants
 import remix.myplayer.util.SearchKeyUtil
-import remix.myplayer.util.Util
+import remix.myplayer.util.Util.isWifiConnected
 import timber.log.Timber
 import java.io.File
 import javax.inject.Inject
@@ -360,7 +360,7 @@ class UriFetcher @Inject constructor(
   private fun canDownloadCover(): Boolean {
     return when (settingPrefs.autoDownloadCover) {
       DOWNLOAD_COVER_ALWAYS -> true
-      DOWNLOAD_COVER_WIFI_ONLY -> Util.isWifi(context)
+      DOWNLOAD_COVER_WIFI_ONLY -> context.isWifiConnected()
       else -> false
     }
   }
