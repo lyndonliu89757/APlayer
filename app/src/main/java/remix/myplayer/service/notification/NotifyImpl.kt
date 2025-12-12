@@ -66,11 +66,11 @@ class NotifyImpl(context: MusicService) : Notify(context) {
 
     //设置播放按钮
     if (!isPlay) {
-      remoteBigView.setImageViewResource(R.id.notify_play, R.drawable.icon_notify_play)
-      remoteView.setImageViewResource(R.id.notify_play, R.drawable.icon_notify_play)
+      remoteBigView.setImageViewResource(R.id.notify_play, R.drawable.ic_play)
+      remoteView.setImageViewResource(R.id.notify_play, R.drawable.ic_play)
     } else {
-      remoteBigView.setImageViewResource(R.id.notify_play, R.drawable.icon_notify_pause)
-      remoteView.setImageViewResource(R.id.notify_play, R.drawable.icon_notify_pause)
+      remoteBigView.setImageViewResource(R.id.notify_play, R.drawable.ic_pause)
+      remoteView.setImageViewResource(R.id.notify_play, R.drawable.ic_pause)
     }
 
     //设置封面
@@ -127,7 +127,7 @@ class NotifyImpl(context: MusicService) : Notify(context) {
         .setContentTitle("")
         .setShowWhen(false)
         .setPriority(NotificationCompat.PRIORITY_MAX)
-        .setOngoing(service.isPlaying)
+        .setOngoing(playbackState.isPlaying)
         .setContentIntent(contentIntent)
         .setSmallIcon(R.drawable.icon_notifbar)
     builder.setCustomBigContentView(remoteBigView)

@@ -96,7 +96,6 @@
       <ImageButton
         android:id="@+id/appwidget_model"
         android:background="@drawable/bg_oval_ripple_light"
-        android:src="@drawable/widget_btn_loop_normal_transparent"
         android:layout_width="@dimen/app_widget_medium_button_size"
         android:layout_height="@dimen/app_widget_medium_button_size"
         android:layout_centerVertical="true"
@@ -112,7 +111,7 @@
       <ImageButton
         android:id="@+id/appwidget_toggle"
         android:background="@drawable/bg_oval_ripple_light"
-        android:src="@drawable/widget_btn_play_normal_transparent"
+        android:src="@drawable/ic_play"
         android:layout_width="@dimen/app_widget_medium_button_size"
         android:layout_height="@dimen/app_widget_medium_button_size"
         android:layout_centerInParent="true"
@@ -121,7 +120,7 @@
       <ImageButton
         android:id="@+id/appwidget_prev"
         android:background="@drawable/bg_oval_ripple_light"
-        android:src="@drawable/widget_btn_previous_normal_transparent"
+        android:src="@drawable/ic_previous"
         android:layout_width="@dimen/app_widget_medium_button_size"
         android:layout_height="@dimen/app_widget_medium_button_size"
         android:layout_toLeftOf="@id/appwidget_toggle"
@@ -129,7 +128,7 @@
       <ImageButton
         android:id="@+id/appwidget_next"
         android:background="@drawable/bg_oval_ripple_light"
-        android:src="@drawable/widget_btn_next_normal_transparent"
+        android:src="@drawable/ic_next"
         android:layout_width="@dimen/app_widget_medium_button_size"
         android:layout_height="@dimen/app_widget_medium_button_size"
         android:layout_toRightOf="@id/appwidget_toggle"
@@ -137,4 +136,3 @@
     </RelativeLayout>
   </LinearLayout>
 </FrameLayout>
-

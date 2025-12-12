@@ -304,16 +304,16 @@ private fun resolveControls(
   DesktopLyricControl(R.drawable.ic_lock_24dp, "DkpLock") {
     onClickLock()
   },
-  DesktopLyricControl(R.drawable.ic_skip_previous_black_24dp, "DkpPrevious") {
+  DesktopLyricControl(R.drawable.ic_previous, "DkpPrevious") {
     sendLocalBroadcast(makeCmdIntent(Command.SKIP_TO_PREVIOUS))
   },
   DesktopLyricControl(
-    if (playing) R.drawable.ic_pause_black_24dp else R.drawable.ic_play_arrow_black_24dp,
+    if (playing) R.drawable.ic_pause else R.drawable.ic_play,
     "DkpPlayPause"
   ) {
     sendLocalBroadcast(makeCmdIntent(Command.PLAY_PAUSE))
   },
-  DesktopLyricControl(R.drawable.ic_skip_next_black_24dp, "DkpNext") {
+  DesktopLyricControl(R.drawable.ic_next, "DkpNext") {
     sendLocalBroadcast(makeCmdIntent(Command.SKIP_TO_NEXT))
   },
   DesktopLyricControl(R.drawable.ic_settings_24dp, "DkpSettings") {

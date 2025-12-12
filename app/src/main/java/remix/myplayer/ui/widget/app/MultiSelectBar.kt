@@ -141,8 +141,6 @@ fun MultiSelectBar(
                   MultiSelectState.Where.Song -> libraryVM.songs.value
                   MultiSelectState.Where.Album -> libraryVM.albums.value
                   MultiSelectState.Where.Artist -> libraryVM.artists.value
-                  MultiSelectState.Where.Genre -> libraryVM.genres.value
-                  MultiSelectState.Where.PlayList -> libraryVM.playLists.value
                   MultiSelectState.Where.Folder -> libraryVM.folders.value
                   MultiSelectState.Where.Detail -> withContext(Dispatchers.IO) {
                     libraryVM.loadSongsByModels(

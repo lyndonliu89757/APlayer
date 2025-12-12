@@ -17,8 +17,6 @@ data class Library(
       TAG_SONG -> R.string.tab_song
       TAG_ALBUM -> R.string.tab_album
       TAG_ARTIST -> R.string.tab_artist
-      TAG_PLAYLIST -> R.string.tab_playlist
-      TAG_GENRE -> R.string.tab_genre
       TAG_FOLDER -> R.string.tab_folder
       TAG_REMOTE -> R.string.tab_remote
       else -> throw IllegalArgumentException("unknown tag: $tag")
@@ -51,17 +49,6 @@ data class Library(
         R.string.artist_desc
       )
 
-      TAG_PLAYLIST -> listOf(
-        R.string.name,
-        R.string.name_desc,
-        R.string.create_time
-      )
-
-      TAG_GENRE -> listOf(
-        R.string.genre,
-        R.string.genre_desc
-      )
-
       else -> throw IllegalArgumentException("unknown tag: $tag")
     }
 
@@ -92,42 +79,14 @@ data class Library(
         SortOrder.ARTIST_Z_A,
       )
 
-      TAG_PLAYLIST -> listOf(
-        SortOrder.PLAYLIST_A_Z,
-        SortOrder.PLAYLIST_Z_A,
-        SortOrder.PLAYLIST_DATE
-      )
-
-      TAG_GENRE -> listOf(
-        SortOrder.GENRE_A_Z,
-        SortOrder.GENRE_Z_A
-      )
-
       else -> throw IllegalArgumentException("unknown tag: $tag")
     }
-
-  fun getTitle(context: Context = App.context): String {
-    return context.getString(
-      when (tag) {
-        TAG_SONG -> R.string.tab_song
-        TAG_ALBUM -> R.string.tab_album
-        TAG_ARTIST -> R.string.tab_artist
-        TAG_PLAYLIST -> R.string.tab_playlist
-        TAG_GENRE -> R.string.tab_genre
-        TAG_FOLDER -> R.string.tab_folder
-        TAG_REMOTE -> R.string.tab_remote
-        else -> throw IllegalArgumentException("unknown tag: $tag")
-      }
-    )
-  }
 
   companion object {
 
     const val TAG_SONG = 0
     const val TAG_ALBUM = 1
     const val TAG_ARTIST = 2
-    const val TAG_GENRE = 3
-    const val TAG_PLAYLIST = 4
     const val TAG_FOLDER = 5
     const val TAG_REMOTE = 6
 
@@ -135,8 +94,6 @@ data class Library(
       Library(TAG_SONG),
       Library(TAG_ALBUM),
       Library(TAG_ARTIST),
-      Library(TAG_GENRE),
-      Library(TAG_PLAYLIST),
       Library(TAG_FOLDER),
       Library(TAG_REMOTE)
     )
@@ -148,8 +105,6 @@ data class Library(
         context.resources.getString(R.string.tab_song),
         context.resources.getString(R.string.tab_album),
         context.resources.getString(R.string.tab_artist),
-        context.resources.getString(R.string.tab_genre),
-        context.resources.getString(R.string.tab_playlist),
         context.resources.getString(R.string.tab_folder),
         context.resources.getString(R.string.tab_remote),
       )

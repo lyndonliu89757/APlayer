@@ -30,9 +30,7 @@ import remix.myplayer.service.Command
 import remix.myplayer.service.MusicService.Companion.EXTRA_SONG
 import remix.myplayer.ui.activity.base.BaseActivity
 import remix.myplayer.ui.nav.LocalNavController
-import remix.myplayer.ui.nav.RouteCrop
 import remix.myplayer.ui.theme.LocalTheme
-import remix.myplayer.util.Constants
 import remix.myplayer.util.MusicUtil
 import remix.myplayer.util.Util
 import remix.myplayer.viewmodel.libraryViewModel
@@ -135,22 +133,6 @@ private fun SongDropdownMenu(
               if (song.isLocal()) {
                 settingVM.showSongEditDialog(song)
               }
-            }
-
-            R.string.set_album_cover -> {
-              nav.navigate("${RouteCrop}/${song.albumId}/${Constants.ALBUM}")
-            }
-
-            R.string.collect -> {
-              val favorite =
-                libraryVM.playLists.value.firstOrNull { it.isFavorite() }
-                  ?: return@DropdownMenuItem
-
-              libraryVM.addSongsToPlayList(listOf(song.id), favorite.name)
-            }
-
-            R.string.ring -> {
-              MusicUtil.setRing(activity, song.id)
             }
 
             R.string.share -> {

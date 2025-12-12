@@ -24,6 +24,7 @@ class PlayQueue @Inject constructor(
     if (queue.isEmpty()) {
       // 默认全部歌曲为播放列表
       queue = songRepository.allSongs()
+      save(queue)
     }
 
     val pos = restoreLastSong(queue)

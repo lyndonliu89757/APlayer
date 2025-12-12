@@ -14,6 +14,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
@@ -51,7 +52,6 @@ import remix.myplayer.service.MusicService
 import remix.myplayer.service.MusicService.Companion.EXTRA_POSITION
 import remix.myplayer.service.playback.PlaybackUiState
 import remix.myplayer.ui.dialog.BottomSheetDialog
-import remix.myplayer.ui.nav.MessageNotifier
 import remix.myplayer.ui.theme.LocalTheme
 import remix.myplayer.ui.widget.common.TextPrimary
 import remix.myplayer.ui.widget.common.TextSecondary
@@ -62,9 +62,9 @@ import remix.myplayer.util.Util.sendLocalBroadcast
 import remix.myplayer.viewmodel.playbackViewModel
 
 val PlayModeMap = mapOf(
-  MODE_LOOP to Pair(R.drawable.play_btn_loop, R.string.model_normal),
-  MODE_SHUFFLE to Pair(R.drawable.play_btn_shuffle, R.string.model_random),
-  MODE_REPEAT to Pair(R.drawable.play_btn_loop_one, R.string.model_repeat)
+  MODE_SHUFFLE to Pair(R.drawable.ic_play_mode_random, R.string.model_random),
+  MODE_LOOP to Pair(R.drawable.ic_play_mode_loop, R.string.model_normal),
+  MODE_REPEAT to Pair(R.drawable.ic_play_mode_loop_one, R.string.model_repeat)
 )
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -86,9 +86,10 @@ internal fun PlayingControl(
       Util.sendCMDLocalBroadcast(Command.CHANGE_MODEL)
     }) {
       Image(
+        modifier = Modifier.size(30.dp),
         painter = painterResource(PlayModeMap[playMode]!!.first),
         contentDescription = "PlayingMode",
-        colorFilter = ColorFilter.tint(swatchColor.copy(0.5f))
+        colorFilter = ColorFilter.tint(swatchColor.copy(0.6f))
       )
     }
 
@@ -101,7 +102,8 @@ internal fun PlayingControl(
       )
     }) {
       Image(
-        painter = painterResource(R.drawable.play_btn_pre),
+        modifier = Modifier.size(40.dp),
+        painter = painterResource(R.drawable.ic_previous),
         contentDescription = "PlayingPrev",
         colorFilter = ColorFilter.tint(swatchColor)
       )
@@ -139,7 +141,8 @@ internal fun PlayingControl(
       )
     }) {
       Image(
-        painter = painterResource(R.drawable.play_btn_next),
+        modifier = Modifier.size(40.dp),
+        painter = painterResource(R.drawable.ic_next),
         contentDescription = "PlayingNext",
         colorFilter = ColorFilter.tint(swatchColor)
       )
@@ -155,9 +158,10 @@ internal fun PlayingControl(
       }
     }) {
       Image(
-        painter = painterResource(R.drawable.play_btn_normal_list),
+        modifier = Modifier.size(30.dp),
+        painter = painterResource(R.drawable.ic_playlist),
         contentDescription = "PlayingPlayQueue",
-        colorFilter = ColorFilter.tint(swatchColor.copy(0.5f))
+        colorFilter = ColorFilter.tint(swatchColor.copy(0.6f))
       )
     }
   }

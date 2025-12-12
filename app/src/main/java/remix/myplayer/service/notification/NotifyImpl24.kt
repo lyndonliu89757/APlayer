@@ -62,7 +62,7 @@ NotifyImpl24(context: MusicService) : Notify(context) {
       return
     }
     val playPauseIcon =
-      if (service.isPlaying) R.drawable.ic_pause_black_24dp else R.drawable.ic_play_arrow_black_24dp
+      if (playbackState.isPlaying) R.drawable.ic_pause else R.drawable.ic_play
 
     val deleteIntent = Intent(MusicService.ACTION_CMD)
     deleteIntent.putExtra(EXTRA_CONTROL, Command.CLOSE_NOTIFY)
@@ -73,7 +73,7 @@ NotifyImpl24(context: MusicService) : Notify(context) {
       .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
       .setSmallIcon(R.drawable.icon_notifbar)
       .addAction(
-        R.drawable.ic_skip_previous_black_24dp, service.getString(R.string.previous),
+        R.drawable.ic_previous, service.getString(R.string.previous),
         buildPendingIntent(service, Command.SKIP_TO_PREVIOUS)
       )
       .addAction(
@@ -81,7 +81,7 @@ NotifyImpl24(context: MusicService) : Notify(context) {
         buildPendingIntent(service, Command.PLAY_PAUSE)
       )
       .addAction(
-        R.drawable.ic_skip_next_black_24dp, service.getString(R.string.next),
+        R.drawable.ic_next, service.getString(R.string.next),
         buildPendingIntent(service, Command.SKIP_TO_NEXT)
       )
       //根据当前桌面歌词的状态判断是显示开关桌面歌词还是解锁桌面歌词
@@ -99,7 +99,7 @@ NotifyImpl24(context: MusicService) : Notify(context) {
       .setContentTitle(song.title)
       .setLargeIcon(bitmap)
       .setShowWhen(false)
-      .setOngoing(service.isPlaying)
+      .setOngoing(playbackState.isPlaying)
       .setPriority(PRIORITY_MAX)
       .setContentText(song.artist + " - " + song.album)
       .setStyle(

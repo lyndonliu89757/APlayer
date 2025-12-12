@@ -3,6 +3,7 @@ package remix.myplayer.ui.widget.popup
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
@@ -50,7 +51,8 @@ fun ScreenPopupButton(library: Library?, vm: LibraryViewModel = libraryViewModel
       expanded = !expanded
     }) {
     Icon(
-      painter = painterResource(R.drawable.ic_sort_white_24dp),
+      modifier = Modifier.size(24.dp),
+      painter = painterResource(R.drawable.ic_sort),
       contentDescription = "ScreenSortOrderPopUp"
     )
   }
@@ -61,8 +63,6 @@ fun ScreenPopupButton(library: Library?, vm: LibraryViewModel = libraryViewModel
     Library.TAG_SONG -> settingState.library.songSortOrder
     Library.TAG_ALBUM -> settingState.library.albumSortOrder
     Library.TAG_ARTIST -> settingState.library.artistSortOrder
-    Library.TAG_PLAYLIST -> settingState.library.playlistSortOrder
-    Library.TAG_GENRE -> settingState.library.genreSortOrder
     else -> throw RuntimeException("unknown tag: ${library.tag}")
   }
   val selectedIndex = sortOrders.indexOf(sortOrder)
@@ -91,14 +91,6 @@ fun ScreenPopupButton(library: Library?, vm: LibraryViewModel = libraryViewModel
 
         Library.TAG_ARTIST -> {
           settingVM.setSortOrder(SortCategory.ARTIST, ret)
-        }
-
-        Library.TAG_PLAYLIST -> {
-          settingVM.setSortOrder(SortCategory.PLAYLIST, ret)
-        }
-
-        Library.TAG_GENRE -> {
-          settingVM.setSortOrder(SortCategory.GENRE, ret)
         }
       }
       expanded = false

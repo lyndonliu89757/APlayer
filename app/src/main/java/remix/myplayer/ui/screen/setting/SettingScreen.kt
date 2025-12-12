@@ -13,12 +13,9 @@ import androidx.compose.ui.unit.sp
 import remix.myplayer.R
 import remix.myplayer.misc.helper.EQHelper
 import remix.myplayer.ui.nav.LocalNavController
-import remix.myplayer.ui.nav.RouteAbout
 import remix.myplayer.ui.screen.setting.logic.common.BlackListLogic
 import remix.myplayer.ui.screen.setting.logic.common.BreakPointLogic
-import remix.myplayer.ui.screen.setting.logic.common.ExportPlayListLogic
 import remix.myplayer.ui.screen.setting.logic.common.ForceSortLogic
-import remix.myplayer.ui.screen.setting.logic.common.ImportPlayListLogic
 import remix.myplayer.ui.screen.setting.logic.common.LanguageLogic
 import remix.myplayer.ui.screen.setting.logic.common.LockScreenLogic
 import remix.myplayer.ui.screen.setting.logic.common.ManualScanLogic
@@ -90,10 +87,6 @@ private fun CommonPreferences() {
   LockScreenLogic()
 
   ManualScanLogic()
-
-  ImportPlayListLogic()
-
-  ExportPlayListLogic()
 
   RestoreDeleteLogic()
 
@@ -181,10 +174,6 @@ private fun OtherPreferences() {
   }
 
   FeedbackLogic()
-
-  ArrowPreference(R.string.about_info) {
-    nav.navigate(RouteAbout)
-  }
 
   Preference(onClick = {
     mainViewModel.checkInAppUpdate(true)

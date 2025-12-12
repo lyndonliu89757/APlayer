@@ -25,26 +25,14 @@ enum class AppWidgetSkin(
     ColorUtil.getColor(R.color.appwidget_btn_color_white_1f),
     R.drawable.bg_corner_app_widget_white_1f,
     R.drawable.widget_btn_timer,
-    R.drawable.widget_btn_next_normal,
-    R.drawable.widget_btn_previous_normal,
+    R.drawable.ic_next,
+    R.drawable.ic_previous,
     R.drawable.widget_btn_like_nor,
-    R.drawable.widget_btn_one_normal,
-    R.drawable.widget_btn_loop_normal,
-    R.drawable.widget_btn_shuffle_normal,
-    R.drawable.widget_btn_play_normal,
-    R.drawable.widget_btn_stop_normal
-  ),
-  TRANSPARENT(
-    ColorUtil.getColor(R.color.appwidget_title_color_transparent),
-    ColorUtil.getColor(R.color.appwidget_artist_color_transparent),
-    ColorUtil.getColor(R.color.appwidget_progress_color_transparent),
-    ColorUtil.getColor(R.color.appwidget_btn_color_transparent),
-    R.drawable.bg_corner_app_widget_transparent,
-    R.drawable.widget_btn_timer_transparent, R.drawable.widget_btn_next_normal_transparent,
-    R.drawable.widget_btn_previous_normal_transparent, R.drawable.widget_btn_like_nor_transparent,
-    R.drawable.widget_btn_one_normal_transparent, R.drawable.widget_btn_loop_normal_transparent,
-    R.drawable.widget_btn_shuffle_normal_transparent, R.drawable.widget_btn_play_normal_transparent,
-    R.drawable.widget_btn_stop_normal_transparent
+    R.drawable.ic_play_mode_loop_one,
+    R.drawable.ic_play_mode_loop,
+    R.drawable.ic_play_mode_random,
+    R.drawable.ic_play,
+    R.drawable.ic_pause
   );
 
   val lovedRes: Int

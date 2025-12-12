@@ -6,7 +6,6 @@ import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
 import androidx.compose.animation.togetherWith
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
@@ -41,16 +40,12 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.bumptech.glide.integration.compose.ExperimentalGlideComposeApi
 import kotlinx.coroutines.flow.MutableSharedFlow
-import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.launch
-import remix.myplayer.R
 import remix.myplayer.data.model.misc.Library
-import remix.myplayer.ui.dialog.CreatePlayListDialog
 import remix.myplayer.ui.nav.LocalNavController
 import remix.myplayer.ui.theme.LocalTheme
 import remix.myplayer.ui.widget.app.BottomBar
@@ -135,17 +130,13 @@ fun HomeScreen() {
           }
         }
 
-        CreatePlayListDialog()
-
         val webDavVM = webDavViewModel
-        FAButton(selectLibrary.tag == Library.TAG_PLAYLIST || selectLibrary.tag == Library.TAG_REMOTE) {
+        FAButton(selectLibrary.tag == Library.TAG_REMOTE) {
           if (mainVM.multiSelectState.value.isShowing()) {
             return@FAButton
           }
 
-          if (selectLibrary.tag == Library.TAG_PLAYLIST) {
-            libraryVM.showCreatePlaylistDialog()
-          } else if (selectLibrary.tag == Library.TAG_REMOTE) {
+          if (selectLibrary.tag == Library.TAG_REMOTE) {
             webDavVM.showAddWebDavDialog()
           }
         }

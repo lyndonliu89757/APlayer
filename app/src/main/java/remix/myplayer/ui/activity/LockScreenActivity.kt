@@ -279,7 +279,7 @@ private fun LockScreen(playbackUiState: PlaybackUiState, currentLyric: CurrentNe
                 .putExtra(EXTRA_CONTROL, Command.SKIP_TO_PREVIOUS)
             )
           },
-          painter = painterResource(R.drawable.lock_btn_prev),
+          painter = painterResource(R.drawable.ic_previous),
           contentDescription = "LockScreenPlay"
         )
 
@@ -290,7 +290,7 @@ private fun LockScreen(playbackUiState: PlaybackUiState, currentLyric: CurrentNe
                 .putExtra(EXTRA_CONTROL, Command.PLAY_PAUSE)
             )
           },
-          painter = painterResource(if (playbackUiState.isPlaying) R.drawable.lock_btn_pause else R.drawable.lock_btn_play),
+          painter = painterResource(if (playbackUiState.isPlaying) R.drawable.ic_pause else R.drawable.ic_play),
           contentDescription = "LockScreenPlay"
         )
 
@@ -301,7 +301,7 @@ private fun LockScreen(playbackUiState: PlaybackUiState, currentLyric: CurrentNe
                 .putExtra(EXTRA_CONTROL, Command.SKIP_TO_NEXT)
             )
           },
-          painter = painterResource(R.drawable.lock_btn_next),
+          painter = painterResource(R.drawable.ic_next),
           contentDescription = "LockScreenPlay"
         )
       }

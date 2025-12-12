@@ -30,7 +30,7 @@ fun BottomSheetDialog(
     sheetMaxWidth = with(LocalDensity.current) { LocalWindowInfo.current.containerSize.width.dp },
     containerColor = LocalTheme.current.dialogBackground,
     shape = RectangleShape,
-    modifier = Modifier.padding(top = with(LocalDensity.current) { LocalWindowInfo.current.containerSize.height.toDp() } * 0.6f)
+    modifier = Modifier.padding(top = with(LocalDensity.current) { LocalWindowInfo.current.containerSize.height.toDp() } * 0.8f)
   ) {
     content()
   }

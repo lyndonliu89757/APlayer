@@ -16,7 +16,6 @@ import remix.myplayer.data.prefs.SettingPrefs
 import remix.myplayer.misc.checkWorkerThread
 import remix.myplayer.misc.helper.MusicServiceRemote
 import remix.myplayer.repo.AbstractRepository.Companion.makeInStrQuery
-import remix.myplayer.repo.PlayListRepository
 import remix.myplayer.repo.PlayQueueRepository
 import remix.myplayer.repo.SongRepository
 import remix.myplayer.ui.activity.base.BaseActivity
@@ -30,7 +29,6 @@ import javax.inject.Singleton
 class DeleteSongUseCase @Inject constructor(
   private val settingPrefs: SettingPrefs,
   private val songRepo: SongRepository,
-  private val playListRepo: PlayListRepository,
   private val playQueueRepo: PlayQueueRepository
 ) {
 
@@ -55,9 +53,7 @@ class DeleteSongUseCase @Inject constructor(
             -1
           }
         }
-        parent.audioIds.removeAll(audioIds)
-
-        playListRepo.updatePlayList(parent)
+        parent.audioIds.removeAll(audioIds.toSet())
 
         if (!deleteSource) {
           activity.contentResolver.notifyChange(Audio.Media.EXTERNAL_CONTENT_URI, null)
@@ -70,8 +66,6 @@ class DeleteSongUseCase @Inject constructor(
             MessageNotifier.show(R.string.mylove_cant_edit)
             continue
           }
-
-          playListRepo.deletePlayList(model.id)
         }
 
         if (!deleteSource) {
@@ -95,9 +89,6 @@ class DeleteSongUseCase @Inject constructor(
         // remove from playQueue
         MusicServiceRemote.removeFromQueue(songIds)
 
-        // remove from all playLists
-        playListRepo.removeAudioIdsFromAll(songIds)
-
         // delete source if need
         if (deleteSource) {
           deleteSource(activity, songs)
@@ -110,8 +101,7 @@ class DeleteSongUseCase @Inject constructor(
       activity.contentResolver.notifyChange(Audio.Media.EXTERNAL_CONTENT_URI, null)
     }
 
-  private fun deleteSource(activity: BaseActivity, songs: List<Song>) {
-    checkWorkerThread()
+  private suspend fun deleteSource(activity: BaseActivity, songs: List<Song>) = withContext(Dispatchers.IO){
 
     try {
       if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
@@ -142,7 +132,7 @@ class DeleteSongUseCase @Inject constructor(
             activity.deleteSongLauncher.launch(
               IntentSenderRequest.Builder(e.userAction.actionIntent.intentSender).build()
             )
-            return
+            return@withContext
           }
           throw e
         }
@@ -152,6 +142,5 @@ class DeleteSongUseCase @Inject constructor(
       MessageNotifier.show(R.string.delete_error)
       Timber.v("delete failed: $e")
     }
-
   }
 }

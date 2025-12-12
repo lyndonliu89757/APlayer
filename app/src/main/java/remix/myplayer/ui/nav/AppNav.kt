@@ -45,18 +45,13 @@ import remix.myplayer.ui.screen.AboutScreen
 import remix.myplayer.ui.screen.CustomSortScreen
 import remix.myplayer.ui.screen.EQScreen
 import remix.myplayer.ui.screen.HomeScreen
-import remix.myplayer.ui.screen.LastAddedScreen
 import remix.myplayer.ui.screen.RemoteScreen
 import remix.myplayer.ui.screen.SearchScreen
-import remix.myplayer.ui.screen.SongChooserScreen
 import remix.myplayer.ui.screen.crop.CropScreen
 import remix.myplayer.ui.screen.detail.DetailScreen
-import remix.myplayer.ui.screen.history.HistoryScreen
 import remix.myplayer.ui.screen.library.AlbumScreen
 import remix.myplayer.ui.screen.library.ArtistScreen
 import remix.myplayer.ui.screen.library.FolderScreen
-import remix.myplayer.ui.screen.library.GenreScreen
-import remix.myplayer.ui.screen.library.PlayListScreen
 import remix.myplayer.ui.screen.playing.PlayingScreen
 import remix.myplayer.ui.screen.setting.SettingScreen
 import remix.myplayer.ui.screen.webdav.WebDavDetailScreen
@@ -67,17 +62,12 @@ import kotlin.reflect.typeOf
 const val RouteHome = "home"
 const val RouteAlbum = "album"
 const val RouteArtist = "artist"
-const val RouteGenre = "genre"
-const val RoutePlaylist = "playlist"
 const val RouteFolder = "folder"
 const val RouteRemote = "remote"
 const val RouteSetting = "setting"
-const val RouteSongChoose = "song_choose"
 const val RoutePlayingScreen = "playing_screen"
 const val RouteAbout = "about"
 const val RouteCustomSort = "custom_sort"
-const val RouteLastAdded = "last_added"
-const val RouteHistory = "history"
 const val RouteSearch = "search"
 const val RouteWebDav = "webdav"
 const val RouteCrop = "crop"
@@ -107,14 +97,6 @@ fun AppNav() {
           ArtistScreen()
         }
 
-        normalAnimatedScreen(RouteGenre) {
-          GenreScreen()
-        }
-
-        normalAnimatedScreen(RoutePlaylist) {
-          PlayListScreen()
-        }
-
         normalAnimatedScreen(RouteFolder) {
           FolderScreen()
         }
@@ -125,17 +107,6 @@ fun AppNav() {
 
         normalAnimatedScreen(RouteSetting) {
           SettingScreen()
-        }
-
-        normalAnimatedScreen(
-          "${RouteSongChoose}/{id}/{name}",
-          arguments = listOf(navArgument("id") {
-            type = NavType.LongType
-          })
-        ) {
-          val id = it.arguments?.getLong("id") ?: return@normalAnimatedScreen
-          val name = it.arguments?.getString("name") ?: return@normalAnimatedScreen
-          SongChooserScreen(id, name)
         }
 
         normalAnimatedScreen(RouteAbout) {
@@ -184,14 +155,6 @@ fun AppNav() {
         ) {
           val id = it.arguments?.getLong("id") ?: return@normalAnimatedScreen
           CustomSortScreen(id)
-        }
-
-        normalAnimatedScreen(RouteLastAdded) {
-          LastAddedScreen()
-        }
-
-        normalAnimatedScreen(RouteHistory) {
-          HistoryScreen()
         }
 
         normalAnimatedScreen(RouteSearch) {

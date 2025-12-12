@@ -7,15 +7,11 @@ import androidx.compose.runtime.Composable
  */
 @Composable
 fun DialogContainer() {
-  AddSongsToPlayListDialog()
-
   LoadingDialog()
 
   TimerDialog()
 
   RemoveSongDialog()
-
-  ReNamePlayListDialog()
 
   InAppUpdateDialog()
 

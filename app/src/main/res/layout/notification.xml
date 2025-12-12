@@ -62,14 +62,14 @@
         android:layout_width="@dimen/d40_size"
         android:layout_height="match_parent"
         android:background="?android:attr/selectableItemBackground"
-        android:src="@drawable/icon_notify_play"
+        android:src="@drawable/ic_play"
         android:tint="@color/ate_secondary_text_light"/>
       <ImageButton
         android:id="@+id/notify_next"
         android:layout_width="@dimen/d32_size"
         android:layout_height="match_parent"
         android:background="?android:attr/selectableItemBackground"
-        android:src="@drawable/icon_notify_next"
+        android:src="@drawable/ic_next"
         android:tint="@color/ate_secondary_text_light"/>
       <ImageButton
         android:id="@+id/notify_lyric"

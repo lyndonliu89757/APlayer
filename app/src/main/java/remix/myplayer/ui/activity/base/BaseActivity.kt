@@ -4,6 +4,7 @@ import android.Manifest
 import android.annotation.SuppressLint
 import android.content.Context
 import android.content.Intent
+import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import androidx.activity.ComponentActivity
@@ -51,9 +52,19 @@ open class BaseActivity : ComponentActivity(), CoroutineScope by MainScope() {
 
   val writeSongLauncher =
     registerForActivityResult(ActivityResultContracts.StartIntentSenderForResult()) {
-      Timber.v("writeSongLauncher resultCode: ${it.resultCode} data: ${it.data}")
-      lifecycleScope.launch {
-        Util.saveAudioTag(this@BaseActivity, pendingWriteRequest ?: return@launch)
+      if (it.resultCode == RESULT_OK) {
+        // 用户授权了写入权限，使用 ContentResolver 方法进行修改
+        lifecycleScope.launch {
+          pendingWriteRequest?.let { request ->
+            Util.saveAudioTagViaContentResolver(
+              this@BaseActivity,
+              request.uri,
+              request.fieldMap
+            )
+          }
+        }
+      } else {
+        MessageNotifier.show(R.string.grant_delete_permission_tip)
       }
     }
 
@@ -183,6 +194,6 @@ open class BaseActivity : ComponentActivity(), CoroutineScope by MainScope() {
 }
 
 data class PendingWriteRequest(
-  val path: String,
+  val uri: Uri,
   val fieldMap: EnumMap<FieldKey, String>
 )

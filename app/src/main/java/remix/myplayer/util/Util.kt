@@ -3,11 +3,9 @@ package remix.myplayer.util
 import android.app.Activity
 import android.app.ActivityManager
 import android.app.ActivityManager.RunningAppProcessInfo
-import android.app.RecoverableSecurityException
 import android.app.Service
 import android.content.ActivityNotFoundException
 import android.content.BroadcastReceiver
-import android.content.ContentUris
 import android.content.ContentValues
 import android.content.Context
 import android.content.Intent
@@ -27,15 +25,14 @@ import android.provider.MediaStore
 import android.provider.Settings
 import android.view.View
 import android.view.inputmethod.InputMethodManager
+import android.webkit.MimeTypeMap
 import android.widget.Toast
 import androidx.activity.result.IntentSenderRequest
 import androidx.core.content.FileProvider
 import androidx.core.net.toUri
 import androidx.core.text.HtmlCompat
-import androidx.lifecycle.lifecycleScope
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.jaudiotagger.audio.AudioFileIO
 import org.jaudiotagger.tag.FieldKey
@@ -506,10 +503,9 @@ object Util {
       put(FieldKey.TRACK, newTrackNum)
     }
 
-    val request = PendingWriteRequest(song.data, fieldMap)
-
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-      activity.pendingWriteRequest = request
+      // Android 11+ 使用MediaStore API
+      activity.pendingWriteRequest = PendingWriteRequest(song.contentUri, fieldMap)
       activity.writeSongLauncher.launch(
         IntentSenderRequest.Builder(
           MediaStore.createWriteRequest(
@@ -519,49 +515,79 @@ object Util {
         ).build()
       )
     } else {
-      activity.lifecycleScope.launch {
-        try {
-          saveAudioTag(activity, request)
-        } catch (e: Exception) {
-          handleSaveAudioTagException(activity, request, e)
-        }
-      }
-    }
-  }
-
-  private fun handleSaveAudioTagException(activity: BaseActivity, request: PendingWriteRequest, e: Exception) {
-    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q && e is RecoverableSecurityException) {
-      activity.pendingWriteRequest = request
-      activity.writeSongLauncher.launch(
-        IntentSenderRequest.Builder(e.userAction.actionIntent.intentSender).build()
-      )
-    } else {
-      Timber.e(e, "Save audio tag failed")
-      MessageNotifier.show(R.string.save_error_arg)
+      MessageNotifier.show("Not supported on Android 10 and below.")
     }
   }
 
   /**
-   * 保存音频标签
+   * 新的保存音频标签方法（通过 ContentResolver）
    */
-  suspend fun saveAudioTag(context: Context, request: PendingWriteRequest) = withContext(Dispatchers.IO) {
+  suspend fun saveAudioTagViaContentResolver(
+    context: Context,
+    contentUri: Uri,
+    fieldMap: EnumMap<FieldKey, String>
+  ) = withContext(Dispatchers.IO) {
     runCatching {
-      val audioFileObj = AudioFileIO.read(File(request.path))
-      val tag = audioFileObj.tagOrCreateAndSetDefault
+      // 1. 通过 ContentResolver 打开输入流，读取原文件
+      context.contentResolver.openInputStream(contentUri)?.use { inputStream ->
+        // 2. 在应用私有目录创建一个临时文件
+        val originalExtension = getFileExtensionFromUri(context, contentUri)
+        val tempFile = File.createTempFile("audio_tag_edit", ".$originalExtension", context.cacheDir).apply {
+          deleteOnExit()
+        }
 
-      request.fieldMap.forEach { (key, value) ->
-        Timber.v("Setting field: $key to value: $value")
-        tag.setField(key, value)
-      }
+        // 3. 通过ContentResolver将原始音频内容复制到临时文件
+        context.contentResolver.openInputStream(contentUri)?.use { inputStream ->
+          tempFile.outputStream().use { outputStream ->
+            inputStream.copyTo(outputStream)
+          }
+        } ?: throw IOException("无法从ContentResolver打开文件流")
 
-      audioFileObj.commit()
-      // 通知媒体库更新
-      MediaScannerConnection.scanFile(context, arrayOf(request.path), null) { _, uri ->
-        context.contentResolver.notifyChange(uri, null)
-      }
+        // 4. 使用 jaudiotagger 修改临时文件的标签
+        val audioFile = AudioFileIO.read(tempFile)
+        val tag = audioFile.tagOrCreateAndSetDefault
+
+        fieldMap.forEach { (key, value) ->
+          Timber.v("Setting field: $key to value: $value")
+          tag.setField(key, value)
+        }
+        audioFile.commit()
+
+        // 5. 将修改后的临时文件内容写回 MediaStore
+        context.contentResolver.openOutputStream(contentUri)?.use { outputStream ->
+          tempFile.inputStream().copyTo(outputStream)
+        }
+
+        // 6. 清理临时文件
+        tempFile.delete()
+
+        // 7. 通知媒体库更新
+        context.contentResolver.notifyChange(contentUri, null)
+        MediaScannerConnection.scanFile(context, arrayOf(tempFile.absolutePath), null, null)
+
+      } ?: throw IOException("无法从ContentResolver打开文件流")
+
     }.onFailure {
-      Timber.e(it, "Save audio tag failed for path: ${request.path}")
-      throw it
+      Timber.e(it, "通过ContentResolver保存音频标签失败，Uri: $contentUri")
+      // 可以在这里调用统一的错误处理
+    }
+  }
+
+  /**
+   * 辅助函数：从Content Uri中解析出文件扩展名
+   */
+  private fun getFileExtensionFromUri(context: Context, uri: Uri): String? {
+    return when (uri.scheme) {
+      "content" -> {
+        // 通过ContentResolver查询文件的MIME类型，再转换为扩展名
+        val mimeType = context.contentResolver.getType(uri)
+        MimeTypeMap.getSingleton().getExtensionFromMimeType(mimeType)
+      }
+      "file" -> {
+        // 如果是file协议，直接从路径获取
+        uri.path?.substringAfterLast('.', "")
+      }
+      else -> null
     }
   }
 

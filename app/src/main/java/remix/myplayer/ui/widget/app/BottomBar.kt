@@ -51,110 +51,113 @@ private const val triggerThreshold = 10
 
 @Composable
 fun BottomBar(modifier: Modifier = Modifier, vm: PlaybackViewModel = playbackViewModel) {
-    val playbackState by vm.playbackUiState.collectAsStateWithLifecycle()
-    val nav = LocalNavController.current
-    val interactionSource = remember { MutableInteractionSource() }
+  val playbackState by vm.playbackUiState.collectAsStateWithLifecycle()
+  val nav = LocalNavController.current
+  val interactionSource = remember { MutableInteractionSource() }
 
-    var hasTriggerAct by remember { mutableStateOf(false) }
-    var hasTriggerOp by remember { mutableStateOf(false) }
+  var hasTriggerAct by remember { mutableStateOf(false) }
+  var hasTriggerOp by remember { mutableStateOf(false) }
 
-    val isSongValid = playbackState.song.valid()
-    val interactionModifiers = if (isSongValid) {
-        Modifier
-            // 点击跳转播放页
-            .clickableWithoutRipple(interactionSource) {
-                nav.navigate(RoutePlayingScreen)
-            }
-            // 垂直滑动跳转播放页
-            .pointerInput(Unit) {
-                detectVerticalDragGestures(
-                    onDragStart = { hasTriggerAct = false }
-                ) { _, dragAmount ->
-                    if (dragAmount < -triggerThreshold && !hasTriggerAct) {
-                        hasTriggerAct = true
-                        nav.navigate(RoutePlayingScreen)
-                    }
-                }
-            }
-            // 水平滑动切换歌曲
-            .pointerInput(Unit) {
-                detectHorizontalDragGestures(
-                    onDragStart = { hasTriggerOp = false }
-                ) { _, dragAmount ->
-                    if (dragAmount.absoluteValue > triggerThreshold && !hasTriggerOp) {
-                        hasTriggerOp = true
-                        Util.sendLocalBroadcast(
-                            Intent(MusicService.ACTION_CMD)
-                                .putExtra(
-                                    EXTRA_CONTROL,
-                                    if (dragAmount < 0) Command.SKIP_TO_NEXT else Command.SKIP_TO_PREVIOUS
-                                )
-                        )
-                    }
-                }
-            }
-    } else {
-        // 歌曲无效时，不响应任何操作
-        Modifier
+  val isSongValid = playbackState.song.valid()
+  val interactionModifiers = if (isSongValid) {
+    Modifier
+      // 点击跳转播放页
+      .clickableWithoutRipple(interactionSource) {
+        nav.navigate(RoutePlayingScreen)
+      }
+      // 垂直滑动跳转播放页
+      .pointerInput(Unit) {
+        detectVerticalDragGestures(
+          onDragStart = { hasTriggerAct = false }
+        ) { _, dragAmount ->
+          if (dragAmount < -triggerThreshold && !hasTriggerAct) {
+            hasTriggerAct = true
+            nav.navigate(RoutePlayingScreen)
+          }
+        }
+      }
+      // 水平滑动切换歌曲
+      .pointerInput(Unit) {
+        detectHorizontalDragGestures(
+          onDragStart = { hasTriggerOp = false }
+        ) { _, dragAmount ->
+          if (dragAmount.absoluteValue > triggerThreshold && !hasTriggerOp) {
+            hasTriggerOp = true
+            Util.sendLocalBroadcast(
+              Intent(MusicService.ACTION_CMD)
+                .putExtra(
+                  EXTRA_CONTROL,
+                  if (dragAmount < 0) Command.SKIP_TO_NEXT else Command.SKIP_TO_PREVIOUS
+                )
+            )
+          }
+        }
+      }
+  } else {
+    // 歌曲无效时，不响应任何操作
+    Modifier
+  }
+
+  Row(
+    modifier = modifier
+      .fillMaxWidth()
+      .height(66.dp)
+      .background(LocalTheme.current.container)
+      .semantics { contentDescription = "BottomBar" }
+      .then(interactionModifiers),
+    verticalAlignment = Alignment.CenterVertically,
+  ) {
+    GlideCover(
+      model = playbackState.song,
+      modifier = Modifier
+        .padding(start = 16.dp, end = 8.dp)
+        .size(52.dp)
+    )
+    Column(
+      verticalArrangement = Arrangement.Center,
+      modifier = Modifier
+        .weight(1f)
+        .fillMaxHeight()
+        .padding(horizontal = 4.dp)
+    ) {
+      TextPrimary(playbackState.song.showName, fontSize = 16.sp)
+      Spacer(modifier = Modifier.height(4.dp))
+      TextSecondary(text = String.format("%s《%s》", playbackState.song.artist, playbackState.song.album), fontSize = 12.sp)
     }
 
     Row(
-        modifier = modifier
-            .fillMaxWidth()
-            .height(66.dp)
-            .background(LocalTheme.current.container)
-            .semantics { contentDescription = "BottomBar" }
-            .then(interactionModifiers),
-        verticalAlignment = Alignment.CenterVertically,
+      modifier = Modifier.padding(end = 26.dp),
+      verticalAlignment = Alignment.CenterVertically,
+      horizontalArrangement = Arrangement.spacedBy(10.dp)
     ) {
-        GlideCover(
-            model = playbackState.song,
-            modifier = Modifier
-                .padding(start = 16.dp, end = 8.dp)
-                .size(52.dp)
-        )
-        Column(
-            verticalArrangement = Arrangement.Center,
-            modifier = Modifier
-                .weight(1f)
-                .fillMaxHeight()
-                .padding(horizontal = 4.dp)
-        ) {
-            TextPrimary(playbackState.song.showName, fontSize = 16.sp)
-            Spacer(modifier = Modifier.height(2.dp))
-            TextSecondary(text = String.format("%s《%s》", playbackState.song.artist, playbackState.song.album), fontSize = 12.sp)
-        }
-
-        Row(
-            modifier = Modifier.padding(end = 14.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            val buttonColor =
-                Color("#323334".toColorInt())
-            Icon(
-                modifier = modifier
-                    .clickableWithoutRipple(interactionSource) {
-                        Util.sendLocalBroadcast(
-                            Intent(MusicService.ACTION_CMD)
-                                .putExtra(EXTRA_CONTROL, Command.PLAY_PAUSE)
-                        )
-                    }
-                    .padding(end = 2.dp),
-                painter = painterResource(if (playbackState.isPlaying) R.drawable.bf_btn_stop else R.drawable.bf_btn_play),
-                contentDescription = "PlayPause",
-                tint = buttonColor
+      val buttonColor =
+        Color("#323334".toColorInt())
+      Icon(
+        modifier = Modifier
+          .size(36.dp)
+          .clickableWithoutRipple(interactionSource) {
+            Util.sendLocalBroadcast(
+              Intent(MusicService.ACTION_CMD)
+                .putExtra(EXTRA_CONTROL, Command.PLAY_PAUSE)
             )
-            Icon(
-                modifier = Modifier.clickableWithoutRipple(interactionSource) {
-                    Util.sendLocalBroadcast(
-                        Intent(MusicService.ACTION_CMD)
-                            .putExtra(EXTRA_CONTROL, Command.SKIP_TO_NEXT)
-                    )
-                },
-                painter = painterResource(R.drawable.bf_btn_next),
-                contentDescription = "Next",
-                tint = buttonColor
+          },
+        painter = painterResource(if (playbackState.isPlaying) R.drawable.ic_pause else R.drawable.ic_play),
+        contentDescription = "PlayPause",
+        tint = buttonColor
+      )
+      Icon(
+        modifier = Modifier
+          .size(36.dp)
+          .clickableWithoutRipple(interactionSource) {
+            Util.sendLocalBroadcast(
+              Intent(MusicService.ACTION_CMD)
+                .putExtra(EXTRA_CONTROL, Command.SKIP_TO_NEXT)
             )
-        }
+          },
+        painter = painterResource(R.drawable.ic_next),
+        contentDescription = "Next",
+        tint = buttonColor
+      )
     }
+  }
 }

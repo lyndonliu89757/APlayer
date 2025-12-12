@@ -10,12 +10,6 @@ import remix.myplayer.repo.ArtistRepoImpl
 import remix.myplayer.repo.ArtistRepository
 import remix.myplayer.repo.FolderRepoImpl
 import remix.myplayer.repo.FolderRepository
-import remix.myplayer.repo.GenreRepoImpl
-import remix.myplayer.repo.GenreRepository
-import remix.myplayer.repo.HistoryRepoImpl
-import remix.myplayer.repo.HistoryRepository
-import remix.myplayer.repo.PlayListRepoImpl
-import remix.myplayer.repo.PlayListRepository
 import remix.myplayer.repo.PlayQueueRepoImpl
 import remix.myplayer.repo.PlayQueueRepository
 import remix.myplayer.repo.SongRepoImpl
@@ -41,23 +35,11 @@ abstract class RepositoryModule {
 
   @Singleton
   @Binds
-  abstract fun bindGenreRepo(repo: GenreRepoImpl): GenreRepository
-
-  @Singleton
-  @Binds
-  abstract fun bindPlayListRepo(repo: PlayListRepoImpl): PlayListRepository
-
-  @Singleton
-  @Binds
   abstract fun bindFolderRepo(repo: FolderRepoImpl): FolderRepository
 
   @Singleton
   @Binds
   abstract fun bindPlayQueueRepo(repo: PlayQueueRepoImpl): PlayQueueRepository
-
-  @Singleton
-  @Binds
-  abstract fun bindHistoryRepo(repo: HistoryRepoImpl): HistoryRepository
 
   @Singleton
   @Binds

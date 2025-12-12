@@ -38,6 +38,7 @@ import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import remix.myplayer.App
+import remix.myplayer.BuildConfig
 import remix.myplayer.R
 import remix.myplayer.data.model.audio.Song
 import remix.myplayer.data.model.audio.Song.Companion.EMPTY_SONG
@@ -62,8 +63,6 @@ import remix.myplayer.misc.receiver.ExitReceiver
 import remix.myplayer.misc.receiver.HeadsetPlugReceiver
 import remix.myplayer.misc.receiver.MediaButtonReceiver
 import remix.myplayer.misc.tryLaunch
-import remix.myplayer.repo.HistoryRepository
-import remix.myplayer.repo.PlayListRepository
 import remix.myplayer.repo.SongRepository
 import remix.myplayer.repo.usecase.FetchMetaDataUseCase
 import remix.myplayer.service.notification.Notify
@@ -79,14 +78,11 @@ import remix.myplayer.ui.activity.base.BaseMusicActivity.Companion.EXTRA_PLAYLIS
 import remix.myplayer.ui.appwidgets.BaseAppwidget
 import remix.myplayer.ui.appwidgets.big.AppWidgetBig
 import remix.myplayer.ui.appwidgets.medium.AppWidgetMedium
-import remix.myplayer.ui.appwidgets.medium.AppWidgetMediumTransparent
 import remix.myplayer.ui.appwidgets.small.AppWidgetSmall
-import remix.myplayer.ui.appwidgets.small.AppWidgetSmallTransparent
 import remix.myplayer.ui.nav.MessageNotifier
 import remix.myplayer.util.Constants.ACTION_EXIT
 import remix.myplayer.util.DensityUtil
 import remix.myplayer.util.PermissionUtil
-import remix.myplayer.util.Util
 import remix.myplayer.util.Util.isAppOnForeground
 import remix.myplayer.util.Util.registerLocalReceiver
 import remix.myplayer.util.Util.unregisterLocalReceiver
@@ -123,13 +119,7 @@ class MusicService : BaseService(),
   lateinit var playQueue: PlayQueue
 
   @Inject
-  lateinit var playListRepository: PlayListRepository
-
-  @Inject
   lateinit var songRepository: SongRepository
-
-  @Inject
-  lateinit var historyRepository: HistoryRepository
 
   @Inject
   lateinit var fetchMetaDataUseCase: FetchMetaDataUseCase
@@ -303,7 +293,7 @@ class MusicService : BaseService(),
   /**
    * 当前是否正在播放
    */
-  val isPlaying: Boolean
+  private val isPlaying: Boolean
     get() = playbackState.isPlaying
 
   override fun onTaskRemoved(rootIntent: Intent) {
@@ -415,9 +405,7 @@ class MusicService : BaseService(),
     // 桌面部件
     appWidgets[APPWIDGET_BIG] = AppWidgetBig.getInstance()
     appWidgets[APPWIDGET_MEDIUM] = AppWidgetMedium.getInstance()
-    appWidgets[APPWIDGET_MEDIUM_TRANSPARENT] = AppWidgetMediumTransparent.getInstance()
     appWidgets[APPWIDGET_SMALL] = AppWidgetSmall.getInstance()
-    appWidgets[APPWIDGET_SMALL_TRANSPARENT] = AppWidgetSmallTransparent.getInstance()
 
     // 初始化Receiver
     val eventFilter = IntentFilter()
@@ -585,8 +573,6 @@ class MusicService : BaseService(),
     }
 
     Timber.v("开始播放")
-    // 记录播放历史
-    updatePlayHistory()
     // 开始播放
     start(false)
   }
@@ -594,11 +580,13 @@ class MusicService : BaseService(),
   override fun onEnded() {
     Timber.v("onEnded")
     // 理论上应该不会到这?
-//    throw IllegalStateException("onEnded")
+    if (BuildConfig.DEBUG) {
+      throw IllegalStateException("onEnded")
+    }
   }
 
   override fun onItemTransition(mediaItem: MediaItem?, reason: Int) {
-    Timber.v("onItemTransition, id: ${mediaItem?.mediaId} reason: $reason")
+    Timber.v("onItemTransition, id: ${mediaItem?.mediaId} reason: $reason playing: ${isPlaying} currentSong: ${playback.currentSong?.title}")
 
     val song = mediaItem?.localConfiguration?.tag as? Song
     if (song is Song.Remote) {
@@ -625,7 +613,6 @@ class MusicService : BaseService(),
       } else {
         lastOp = Command.SKIP_TO_NEXT
       }
-      updatePlayHistory()
     }
 
     pushPlaybackUiState()
@@ -652,18 +639,6 @@ class MusicService : BaseService(),
 
   override fun onPositionChange() {
     pushProgressUiState()
-  }
-
-  /**
-   * 更新播放历史
-   */
-  private fun updatePlayHistory() {
-    val song = playback.currentSong ?: return
-    if (song.isLocal()) {
-      launch {
-        historyRepository.update(song.id)
-      }
-    }
   }
 
   private fun unInit() {
@@ -991,14 +966,6 @@ class MusicService : BaseService(),
         APPWIDGET_SMALL -> if (appWidgets[APPWIDGET_SMALL] != null) {
           appWidgets[APPWIDGET_SMALL]?.updateWidget(service, appIds, true)
         }
-
-        APPWIDGET_MEDIUM_TRANSPARENT -> if (appWidgets[APPWIDGET_MEDIUM_TRANSPARENT] != null) {
-          appWidgets[APPWIDGET_MEDIUM_TRANSPARENT]?.updateWidget(service, appIds, true)
-        }
-
-        APPWIDGET_SMALL_TRANSPARENT -> if (appWidgets[APPWIDGET_SMALL_TRANSPARENT] != null) {
-          appWidgets[APPWIDGET_SMALL_TRANSPARENT]?.updateWidget(service, appIds, true)
-        }
       }
     }
   }
@@ -1045,10 +1012,8 @@ class MusicService : BaseService(),
 
       ACTION_SHORTCUT_MYLOVE -> {
         tryLaunch {
-          val playlist = playListRepository.getFavorite() ?: return@tryLaunch
-
           val songs =
-            withContext(Dispatchers.IO) { songRepository.getSongsByModels(listOf(playlist)) }
+            withContext(Dispatchers.IO) { songRepository.getSongsByModels(listOf()) }
 
           if (songs.isEmpty()) {
             MessageNotifier.show(R.string.list_is_empty)
@@ -1216,7 +1181,6 @@ class MusicService : BaseService(),
       Command.LOVE -> {
         launch {
           playback.currentSong?.let {
-            playListRepository.toggleFavorite(it.id)
             MusicStateSource.updatePlaybackUiState(isFavorite = !playbackState.isFavorite)
             updateAppwidget()
           }
@@ -1243,6 +1207,14 @@ class MusicService : BaseService(),
       // 某一首歌曲添加至下一首播放
       Command.ADD_TO_NEXT_SONG -> {
         val nextSong = intent.getSerializableExtra(EXTRA_SONG) as Song? ?: return
+        if (playbackState.song.id == nextSong.id) {
+          return
+        }
+        val playlist = playback.getPlaylist()
+        val index = playlist.indexOfFirst { it.id == nextSong.id }
+        if (index != -1 && index != playback.currentIndex) {
+          playback.removeSong(index)
+        }
         playback.addSongs(listOf(nextSong), playback.currentIndex + 1)
         // 同步更新
         launch { playQueue.save(playback.getPlaylist()) }
@@ -1384,8 +1356,6 @@ class MusicService : BaseService(),
     // 第一次启动软件
     if (settingPrefs.firstLoad) {
       settingPrefs.firstLoad = false
-      // 新建我的收藏
-      playListRepository.insertPlayList(getString(R.string.my_favorite))
 
       // 通知栏样式
       settingPrefs.classicNotify = Build.VERSION.SDK_INT < Build.VERSION_CODES.N
@@ -1598,8 +1568,6 @@ class MusicService : BaseService(),
     private const val APPWIDGET_BIG = "AppWidgetBig"
     private const val APPWIDGET_MEDIUM = "AppWidgetMedium"
     private const val APPWIDGET_SMALL = "AppWidgetSmall"
-    private const val APPWIDGET_MEDIUM_TRANSPARENT = "AppWidgetMediumTransparent"
-    private const val APPWIDGET_SMALL_TRANSPARENT = "AppWidgetSmallTransparent"
 
     private const val INTERVAL_UPDATE_APPWIDGET = 1000L
     private const val INTERVAL_SAVE_PROGRESS = 1000L

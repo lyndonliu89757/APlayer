@@ -19,7 +19,6 @@ class ShuffleShortcutType(context: Context) : BaseShortcutType(context) {
     get() = ShortcutInfo.Builder(context, ID_PREFIX + "shuffle")
         .setShortLabel(context.getString(R.string.model_random))
         .setLongLabel(context.getString(R.string.model_random))
-        .setIcon(Icon.createWithResource(context, R.drawable.icon_appshortcut_shuffle))
         .setIntent(getIntent(AppShortcutActivity.SHORTCUT_TYPE_SHUFFLE_ALL))
         .build()
 }

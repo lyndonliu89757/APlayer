@@ -167,16 +167,6 @@ fun PlayingDropDownMenu(
               settingVM.showSongDetailDialog(song)
             }
 
-            R.string.collect -> {
-              if (activity == null) {
-                return@DropdownMenuItem
-              }
-              val favorite =
-                libraryVM.playLists.value.firstOrNull { it.isFavorite() } ?: return@DropdownMenuItem
-
-              libraryVM.addSongsToPlayList(listOf(song.id), favorite.name)
-            }
-
             R.string.add_to_playlist -> {
               settingVM.showAddSongToPlayListDialog(listOf(song.id))
             }

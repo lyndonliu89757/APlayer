@@ -21,8 +21,6 @@ import remix.myplayer.ui.screen.RemoteScreen
 import remix.myplayer.ui.screen.library.AlbumScreen
 import remix.myplayer.ui.screen.library.ArtistScreen
 import remix.myplayer.ui.screen.library.FolderScreen
-import remix.myplayer.ui.screen.library.GenreScreen
-import remix.myplayer.ui.screen.library.PlayListScreen
 import remix.myplayer.ui.screen.library.SongScreen
 import remix.myplayer.viewmodel.settingViewModel
 import remix.myplayer.viewmodel.settings.SettingViewModel
@@ -38,14 +36,13 @@ fun ViewPager(
   HorizontalPager(
     modifier = modifier,
     state = pagerState,
-    beyondViewportPageCount = 1
+    beyondViewportPageCount = 1,
+    userScrollEnabled = false,
   ) { page ->
     when (libraries[page].tag) {
       Library.TAG_SONG -> SongScreen(scrollToCurrentEvent)
       Library.TAG_ALBUM -> AlbumScreen()
       Library.TAG_ARTIST -> ArtistScreen()
-      Library.TAG_GENRE -> GenreScreen()
-      Library.TAG_PLAYLIST -> PlayListScreen()
       Library.TAG_FOLDER -> FolderScreen()
       Library.TAG_REMOTE -> RemoteScreen()
       else -> PageContent("Page: ${libraries[page]}")

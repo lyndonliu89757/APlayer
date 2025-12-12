@@ -142,8 +142,6 @@ fun CustomSortScreen(id: Long) {
   }
 
   LaunchedEffect(Unit) {
-    playList = libraryVM.playLists.value.first { it.id == id }
-
     withContext(Dispatchers.IO) {
       songs.addAll(libraryVM.loadSongsByModels(listOf(playList!!)))
     }

@@ -210,7 +210,7 @@ internal fun LyricContainer(
                 playbackVM.setProgress(lyrics[highlightIndex].time)
                 allowProgressUpdates = true
               },
-            painter = painterResource(R.drawable.ic_play_arrow_black_24dp),
+            painter = painterResource(R.drawable.ic_play),
             contentDescription = "LyricPlayFromLine",
             colorFilter = ColorFilter.tint(LocalTheme.current.textSecondary)
           )
