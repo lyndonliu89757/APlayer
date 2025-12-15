@@ -28,7 +28,6 @@ import remix.myplayer.data.model.audio.APlayerModel
 import remix.myplayer.data.model.audio.Album
 import remix.myplayer.data.model.audio.Artist
 import remix.myplayer.data.model.audio.Folder
-import remix.myplayer.data.model.audio.Genre
 import remix.myplayer.data.model.audio.type
 import remix.myplayer.misc.clickWithRipple
 import remix.myplayer.misc.helper.MusicServiceRemote.setPlayQueue
@@ -127,10 +126,6 @@ fun LibraryItemDropdownMenu(
 
                 playbackVM.insertToQueue(songs)
               }
-              // 添加到播放列表
-              R.string.add_to_playlist -> {
-                settingVM.showAddSongToPlayListDialog(ids, "")
-              }
               // 删除
               R.string.delete -> {
                 if (model is PlayList && model.isFavorite()) {
@@ -175,7 +170,6 @@ private fun APlayerModel.popMenuItems(): List<Int> {
     is Album -> listOf(
       R.string.play,
       R.string.add_to_play_queue,
-      R.string.add_to_playlist,
       R.string.set_album_cover,
       R.string.delete
     )
@@ -183,30 +177,13 @@ private fun APlayerModel.popMenuItems(): List<Int> {
     is Artist -> listOf(
       R.string.play,
       R.string.add_to_play_queue,
-      R.string.add_to_playlist,
       R.string.set_artist_cover,
       R.string.delete
-    )
-
-    is PlayList -> listOf(
-      R.string.play,
-      R.string.add_to_play_queue,
-      R.string.add_to_playlist,
-      R.string.set_playlist_cover,
-      R.string.rename,
-      R.string.delete
-    )
-
-    is Genre -> listOf(
-      R.string.play,
-      R.string.add_to_play_queue,
-      R.string.add_to_playlist
     )
 
     is Folder -> listOf(
       R.string.play,
       R.string.add_to_play_queue,
-      R.string.add_to_playlist,
       R.string.delete
     )
 

@@ -57,6 +57,7 @@ fun SongListHeader(songSize: Int, scrollToTop: () -> Unit = {}, scrollToCurrent:
     val interactionSource = remember { MutableInteractionSource() }
     Row(
       horizontalArrangement = Arrangement.spacedBy(10.dp),
+      verticalAlignment = Alignment.CenterVertically,
       modifier = Modifier
         .weight(1f)
         .clickableWithoutRipple(interactionSource) {
@@ -76,22 +77,25 @@ fun SongListHeader(songSize: Int, scrollToTop: () -> Unit = {}, scrollToCurrent:
       )
     }
 
-    Row(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
+    Row(
+      horizontalArrangement = Arrangement.spacedBy(16.dp),
+      verticalAlignment = Alignment.CenterVertically,
+    ) {
       if (scrollToTop != {}) {
         Icon(
           modifier = Modifier
-            .size(18.dp)
+            .size(20.dp)
             .clickableWithoutRipple(interactionSource) {
               scrollToTop()
             },
-          painter = painterResource(R.drawable.ic_scroll_to_top),
+          painter = painterResource(R.drawable.ic_top),
           contentDescription = "ListHeaderIcon"
         )
       }
       if (scrollToCurrent != {}) {
         Icon(
           modifier = Modifier
-            .size(18.dp)
+            .size(20.dp)
             .clickableWithoutRipple(interactionSource) {
               scrollToCurrent()
             },

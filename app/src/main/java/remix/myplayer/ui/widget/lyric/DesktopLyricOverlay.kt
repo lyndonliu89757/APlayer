@@ -301,7 +301,7 @@ private fun resolveControls(
   onClickLock: () -> Unit,
   onClickSetting: () -> Unit
 ): List<DesktopLyricControl> = listOf(
-  DesktopLyricControl(R.drawable.ic_lock_24dp, "DkpLock") {
+  DesktopLyricControl(R.drawable.ic_lock, "DkpLock") {
     onClickLock()
   },
   DesktopLyricControl(R.drawable.ic_previous, "DkpPrevious") {

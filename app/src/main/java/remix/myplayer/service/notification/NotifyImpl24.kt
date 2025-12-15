@@ -26,7 +26,7 @@ class
 NotifyImpl24(context: MusicService) : Notify(context) {
 
   private val defaultBitmap =
-    BitmapFactory.decodeResource(service.resources, R.drawable.album_empty_bg_night)
+    BitmapFactory.decodeResource(service.resources, R.drawable.album_empty_bg_day)
   private val size = DensityUtil.dip2px(service, 128f)
 
   override fun updateForPlaying() {
@@ -87,7 +87,7 @@ NotifyImpl24(context: MusicService) : Notify(context) {
       //根据当前桌面歌词的状态判断是显示开关桌面歌词还是解锁桌面歌词
       //当前显示了桌面歌词并且已经锁定,显示解锁的按钮
       .addAction(
-        if (desktopLyricLock) R.drawable.ic_lock_open_black_24dp else R.drawable.ic_desktop_lyric_black_24dp,
+        if (desktopLyricLock) R.drawable.ic_unlock else R.drawable.ic_lock,
         service.getString(if (desktopLyricLock) R.string.desktop_lyric__unlock else R.string.desktop_lyric_lock),
         buildPendingIntent(
           service,

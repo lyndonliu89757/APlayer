@@ -31,10 +31,8 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.palette.graphics.Palette
-import remix.myplayer.data.prefs.SettingPrefs
 import remix.myplayer.misc.isPortraitOrientation
 import remix.myplayer.viewmodel.playbackViewModel
-import remix.myplayer.viewmodel.settingViewModel
 
 @Composable
 fun PlayingScreen() {
@@ -51,9 +49,8 @@ fun PlayingScreen() {
 @Composable
 private fun Portrait() {
   Column(
-    modifier = Modifier,
     horizontalAlignment = Alignment.CenterHorizontally,
-    verticalArrangement = Arrangement.spacedBy(30.dp)
+    verticalArrangement = Arrangement.spacedBy(16.dp)
   ) {
     val playbackState by playbackViewModel.playbackUiState.collectAsStateWithLifecycle()
     val playbackVM = playbackViewModel
@@ -65,7 +62,7 @@ private fun Portrait() {
 
     HorizontalPager(
       pagerState,
-      modifier = Modifier.weight(7f),
+      modifier = Modifier.weight(1f),
       beyondViewportPageCount = 1
     ) { page ->
       when (page) {
@@ -98,22 +95,12 @@ private fun Portrait() {
 
     PlayingSeekbarWithText(swatch)
 
-    val playingScreenBottom =
-      settingViewModel.settingsState.collectAsStateWithLifecycle().value.playingScreen.bottom
-    val showBottomBar = playingScreenBottom != SettingPrefs.BOTTOM_SHOW_NONE
-    PlayingControl(Modifier.weight(if (showBottomBar) 1f else 2f), playbackState, swatch)
+    PlayingControl(playbackState, swatch)
 
-    if (showBottomBar) {
-      PlayingBottomBar(
-        Modifier
-          .weight(1.5f)
-          .fillMaxWidth()
-          .padding(top = 12.dp),
-        playingScreenBottom,
-        playbackState,
-        swatch
-      )
-    }
+    PlayingBottomBar(
+      playbackState,
+      swatch
+    )
 
     val window = LocalActivity.current?.window
     DisposableEffect(pagerState.currentPage) {
@@ -179,7 +166,7 @@ private fun Landscape() {
 
     PlayingSeekbarWithText(swatch)
 
-    PlayingControl(Modifier.weight(1f), playbackState, swatch)
+    PlayingControl(playbackState, swatch)
   }
 }
 

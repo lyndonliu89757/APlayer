@@ -70,17 +70,20 @@ val PlayModeMap = mapOf(
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 internal fun PlayingControl(
-  modifier: Modifier = Modifier,
   playbackUiState: PlaybackUiState,
   swatch: Palette.Swatch
 ) {
   Row(
-    modifier = modifier
-      .fillMaxSize(),
+    modifier = Modifier
+      .fillMaxWidth()
+      .height(60.dp)
+      .padding(0.dp),
     horizontalArrangement = Arrangement.SpaceEvenly,
     verticalAlignment = Alignment.CenterVertically
   ) {
     val swatchColor = Color(swatch.rgb)
+
+    // 播放模式
     val playMode = playbackUiState.playMode
     ControlButton(onClick = {
       Util.sendCMDLocalBroadcast(Command.CHANGE_MODEL)
@@ -93,6 +96,7 @@ internal fun PlayingControl(
       )
     }
 
+    // 前一首
     ControlButton(onClick = {
       sendLocalBroadcast(
         Intent(MusicService.ACTION_CMD).putExtra(
@@ -109,6 +113,7 @@ internal fun PlayingControl(
       )
     }
 
+    // 播放/暂停
     ControlButton(onClick = {
       sendLocalBroadcast(
         Intent(MusicService.ACTION_CMD).putExtra(
@@ -132,6 +137,7 @@ internal fun PlayingControl(
       )
     }
 
+    // 下一首
     ControlButton(onClick = {
       sendLocalBroadcast(
         Intent(MusicService.ACTION_CMD).putExtra(
@@ -151,6 +157,7 @@ internal fun PlayingControl(
     val state = rememberModalBottomSheetState()
     PlayQueueDialog(state, playbackUiState)
 
+    // 播放列表
     val scope = rememberCoroutineScope()
     ControlButton(onClick = {
       scope.launch {

@@ -76,7 +76,6 @@ private fun SongDropdownMenu(
     listOf(
       R.string.add_to_next_song,
 //      R.string.add_to_play_queue,
-//      R.string.add_to_playlist,
       R.string.song_detail,
       R.string.song_edit,
 //      R.string.set_album_cover,
@@ -115,10 +114,6 @@ private fun SongDropdownMenu(
                 MusicUtil.makeCmdIntent(Command.ADD_TO_NEXT_SONG)
                   .putExtra(EXTRA_SONG, song)
               )
-            }
-
-            R.string.add_to_playlist -> {
-              settingVM.showAddSongToPlayListDialog(listOf(song.id), "")
             }
 
             R.string.add_to_play_queue -> {

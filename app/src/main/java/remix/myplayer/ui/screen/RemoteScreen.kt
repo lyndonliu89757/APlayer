@@ -124,7 +124,7 @@ private fun WebDavItem(webDav: WebDav, onMenuClick: (Int) -> Unit) {
   ) {
     Icon(
       modifier = Modifier.padding(start = 12.dp),
-      painter = painterResource(R.drawable.icon_webdav),
+      painter = painterResource(R.drawable.ic_webdav),
       contentDescription = "IconWebDavItem",
       tint = theme.icon()
     )

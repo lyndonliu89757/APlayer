@@ -79,17 +79,6 @@ fun MultiSelectBar(
       }
     },
     actions = {
-      TooltipButton(R.string.add_to_playlist, R.drawable.ic_library_add_white_24dp, tintColor) {
-        scope.launch {
-          mainVM.closeMultiSelect()
-          val songs =
-            withContext(Dispatchers.IO) { libraryVM.loadSongsByModels(state.selectedModels) }
-          if (songs.isNotEmpty()) {
-            settingVM.showAddSongToPlayListDialog(songs.map { it.id }, "")
-          }
-        }
-      }
-
       TooltipButton(R.string.add_to_play_queue, R.drawable.ic_playlist_add_white_24dp, tintColor) {
         scope.launch {
           mainVM.closeMultiSelect()
@@ -97,22 +86,6 @@ fun MultiSelectBar(
             withContext(Dispatchers.IO) { libraryVM.loadSongsByModels(state.selectedModels) }
           if (songs.isNotEmpty()) {
             playbackVM.insertToQueue(songs)
-          }
-        }
-      }
-
-      if (state.where != MultiSelectState.Where.Genre) {
-        TooltipButton(R.string.delete, R.drawable.ic_delete_black_24dp, tintColor) {
-          mainVM.closeMultiSelect()
-          if (state.selectedModels.isNotEmpty()) {
-            val title = if (state.selectedModels.all { it is PlayList }) {
-              R.string.confirm_delete_playlist
-            } else if (parent is PlayList) {
-              R.string.confirm_delete_from_playlist
-            } else {
-              R.string.confirm_delete_from_library
-            }
-            settingVM.showDeleteSongDialog(state.selectedModels, title, parent)
           }
         }
       }

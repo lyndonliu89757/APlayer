@@ -4,13 +4,11 @@ import android.content.Context.AUDIO_SERVICE
 import android.media.AudioManager
 import android.media.AudioManager.STREAM_MUSIC
 import android.os.Build
-import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -24,7 +22,6 @@ import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
@@ -46,102 +43,55 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import remix.myplayer.R
-import remix.myplayer.data.prefs.SettingPrefs.Companion.BOTTOM_SHOW_BOTH
-import remix.myplayer.data.prefs.SettingPrefs.Companion.BOTTOM_SHOW_NEXT
-import remix.myplayer.data.prefs.SettingPrefs.Companion.BOTTOM_SHOW_NONE
-import remix.myplayer.data.prefs.SettingPrefs.Companion.BOTTOM_SHOW_VOLUME
 import remix.myplayer.misc.CenterInBox
 import remix.myplayer.misc.clickWithRipple
-import remix.myplayer.misc.clickableWithoutRipple
 import remix.myplayer.service.playback.PlaybackUiState
-import remix.myplayer.ui.theme.LocalTheme
 import remix.myplayer.ui.widget.common.LineSlider
 import remix.myplayer.ui.widget.common.defaultLineSliderProperties
 
 @Composable
 internal fun PlayingBottomBar(
-  modifier: Modifier,
-  playingScreenBottom: Int,
   musicState: PlaybackUiState,
   swatch: Palette.Swatch
 ) {
-  Box(modifier = modifier, contentAlignment = Alignment.TopCenter) {
-    val swatchColor = Color(swatch.rgb)
-    assert(playingScreenBottom != BOTTOM_SHOW_NONE)
-
-    var nextSongIsVisible by remember {
-      mutableStateOf(playingScreenBottom == BOTTOM_SHOW_NEXT)
-    }
-    var volumeIsVisible by remember {
-      mutableStateOf(playingScreenBottom != BOTTOM_SHOW_NEXT)
-    }
-
-    var refreshKey by remember {
-      mutableIntStateOf(0)
-    }
-
-    AnimatedVisibility(nextSongIsVisible, enter = fadeIn(), exit = fadeOut()) {
-      NextSong(musicState, swatchColor) {
-        if (playingScreenBottom != BOTTOM_SHOW_NEXT) {
-          nextSongIsVisible = false
-          volumeIsVisible = true
-          refreshKey++
-        }
-      }
-    }
-    AnimatedVisibility(volumeIsVisible, enter = fadeIn(), exit = fadeOut()) {
-      VolumeSeekbar(swatchColor) {
-        if (playingScreenBottom != BOTTOM_SHOW_VOLUME) {
-          refreshKey++
-        }
-      }
-    }
-
-    LaunchedEffect(refreshKey) {
-      if (refreshKey == 0 && playingScreenBottom == BOTTOM_SHOW_BOTH || refreshKey > 0) {
-        // nextSong -> GONE
-        // volume -> VISIBLE
-        delay(3000)
-        nextSongIsVisible = true
-        volumeIsVisible = false
-      }
-    }
-  }
-}
-
-@Composable
-private fun NextSong(musicState: PlaybackUiState, swatchColor: Color, onClick: (() -> Unit)? = null) {
-  CenterInBox(
-    modifier = Modifier
-      .padding(horizontal = 36.dp)
-      .fillMaxWidth()
-      .background(swatchColor.copy(0.1f), shape = RoundedCornerShape(2.dp))
-      .clickableWithoutRipple {
-        onClick?.invoke()
-      }
+  Column(
+    modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp),
+    verticalArrangement = Arrangement.spacedBy(6.dp),
   ) {
-    Text(
-      text = stringResource(R.string.next_song, musicState.nextSong.title),
-      color = Color("#a8a8a8".toColorInt()
-      ),
-      fontSize = 14.sp,
-      textAlign = TextAlign.Center,
-      maxLines = 1,
-      overflow = TextOverflow.Ellipsis,
-      modifier = Modifier.padding(vertical = 8.dp)
-    )
+    val swatchColor = Color(swatch.rgb)
+
+    VolumeSeekbar(swatchColor)
+
+    // 展示下一首歌
+    CenterInBox(
+      modifier = Modifier
+        .padding(horizontal = 10.dp)
+        .fillMaxWidth()
+        .background(swatchColor.copy(0.1f), shape = RoundedCornerShape(2.dp))
+    ) {
+      Text(
+        text = stringResource(R.string.next_song, musicState.nextSong.title),
+        color = Color(
+          "#a8a8a8".toColorInt()
+        ),
+        fontSize = 14.sp,
+        textAlign = TextAlign.Center,
+        maxLines = 1,
+        overflow = TextOverflow.Ellipsis,
+        modifier = Modifier.padding(vertical = 8.dp)
+      )
+    }
   }
 }
 
 @Composable
-private fun VolumeSeekbar(swatchColor: Color, onValueChange: () -> Unit) {
+private fun VolumeSeekbar(swatchColor: Color) {
   val context = LocalContext.current
   val audioManager = remember {
     context.getSystemService(AUDIO_SERVICE) as AudioManager
   }
   Row(
-    horizontalArrangement = Arrangement.spacedBy(40.dp),
-    modifier = Modifier.padding(horizontal = 18.dp)
+    horizontalArrangement = Arrangement.spacedBy(10.dp),
   ) {
     CenterInBox(
       Modifier
@@ -154,13 +104,14 @@ private fun VolumeSeekbar(swatchColor: Color, onValueChange: () -> Unit) {
           )
         }) {
       Image(
-        painter = painterResource(R.drawable.ic_volume_down_black_24dp),
+        modifier = Modifier.size(24.dp),
+        painter = painterResource(R.drawable.ic_mute),
         contentDescription = "PlayingBottomBarVolumeDown",
-        colorFilter = ColorFilter.tint(swatchColor.copy(0.5f))
+        colorFilter = ColorFilter.tint(swatchColor.copy(0.6f))
       )
     }
 
-    VolumeSeekBar(audioManager, swatchColor, onValueChange)
+    VolumeSeekBar(audioManager, swatchColor)
 
     CenterInBox(
       Modifier
@@ -173,9 +124,10 @@ private fun VolumeSeekbar(swatchColor: Color, onValueChange: () -> Unit) {
           )
         }) {
       Image(
-        painter = painterResource(R.drawable.ic_volume_up_black_24dp),
+        modifier = Modifier.size(24.dp),
+        painter = painterResource(R.drawable.ic_voice),
         contentDescription = "PlayingBottomBarVolumeUp",
-        colorFilter = ColorFilter.tint(swatchColor.copy(0.5f))
+        colorFilter = ColorFilter.tint(swatchColor.copy(0.8f))
       )
     }
   }
@@ -185,7 +137,6 @@ private fun VolumeSeekbar(swatchColor: Color, onValueChange: () -> Unit) {
 private fun RowScope.VolumeSeekBar(
   audioManager: AudioManager,
   swatchColor: Color,
-  onValueChange: () -> Unit
 ) {
   var min by remember {
     mutableIntStateOf(0)
@@ -202,7 +153,6 @@ private fun RowScope.VolumeSeekBar(
     valueRange = min.toFloat()..max.toFloat(),
     onValueChange = {
       current = it.toInt()
-      onValueChange()
     },
     onValueChangeFinished = {
       audioManager.setStreamVolume(

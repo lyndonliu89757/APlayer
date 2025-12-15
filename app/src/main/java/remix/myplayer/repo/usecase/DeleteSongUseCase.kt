@@ -13,7 +13,6 @@ import remix.myplayer.data.db.room.entity.PlayList
 import remix.myplayer.data.model.audio.APlayerModel
 import remix.myplayer.data.model.audio.Song
 import remix.myplayer.data.prefs.SettingPrefs
-import remix.myplayer.misc.checkWorkerThread
 import remix.myplayer.misc.helper.MusicServiceRemote
 import remix.myplayer.repo.AbstractRepository.Companion.makeInStrQuery
 import remix.myplayer.repo.PlayQueueRepository
@@ -101,7 +100,7 @@ class DeleteSongUseCase @Inject constructor(
       activity.contentResolver.notifyChange(Audio.Media.EXTERNAL_CONTENT_URI, null)
     }
 
-  private suspend fun deleteSource(activity: BaseActivity, songs: List<Song>) = withContext(Dispatchers.IO){
+  private suspend fun deleteSource(activity: BaseActivity, songs: List<Song>) = withContext(Dispatchers.IO) {
 
     try {
       if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {

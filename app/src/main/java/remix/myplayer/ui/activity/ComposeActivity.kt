@@ -34,7 +34,6 @@ class ComposeActivity : BaseMusicActivity() {
 
   private val libraryViewModel: LibraryViewModel by viewModels()
   private val playbackViewModel: PlaybackViewModel by viewModels()
-  private val mainViewModel: MainViewModel by viewModels()
 
   override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)
@@ -64,10 +63,6 @@ class ComposeActivity : BaseMusicActivity() {
           AppNav()
         }
       }
-    }
-
-    lifecycleScope.launch {
-      mainViewModel.checkInAppUpdate()
     }
   }
 

@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.pager.PagerState
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.material.icons.Icons
@@ -40,6 +41,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.bumptech.glide.integration.compose.ExperimentalGlideComposeApi
@@ -64,10 +66,6 @@ import remix.myplayer.viewmodel.webDavViewModel
 @Composable
 fun HomeScreen() {
   val mainVM = mainViewModel
-  val libraryVM = libraryViewModel
-  val navController = LocalNavController.current
-  val context = LocalContext.current
-
   val libraries by settingViewModel.allLibraries.collectAsStateWithLifecycle()
 
   val multiSelectState by mainVM.multiSelectState.collectAsStateWithLifecycle()
@@ -213,7 +211,7 @@ fun HomeAppBar(
       actionIconContentColor = Color.Black,
     ),
     title = {
-      Text(stringResource(library.stringRes), fontSize = 15.sp, fontWeight = FontWeight.Bold, maxLines = 1)
+      Text(stringResource(library.stringRes), fontSize = 14.sp, fontWeight = FontWeight.Bold, maxLines = 1)
     },
     navigationIcon = {
       IconButton(onClick = { scope.launch { drawerState.open() } }) {
@@ -230,6 +228,7 @@ fun HomeAppBar(
           it.action()
         }) {
           Icon(
+            modifier = Modifier.size(30.dp),
             painter = painterResource(it.icon),
             contentDescription = it.contentDescription
           )

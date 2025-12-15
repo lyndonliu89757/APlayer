@@ -22,7 +22,6 @@ import remix.myplayer.misc.updateIf
 import remix.myplayer.ui.dialog.DialogState
 import remix.myplayer.ui.dialog.runWithLoadingResult
 import remix.myplayer.ui.nav.MessageNotifier
-import remix.myplayer.util.Util
 import remix.myplayer.util.Util.installApk
 import remix.myplayer.util.Util.vibrate
 import timber.log.Timber
@@ -161,12 +160,9 @@ data class MultiSelectState(
   fun isShowing() = where != Where.None
 
   fun isShowInLibrary() =
-    where == Where.Song || where == Where.Album || where == Where.Artist || where == Where.Genre ||
-        where == Where.PlayList || where == Where.Folder
+    where == Where.Song || where == Where.Album || where == Where.Artist || where == Where.Folder
 
   fun isShowInDetail() = where == Where.Detail
-
-  fun isShowInLastAdded() = where == Where.LastAdded
 
   fun isShowInSearch() = where == Where.Search
 
@@ -183,8 +179,6 @@ data class MultiSelectState(
     Song,
     Album,
     Artist,
-    Genre,
-    PlayList,
     Folder,
     Detail,
     LastAdded,

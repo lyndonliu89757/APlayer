@@ -1,19 +1,16 @@
 package remix.myplayer.viewmodel.settings
 
 import androidx.compose.runtime.Stable
-import androidx.compose.ui.graphics.Color
 import remix.myplayer.data.model.misc.LyricOrder
 
 @Stable
 data class CommonSettings(
   val scanSize: Int,
   val forceSort: Boolean,
-  val lockScreen: Int,
   val manualScanFolder: String,
   val blacklist: Set<String>,
   val deleteIds: Set<String>,
   val language: Int,
-  val shake: Boolean,
   val showDisplayName: Boolean,
 )
 
@@ -48,7 +45,6 @@ data class LibrarySettings(
 @Stable
 data class PlayingScreenSettings(
   val background: Int,
-  val bottom: Int,
   val keepScreenOn: Boolean,
 )
 
@@ -68,12 +64,6 @@ data class LyricSettings(
 )
 
 @Stable
-data class NotificationSettings(
-  val classicNotify: Boolean,
-  val notifyUseSystemBackground: Boolean,
-)
-
-@Stable
 data class SettingsState(
   val common: CommonSettings,
   val play: PlaySettings,
@@ -81,5 +71,4 @@ data class SettingsState(
   val playingScreen: PlayingScreenSettings,
   val cover: CoverSettings,
   val lyric: LyricSettings,
-  val notification: NotificationSettings,
 )

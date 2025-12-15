@@ -41,7 +41,6 @@ import remix.myplayer.data.model.audio.Artist
 import remix.myplayer.data.model.audio.Folder
 import remix.myplayer.data.model.audio.Genre
 import remix.myplayer.ui.dialog.DialogContainer
-import remix.myplayer.ui.screen.AboutScreen
 import remix.myplayer.ui.screen.CustomSortScreen
 import remix.myplayer.ui.screen.EQScreen
 import remix.myplayer.ui.screen.HomeScreen
@@ -66,7 +65,6 @@ const val RouteFolder = "folder"
 const val RouteRemote = "remote"
 const val RouteSetting = "setting"
 const val RoutePlayingScreen = "playing_screen"
-const val RouteAbout = "about"
 const val RouteCustomSort = "custom_sort"
 const val RouteSearch = "search"
 const val RouteWebDav = "webdav"
@@ -107,10 +105,6 @@ fun AppNav() {
 
         normalAnimatedScreen(RouteSetting) {
           SettingScreen()
-        }
-
-        normalAnimatedScreen(RouteAbout) {
-          AboutScreen()
         }
 
         composable<DetailScreenRoute>(

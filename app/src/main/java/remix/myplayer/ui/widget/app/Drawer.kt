@@ -1,20 +1,18 @@
 package remix.myplayer.ui.widget.app
 
-import android.content.ComponentName
-import android.content.Intent
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.WindowInsetsSides
 import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.systemBars
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.pager.PagerState
 import androidx.compose.material3.DrawerState
 import androidx.compose.material3.Icon
@@ -29,33 +27,27 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.RectangleShape
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.bumptech.glide.integration.compose.ExperimentalGlideComposeApi
 import kotlinx.coroutines.launch
+import remix.myplayer.BuildConfig
 import remix.myplayer.R
-import remix.myplayer.misc.receiver.ExitReceiver
 import remix.myplayer.ui.nav.LocalNavController
-import remix.myplayer.ui.nav.RouteAbout
 import remix.myplayer.ui.nav.RouteSetting
 import remix.myplayer.ui.theme.LocalTheme
 import remix.myplayer.ui.widget.common.TextPrimary
-import remix.myplayer.util.Constants
-import remix.myplayer.viewmodel.PlaybackViewModel
-import remix.myplayer.viewmodel.playbackViewModel
 
 @OptIn(ExperimentalGlideComposeApi::class)
 @Composable
 fun Drawer(
   drawerState: DrawerState,
   pagerState: PagerState,
-  vm: PlaybackViewModel = playbackViewModel
 ) {
   val navController = LocalNavController.current
-  val context = LocalContext.current
   val theme = LocalTheme.current
 
   ModalDrawerSheet(
@@ -73,24 +65,21 @@ fun Drawer(
 
     var selectDrawer by remember { mutableIntStateOf(0) }
     val scope = rememberCoroutineScope()
+    val navigationItems = listOf(
+      "歌曲" to R.drawable.ic_music,
+      "专辑" to R.drawable.ic_album,
+      "歌手" to R.drawable.ic_singer,
+      "文件夹" to R.drawable.ic_folder,
+      "远程" to R.drawable.ic_webdav,
+      "设置" to R.drawable.ic_setting,
+    )
 
-    LazyColumn(
+    Column(
       modifier = Modifier
         .background(theme.background)
         .fillMaxHeight()
     ) {
-      itemsIndexed(
-        listOf(
-          "歌曲" to R.drawable.ic_music,
-          "专辑" to R.drawable.ic_album,
-          "歌手" to R.drawable.ic_singer,
-          "文件夹" to R.drawable.ic_folder,
-          "远程" to R.drawable.ic_webdav,
-
-          "设置" to R.drawable.ic_setting,
-          "关于" to R.drawable.ic_about,
-        )
-      ) { index, (label, icon) ->
+      navigationItems.forEachIndexed { index, (label, icon) ->
         NavigationDrawerItem(
           shape = RectangleShape,
           label = {
@@ -113,7 +102,6 @@ fun Drawer(
               }
 
               "设置" -> navController.navigate(RouteSetting)
-              "关于" -> navController.navigate(RouteAbout)
             }
           },
           icon = {
@@ -131,9 +119,21 @@ fun Drawer(
         )
       }
 
-      item {
-        Spacer(modifier = Modifier.weight(1f))
-      }
+      Spacer(modifier = Modifier.weight(1f))
+
+      TextPrimary(
+        "v${BuildConfig.VERSION_NAME}",
+        color = theme.textSecondary,
+        textAlign = TextAlign.Center,
+        modifier = Modifier
+          .fillMaxWidth()
+          .padding(vertical = 8.dp),
+      )
+
+      Spacer(
+        modifier = Modifier.height(
+          with(LocalDensity.current) { WindowInsets.systemBars.getBottom(this).toDp() }
+        ))
     }
   }
 }

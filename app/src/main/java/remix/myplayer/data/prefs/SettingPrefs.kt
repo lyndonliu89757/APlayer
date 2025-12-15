@@ -86,10 +86,8 @@ class SettingPrefs @Inject constructor(
   var blacklist by PrefsDelegate(sp, PrefKeys.Setting.BLACKLIST, emptySet<String>())
   var deleteSource by PrefsDelegate(sp, PrefKeys.Setting.DELETE_SOURCE, false)
 
-  var lockScreen by PrefsDelegate(sp, PrefKeys.Setting.LOCKSCREEN, LOCKSCREEN_SYSTEM)
   var language by PrefsDelegate(sp, PrefKeys.Setting.LANGUAGE, AUTO)
   var playAtBreakPoint by PrefsDelegate(sp, PrefKeys.Setting.PLAY_AT_BREAKPOINT, false)
-  var shake by PrefsDelegate(sp, PrefKeys.Setting.SHAKE, false)
   var showDisplayName by PrefsDelegate(sp, PrefKeys.Setting.SHOW_DISPLAYNAME, false)
 
   var ignoreAudioFocus by PrefsDelegate(sp, PrefKeys.Setting.AUDIO_FOCUS, false)
@@ -106,11 +104,6 @@ class SettingPrefs @Inject constructor(
     PrefKeys.Setting.PLAYER_BACKGROUND,
     BACKGROUND_ADAPTIVE_COLOR
   )
-  var playingScreenBottom by PrefsDelegate(
-    sp,
-    PrefKeys.Setting.BOTTOM_OF_NOW_PLAYING_SCREEN,
-    BOTTOM_SHOW_BOTH
-  )
   var keepScreenOn by PrefsDelegate(sp, PrefKeys.Setting.SCREEN_ALWAYS_ON, false)
 
   var ignoreMediaStore by PrefsDelegate(sp, PrefKeys.Setting.IGNORE_MEDIA_STORE, false)
@@ -125,9 +118,6 @@ class SettingPrefs @Inject constructor(
     DOWNLOAD_NETEASE
   )
 
-  var classicNotify by PrefsDelegate(sp, PrefKeys.Setting.NOTIFY_STYLE_CLASSIC, false)
-  var notifyUseSystemBackground by PrefsDelegate(sp, PrefKeys.Setting.NOTIFY_SYSTEM_COLOR, true)
-
   var exitAfterTimerFinish by PrefsDelegate(sp, PrefKeys.Setting.TIMER_EXIT_AFTER_FINISH, false)
   var timerStartAuto by PrefsDelegate(sp, PrefKeys.Setting.TIMER_DEFAULT, false)
   var timerDefaultDuration by PrefsDelegate(sp, PrefKeys.Setting.TIMER_DURATION, -1)
@@ -139,12 +129,6 @@ class SettingPrefs @Inject constructor(
 
   companion object {
 
-    // 播放界面底部
-    const val BOTTOM_SHOW_NEXT = 0
-    const val BOTTOM_SHOW_VOLUME = 1
-    const val BOTTOM_SHOW_BOTH = 2
-    const val BOTTOM_SHOW_NONE = 3
-
     // 播放界面背景
     const val BACKGROUND_THEME = 0
     const val BACKGROUND_ADAPTIVE_COLOR = 1
@@ -154,13 +138,6 @@ class SettingPrefs @Inject constructor(
     const val DOWNLOAD_COVER_ALWAYS = 0
     const val DOWNLOAD_COVER_WIFI_ONLY = 1
     const val DOWNLOAD_COVER_NEVER = 2
-
-    const val CLASSIC_NOTIFY_BACKGROUND_SYSTEM = 0
-
-    // 0:软件锁屏 1:系统锁屏 2:关闭
-    const val LOCKSCREEN_APLAYER: Int = 0
-    const val LOCKSCREEN_SYSTEM: Int = 1
-    const val LOCKSCREEN_CLOSE: Int = 2
 
     // 播放模式
     const val MODE_LOOP: Int = 1

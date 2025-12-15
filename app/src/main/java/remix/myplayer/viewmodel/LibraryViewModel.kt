@@ -11,8 +11,10 @@ import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import remix.myplayer.R
 import remix.myplayer.data.db.room.entity.PlayList
@@ -20,7 +22,6 @@ import remix.myplayer.data.model.audio.APlayerModel
 import remix.myplayer.data.model.audio.Album
 import remix.myplayer.data.model.audio.Artist
 import remix.myplayer.data.model.audio.Folder
-import remix.myplayer.data.model.audio.Genre
 import remix.myplayer.data.model.audio.Song
 import remix.myplayer.data.prefs.SettingPrefs
 import remix.myplayer.glide.UriFetcher
@@ -31,8 +32,8 @@ import remix.myplayer.repo.ArtistRepository
 import remix.myplayer.repo.FolderRepository
 import remix.myplayer.repo.SongRepository
 import remix.myplayer.service.MusicService
-import remix.myplayer.ui.dialog.DialogState
 import remix.myplayer.ui.nav.MessageNotifier
+import remix.myplayer.util.PermissionUtil
 import timber.log.Timber
 import javax.inject.Inject
 
@@ -62,10 +63,15 @@ class LibraryViewModel @Inject constructor(
   private val _folders = MutableStateFlow<List<Folder>>(emptyList())
   val folders: StateFlow<List<Folder>> = _folders.asStateFlow()
 
-  fun loadSongsByModels(models: List<APlayerModel>) = songRepo.getSongsByModels(models)
+  init {
+    // load all media
+    hasPermission = PermissionUtil.hasNecessaryPermission()
+    if (hasPermission) {
+      fetchMedia()
+    }
+  }
 
-  fun loadSong(selection: String?, selectionValues: Array<String?>?, sortOrder: String? = null) =
-    songRepo.getSongs(selection, selectionValues, sortOrder)
+  fun loadSongsByModels(models: List<APlayerModel>) = songRepo.getSongsByModels(models)
 
   fun searchSong(key: String): List<Song> {
     checkWorkerThread()
@@ -145,8 +151,3 @@ class LibraryViewModel @Inject constructor(
   ) {
   }
 }
-
-data class CreatePlaylistState(
-  val dialogState: DialogState = DialogState(),
-  val name: String = ""
-)

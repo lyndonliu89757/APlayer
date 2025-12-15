@@ -44,9 +44,6 @@ import remix.myplayer.data.model.audio.Song
 import remix.myplayer.data.model.audio.Song.Companion.EMPTY_SONG
 import remix.myplayer.data.prefs.PrefKeys
 import remix.myplayer.data.prefs.SettingPrefs
-import remix.myplayer.data.prefs.SettingPrefs.Companion.LOCKSCREEN_APLAYER
-import remix.myplayer.data.prefs.SettingPrefs.Companion.LOCKSCREEN_CLOSE
-import remix.myplayer.data.prefs.SettingPrefs.Companion.LOCKSCREEN_SYSTEM
 import remix.myplayer.data.prefs.SettingPrefs.Companion.MODE_LOOP
 import remix.myplayer.data.prefs.SettingPrefs.Companion.MODE_REPEAT
 import remix.myplayer.data.prefs.SettingPrefs.Companion.MODE_SHUFFLE
@@ -56,7 +53,6 @@ import remix.myplayer.misc.getPendingIntentFlag
 import remix.myplayer.misc.helper.EQHelper
 import remix.myplayer.misc.helper.LanguageHelper
 import remix.myplayer.misc.helper.MusicEventCallback
-import remix.myplayer.misc.helper.ShakeDetector
 import remix.myplayer.misc.helper.SleepTimer
 import remix.myplayer.misc.observer.MediaStoreObserver
 import remix.myplayer.misc.receiver.ExitReceiver
@@ -66,27 +62,19 @@ import remix.myplayer.misc.tryLaunch
 import remix.myplayer.repo.SongRepository
 import remix.myplayer.repo.usecase.FetchMetaDataUseCase
 import remix.myplayer.service.notification.Notify
-import remix.myplayer.service.notification.NotifyImpl
 import remix.myplayer.service.notification.NotifyImpl24
 import remix.myplayer.service.playback.ExoPlayback
 import remix.myplayer.service.playback.MusicStateSource
 import remix.myplayer.service.playback.Playback
-import remix.myplayer.ui.activity.LockScreenActivity
 import remix.myplayer.ui.activity.base.BaseMusicActivity
 import remix.myplayer.ui.activity.base.BaseMusicActivity.Companion.EXTRA_PERMISSION
 import remix.myplayer.ui.activity.base.BaseMusicActivity.Companion.EXTRA_PLAYLIST
-import remix.myplayer.ui.appwidgets.BaseAppwidget
-import remix.myplayer.ui.appwidgets.big.AppWidgetBig
-import remix.myplayer.ui.appwidgets.medium.AppWidgetMedium
-import remix.myplayer.ui.appwidgets.small.AppWidgetSmall
 import remix.myplayer.ui.nav.MessageNotifier
 import remix.myplayer.util.Constants.ACTION_EXIT
 import remix.myplayer.util.DensityUtil
 import remix.myplayer.util.PermissionUtil
-import remix.myplayer.util.Util.isAppOnForeground
 import remix.myplayer.util.Util.registerLocalReceiver
 import remix.myplayer.util.Util.unregisterLocalReceiver
-import remix.myplayer.util.Util.unregisterSafely
 import timber.log.Timber
 import javax.inject.Inject
 
@@ -154,7 +142,6 @@ class MusicService : BaseService(),
 
       field = value
       playback.setMode(value)
-      partiallyUpdateWidget()
 
       updateQueueItem()
 
@@ -172,11 +159,6 @@ class MusicService : BaseService(),
    */
   lateinit var playback: ExoPlayback
     private set
-
-  /**
-   * 桌面部件
-   */
-  private val appWidgets: HashMap<String, BaseAppwidget> = HashMap()
 
   /**
    * 播放控制的Receiver
@@ -197,13 +179,6 @@ class MusicService : BaseService(),
    */
   private val headSetReceiver: HeadsetPlugReceiver by lazy {
     HeadsetPlugReceiver()
-  }
-
-  /**
-   * 接收桌面部件
-   */
-  private val widgetReceiver: WidgetReceiver by lazy {
-    WidgetReceiver()
   }
 
   /**
@@ -352,27 +327,6 @@ class MusicService : BaseService(),
   override fun onSharedPreferenceChanged(sp: SharedPreferences?, key: String?) {
 //    Timber.v("onSharedPreferenceChanged, key: $key")
     when (key) {
-      // 通知栏样式
-      PrefKeys.Setting.NOTIFY_STYLE_CLASSIC -> {
-        val wasShowing = notify.isNotifyShowing
-        notify = if (settingPrefs.classicNotify) {
-          NotifyImpl(this@MusicService)
-        } else {
-          NotifyImpl24(this@MusicService)
-        }
-        if (wasShowing) {
-          // 先取消再重新显示 让通知栏彻底刷新一次
-          notify.cancelPlayingNotify()
-          updateNotification()
-        }
-      }
-      // 锁屏
-      PrefKeys.Setting.LOCKSCREEN -> {
-        when (settingPrefs.lockScreen) {
-          LOCKSCREEN_CLOSE -> clearMediaSession()
-          LOCKSCREEN_SYSTEM, LOCKSCREEN_APLAYER -> updateMediaSession(Command.SKIP_TO_NEXT)
-        }
-      }
       // 断点播放
       PrefKeys.Setting.PLAY_AT_BREAKPOINT -> {
         if (!settingPrefs.playAtBreakPoint) {
@@ -395,17 +349,7 @@ class MusicService : BaseService(),
       .registerOnSharedPreferenceChangeListener(this)
 
     // 通知栏
-    settingPrefs.classicNotify
-    notify = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N && !settingPrefs.classicNotify) {
-      NotifyImpl24(this)
-    } else {
-      NotifyImpl(this)
-    }
-
-    // 桌面部件
-    appWidgets[APPWIDGET_BIG] = AppWidgetBig.getInstance()
-    appWidgets[APPWIDGET_MEDIUM] = AppWidgetMedium.getInstance()
-    appWidgets[APPWIDGET_SMALL] = AppWidgetSmall.getInstance()
+    notify = NotifyImpl24(this)
 
     // 初始化Receiver
     val eventFilter = IntentFilter()
@@ -421,8 +365,6 @@ class MusicService : BaseService(),
     noisyFilter.addAction(AudioManager.ACTION_AUDIO_BECOMING_NOISY)
     noisyFilter.addAction(Intent.ACTION_HEADSET_PLUG)
     registerReceiver(headSetReceiver, noisyFilter)
-
-    registerLocalReceiver(widgetReceiver, IntentFilter(ACTION_WIDGET_UPDATE))
 
     val screenFilter = IntentFilter()
     screenFilter.addAction(Intent.ACTION_SCREEN_ON)
@@ -668,16 +610,13 @@ class MusicService : BaseService(),
 
     unregisterLocalReceiver(controlReceiver)
     unregisterLocalReceiver(musicEventReceiver)
-    unregisterLocalReceiver(widgetReceiver)
-    headSetReceiver.unregisterSafely(this)
-    screenReceiver.unregisterSafely(this)
+    unregisterLocalReceiver(headSetReceiver)
+    unregisterLocalReceiver(screenReceiver)
 
     getSharedPreferences(PrefKeys.Setting.NAME, MODE_PRIVATE)
       .unregisterOnSharedPreferenceChangeListener(this)
 
     contentResolver.unregisterContentObserver(mediaStoreObserver)
-
-    ShakeDetector.getInstance().stopListen()
 
     alreadyUnInit = true
   }
@@ -945,31 +884,6 @@ class MusicService : BaseService(),
 
   }
 
-  inner class WidgetReceiver : BroadcastReceiver() {
-
-    override fun onReceive(context: Context, intent: Intent) {
-      //            final int skin = SPUtil.getValue(context,SETTING_KEY.NAME,SETTING_KEY.APP_WIDGET_SKIN,SKIN_WHITE_1F);
-      //            SPUtil.putValue(context,SETTING_KEY.NAME, SETTING_KEY.APP_WIDGET_SKIN,skin == SKIN_WHITE_1F ? SKIN_TRANSPARENT : SKIN_WHITE_1F);
-
-      val name = intent.getStringExtra(BaseAppwidget.EXTRA_WIDGET_NAME)
-      val appIds = intent.getIntArrayExtra(BaseAppwidget.EXTRA_WIDGET_IDS)
-      Timber.v("name: $name appIds: $appIds")
-      when (name) {
-        APPWIDGET_BIG -> if (appWidgets[APPWIDGET_BIG] != null) {
-          appWidgets[APPWIDGET_BIG]?.updateWidget(service, appIds, true)
-        }
-
-        APPWIDGET_MEDIUM -> if (appWidgets[APPWIDGET_MEDIUM] != null) {
-          appWidgets[APPWIDGET_MEDIUM]?.updateWidget(service, appIds, true)
-        }
-
-        APPWIDGET_SMALL -> if (appWidgets[APPWIDGET_SMALL] != null) {
-          appWidgets[APPWIDGET_SMALL]?.updateWidget(service, appIds, true)
-        }
-      }
-    }
-  }
-
   inner class MusicEventReceiver : BroadcastReceiver() {
 
     override fun onReceive(context: Context, intent: Intent) {
@@ -992,15 +906,6 @@ class MusicService : BaseService(),
           intent.putExtra(EXTRA_POSITION, 0)
           setPlayQueue(listOf(song), intent)
         }
-      }
-
-      ACTION_APPWIDGET_OPERATE -> {
-        handleCommand(
-          Intent(ACTION_CMD).putExtra(
-            EXTRA_CONTROL,
-            commandIntent?.getIntExtra(EXTRA_CONTROL, -1)
-          )
-        )
       }
 
       ACTION_SHORTCUT_SHUFFLE -> {
@@ -1074,7 +979,6 @@ class MusicService : BaseService(),
     if (song == EMPTY_SONG) {
       return
     }
-    updateAppwidget()
 
     // 正在播放、已有通知在显示、用户操作过
     if (isPlaying || notify.isNotifyShowing || lastOp != -1) {
@@ -1182,7 +1086,6 @@ class MusicService : BaseService(),
         launch {
           playback.currentSong?.let {
             MusicStateSource.updatePlaybackUiState(isFavorite = !playbackState.isFavorite)
-            updateAppwidget()
           }
         }
       }
@@ -1264,7 +1167,7 @@ class MusicService : BaseService(),
    */
   private fun updateMediaSession(control: Int) {
     val currentSong = playback.currentSong ?: EMPTY_SONG
-    if (currentSong == EMPTY_SONG || settingPrefs.lockScreen == LOCKSCREEN_CLOSE) {
+    if (currentSong == EMPTY_SONG) {
       return
     }
 
@@ -1327,7 +1230,7 @@ class MusicService : BaseService(),
         PlaybackStateCompat.CustomAction.Builder(
           if (desktopLyricLock) ACTION_UNLOCK_DESKTOP_LYRIC else ACTION_TOGGLE_DESKTOP_LYRIC,
           getString(if (desktopLyricLock) R.string.desktop_lyric__unlock else R.string.desktop_lyric_lock),
-          if (desktopLyricLock) R.drawable.ic_lock_open_black_24dp else R.drawable.ic_desktop_lyric_black_24dp
+          if (desktopLyricLock) R.drawable.ic_unlock else R.drawable.ic_lock
         ).build()
       )
     }
@@ -1356,14 +1259,6 @@ class MusicService : BaseService(),
     // 第一次启动软件
     if (settingPrefs.firstLoad) {
       settingPrefs.firstLoad = false
-
-      // 通知栏样式
-      settingPrefs.classicNotify = Build.VERSION.SDK_INT < Build.VERSION_CODES.N
-    }
-
-    // 摇一摇
-    if (settingPrefs.shake) {
-      ShakeDetector.getInstance().beginListen()
     }
 
     restorePlayList()
@@ -1387,52 +1282,9 @@ class MusicService : BaseService(),
     }
   }
 
-  /**
-   * 更新桌面部件
-   */
-  private fun updateAppwidget() {
-    // 暂停停止更新进度条和时间
-    if (!isPlaying) {
-      // 暂停后不再更新
-      // 所以需要在停止前更新一次 保证桌面部件控件的播放|暂停按钮状态是对的
-      partiallyUpdateWidget(true)
-      stopUpdateAppWidget()
-    } else {
-      if (screenOn) {
-        appWidgets.forEach {
-          it.value.updateWidget(this, null, true)
-        }
-        // 开始播放后更新进度条和时间
-        startUpdateAppWidget()
-      }
-    }
-  }
-
   private fun stopUpdateAppWidget() {
     desktopWidgetJob?.cancel()
     desktopWidgetJob = null
-  }
-
-  private fun startUpdateAppWidget() {
-    if (desktopWidgetJob != null) {
-      return
-    }
-    desktopWidgetJob = launch {
-      while (isActive) {
-        partiallyUpdateWidget()
-        delay(INTERVAL_UPDATE_APPWIDGET)
-      }
-
-    }
-  }
-
-  private fun partiallyUpdateWidget(force: Boolean = false) {
-    // app在前台不用更新
-    if (!isAppOnForeground || force) {
-      appWidgets.forEach {
-        it.value.partiallyUpdateWidget(service)
-      }
-    }
   }
 
   private fun startSaveProgress() {
@@ -1503,19 +1355,6 @@ class MusicService : BaseService(),
       Timber.tag("ScreenReceiver").v(action)
       if (Intent.ACTION_SCREEN_ON == action) {
         screenOn = true
-        //显示锁屏
-        if (isPlaying && settingPrefs.lockScreen == LOCKSCREEN_APLAYER) {
-          try {
-            context.startActivity(
-              Intent(context, LockScreenActivity::class.java)
-                .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-            )
-          } catch (e: Exception) {
-            Timber.v("启动锁屏页失败: $e")
-          }
-        }
-        //重新开始更新桌面部件
-        updateAppwidget()
       } else {
         screenOn = false
         //停止更新桌面部件
@@ -1547,13 +1386,11 @@ class MusicService : BaseService(),
     const val EXTRA_CONTROL = "control"
     const val EXTRA_SHUFFLE = "shuffle"
     const val EXTRA_PROGRESS = "progress"
-    const val ACTION_APPWIDGET_OPERATE = "$APLAYER_PACKAGE_NAME.appwidget.operate"
     const val ACTION_PLAY_FROM_URI = "$APLAYER_PACKAGE_NAME.play_from_uri"
     const val ACTION_SHORTCUT_SHUFFLE = "$APLAYER_PACKAGE_NAME.shortcut.shuffle"
     const val ACTION_SHORTCUT_MYLOVE = "$APLAYER_PACKAGE_NAME.shortcut.my_love"
     const val ACTION_SHORTCUT_LASTADDED = "$APLAYER_PACKAGE_NAME.shortcut.last_added"
     const val ACTION_CMD = "$APLAYER_PACKAGE_NAME.cmd"
-    const val ACTION_WIDGET_UPDATE = "$APLAYER_PACKAGE_NAME.widget_update"
     const val ACTION_UNLOCK_DESKTOP_LYRIC = "$APLAYER_PACKAGE_NAME.unlock.desktop_lyric"
     const val ACTION_TOGGLE_DESKTOP_LYRIC = "$APLAYER_PACKAGE_NAME.toggle.desktop_lyric"
 
@@ -1565,11 +1402,6 @@ class MusicService : BaseService(),
         or PlaybackStateCompat.ACTION_STOP
         or PlaybackStateCompat.ACTION_SEEK_TO)
 
-    private const val APPWIDGET_BIG = "AppWidgetBig"
-    private const val APPWIDGET_MEDIUM = "AppWidgetMedium"
-    private const val APPWIDGET_SMALL = "AppWidgetSmall"
-
-    private const val INTERVAL_UPDATE_APPWIDGET = 1000L
     private const val INTERVAL_SAVE_PROGRESS = 1000L
     private const val INTERVAL_CONTROL = 1000
 

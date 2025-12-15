@@ -16,20 +16,11 @@ object PrefKeys {
     /** 是否开启屏幕常亮 */
     const val SCREEN_ALWAYS_ON = "key_screen_always_on"
 
-    /** 通知栏是否启用经典样式 */
-    const val NOTIFY_STYLE_CLASSIC = "notify_classic"
-
     /** 是否自动下载专辑封面 */
     const val AUTO_DOWNLOAD_ALBUM_COVER = "auto_download_album_cover_v1"
 
     /** 曲库配置 */
     const val LIBRARY = "library_category"
-
-    /** 锁屏设置 */
-    const val LOCKSCREEN = "lockScreen"
-
-    /** 摇一摇 */
-    const val SHAKE = "shake"
 
     /** 是否开启桌面歌词 */
     const val DESKTOP_LYRIC_SHOW = "desktop_lyric_show"
@@ -117,9 +108,6 @@ object PrefKeys {
 
     /** 封面下载源 */
     const val ALBUM_COVER_DOWNLOAD_SOURCE = "album_cover_download_source"
-
-    /** 播放界面底部显示 */
-    const val BOTTOM_OF_NOW_PLAYING_SCREEN = "bottom_of_now_playing_screen"
 
     /** 倍速播放 */
     const val SPEED = "speed"

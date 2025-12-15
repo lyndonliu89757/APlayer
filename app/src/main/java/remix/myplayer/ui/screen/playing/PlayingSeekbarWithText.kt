@@ -63,7 +63,7 @@ internal fun PlayingSeekbarWithText(
     Row(
       horizontalArrangement = Arrangement.spacedBy(20.dp),
       verticalAlignment = Alignment.CenterVertically,
-      modifier = Modifier.padding(horizontal = 20.dp)
+      modifier = Modifier.padding(horizontal = 20.dp),
     ) {
 
       Text(

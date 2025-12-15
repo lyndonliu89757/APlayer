@@ -88,7 +88,7 @@ fun CustomSortScreen(id: Long) {
         contentAlignment = Alignment.Center
       ) {
         Icon(
-          painterResource(R.drawable.ic_save_white_24dp),
+          painterResource(R.drawable.ic_save),
           contentDescription = "CustomSortSave",
           tint = Color.White
         )

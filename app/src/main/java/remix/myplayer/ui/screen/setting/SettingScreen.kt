@@ -17,11 +17,9 @@ import remix.myplayer.ui.screen.setting.logic.common.BlackListLogic
 import remix.myplayer.ui.screen.setting.logic.common.BreakPointLogic
 import remix.myplayer.ui.screen.setting.logic.common.ForceSortLogic
 import remix.myplayer.ui.screen.setting.logic.common.LanguageLogic
-import remix.myplayer.ui.screen.setting.logic.common.LockScreenLogic
 import remix.myplayer.ui.screen.setting.logic.common.ManualScanLogic
 import remix.myplayer.ui.screen.setting.logic.common.RestoreDeleteLogic
 import remix.myplayer.ui.screen.setting.logic.common.ScanSizeLogic
-import remix.myplayer.ui.screen.setting.logic.common.ShakeLogic
 import remix.myplayer.ui.screen.setting.logic.common.ShowDisplayNameLogic
 import remix.myplayer.ui.screen.setting.logic.cover.AutoDownloadLogic
 import remix.myplayer.ui.screen.setting.logic.cover.DownloadSourceLogic
@@ -30,8 +28,6 @@ import remix.myplayer.ui.screen.setting.logic.library.LibraryLogic
 import remix.myplayer.ui.screen.setting.logic.lyric.DesktopLyricLogic
 import remix.myplayer.ui.screen.setting.logic.lyric.LyricPriorityLogic
 import remix.myplayer.ui.screen.setting.logic.lyric.StatusBarLyricLogic
-import remix.myplayer.ui.screen.setting.logic.notification.ClassicNotifyLogic
-import remix.myplayer.ui.screen.setting.logic.notification.NotifyBackgroundLogic
 import remix.myplayer.ui.screen.setting.logic.other.ClearCacheLogic
 import remix.myplayer.ui.screen.setting.logic.other.FeedbackLogic
 import remix.myplayer.ui.screen.setting.logic.play.AutoPlayLogic
@@ -39,7 +35,6 @@ import remix.myplayer.ui.screen.setting.logic.play.IgnoreAudioFocusLogic
 import remix.myplayer.ui.screen.setting.logic.play.PlayFadeLogic
 import remix.myplayer.ui.screen.setting.logic.playingscreen.KeepScreenOnLogic
 import remix.myplayer.ui.screen.setting.logic.playingscreen.PlayingScreenBackgroundLogic
-import remix.myplayer.ui.screen.setting.logic.playingscreen.PlayingScreenBottomLogic
 import remix.myplayer.ui.theme.LocalTheme
 import remix.myplayer.ui.widget.common.CommonAppBar
 import remix.myplayer.viewmodel.mainViewModel
@@ -68,8 +63,6 @@ fun SettingScreen() {
 
         LyricPreferences()
 
-        NotificationPreferences()
-
         OtherPreferences()
       }
     }
@@ -84,15 +77,11 @@ private fun CommonPreferences() {
 
   BlackListLogic()
 
-  LockScreenLogic()
-
   ManualScanLogic()
 
   RestoreDeleteLogic()
 
   LanguageLogic()
-
-  ShakeLogic()
 
   ShowDisplayNameLogic()
 
@@ -125,8 +114,6 @@ private fun PlayingScreenPreferences() {
 
   PlayingScreenBackgroundLogic()
 
-  PlayingScreenBottomLogic()
-
   KeepScreenOnLogic()
 }
 
@@ -139,15 +126,6 @@ private fun CoverPreferences() {
   AutoDownloadLogic()
 
   DownloadSourceLogic()
-}
-
-@Composable
-private fun NotificationPreferences() {
-  SettingTitle(R.string.notify)
-
-  ClassicNotifyLogic()
-
-  NotifyBackgroundLogic()
 }
 
 @Composable

@@ -102,10 +102,10 @@ val defaultAppBarActions: List<AppBarAction>
     val nav = LocalNavController.current
 
     return listOf(
-      AppBarAction(R.drawable.ic_timer_white_24dp, "Timer") {
+      AppBarAction(R.drawable.ic_time, "Timer") {
         timerVM.showTimerDialog()
       },
-      AppBarAction(R.drawable.ic_search_white_24dp, "Search") {
+      AppBarAction(R.drawable.ic_search, "Search") {
         nav.navigate(RouteSearch)
       })
   }

@@ -2,12 +2,10 @@ package remix.myplayer.viewmodel.settings
 
 import android.app.Activity
 import android.content.Context
-import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.bumptech.glide.Glide
 import dagger.hilt.android.lifecycle.HiltViewModel
-import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -23,15 +21,12 @@ import remix.myplayer.data.model.misc.LyricOrder
 import remix.myplayer.data.prefs.LyricPrefs
 import remix.myplayer.data.prefs.SettingPrefs
 import remix.myplayer.lyric.LyricManager
-import remix.myplayer.misc.helper.ShakeDetector
 import remix.myplayer.misc.updateIf
-import remix.myplayer.repo.SongRepository
 import remix.myplayer.repo.usecase.DeleteSongUseCase
 import remix.myplayer.service.playback.MusicStateSource
 import remix.myplayer.ui.activity.base.BaseActivity
 import remix.myplayer.ui.dialog.DeleteSongState
 import remix.myplayer.ui.dialog.DialogState
-import remix.myplayer.ui.dialog.ImportPlayListState
 import remix.myplayer.ui.dialog.ReNamePlayListState
 import remix.myplayer.ui.dialog.SongDetailState
 import remix.myplayer.ui.dialog.SongEditState
@@ -40,9 +35,6 @@ import javax.inject.Inject
 
 @HiltViewModel
 class SettingViewModel @Inject constructor(
-  private val savedStateHandle: SavedStateHandle,
-  @ApplicationContext private val context: Context,
-  private val songRepo: SongRepository,
   val settingPrefs: SettingPrefs,
   val lyricPrefs: LyricPrefs,
   val lyricManager: LyricManager
@@ -65,12 +57,10 @@ class SettingViewModel @Inject constructor(
     common = CommonSettings(
       scanSize = settingPrefs.scanSize,
       forceSort = settingPrefs.forceSort,
-      lockScreen = settingPrefs.lockScreen,
       manualScanFolder = settingPrefs.manualScanFolder,
       blacklist = settingPrefs.blacklist,
       deleteIds = settingPrefs.deleteIds,
       language = settingPrefs.language,
-      shake = settingPrefs.shake,
       showDisplayName = settingPrefs.showDisplayName
     ),
     play = PlaySettings(
@@ -99,7 +89,6 @@ class SettingViewModel @Inject constructor(
     ),
     playingScreen = PlayingScreenSettings(
       background = settingPrefs.playingScreenBackground,
-      bottom = settingPrefs.playingScreenBottom,
       keepScreenOn = settingPrefs.keepScreenOn
     ),
     cover = CoverSettings(
@@ -113,10 +102,6 @@ class SettingViewModel @Inject constructor(
       fontScale = lyricPrefs.fontScale,
       generalLyricOrder = lyricPrefs.generalLyricOrderList
     ),
-    notification = NotificationSettings(
-      classicNotify = settingPrefs.classicNotify,
-      notifyUseSystemBackground = settingPrefs.notifyUseSystemBackground
-    )
   )
 
   init {
@@ -152,11 +137,6 @@ class SettingViewModel @Inject constructor(
     _settingsState.update { it.copy(common = it.common.copy(forceSort = enabled)) }
   }
 
-  fun setLockScreen(mode: Int) {
-    settingPrefs.lockScreen = mode
-    _settingsState.update { it.copy(common = it.common.copy(lockScreen = mode)) }
-  }
-
   fun setManualScanFolder(path: String) {
     settingPrefs.manualScanFolder = path
     _settingsState.update { it.copy(common = it.common.copy(manualScanFolder = path)) }
@@ -170,17 +150,6 @@ class SettingViewModel @Inject constructor(
   fun setDeleteIds(values: Set<String>) {
     settingPrefs.deleteIds = values
     _settingsState.update { it.copy(common = it.common.copy(deleteIds = values)) }
-  }
-
-  fun setShake(enabled: Boolean) {
-    settingPrefs.shake = enabled
-    _settingsState.update { it.copy(common = it.common.copy(shake = enabled)) }
-
-    if (enabled) {
-      ShakeDetector.getInstance().beginListen()
-    } else {
-      ShakeDetector.getInstance().stopListen()
-    }
   }
 
   fun setShowDisplayName(enabled: Boolean) {
@@ -271,11 +240,6 @@ class SettingViewModel @Inject constructor(
     _settingsState.update { it.copy(playingScreen = it.playingScreen.copy(background = bg)) }
   }
 
-  fun setPlayingScreenBottom(bottom: Int) {
-    settingPrefs.playingScreenBottom = bottom
-    _settingsState.update { it.copy(playingScreen = it.playingScreen.copy(bottom = bottom)) }
-  }
-
   fun setKeepScreenOn(enabled: Boolean) {
     settingPrefs.keepScreenOn = enabled
     _settingsState.update { it.copy(playingScreen = it.playingScreen.copy(keepScreenOn = enabled)) }
@@ -323,42 +287,6 @@ class SettingViewModel @Inject constructor(
       lyricManager.updateLyrics(MusicStateSource.currentPlaybackUiState.song)
     }
     _settingsState.update { it.copy(lyric = it.lyric.copy(generalLyricOrder = orderList)) }
-  }
-
-  // -------- Notification 分组 ----------
-  fun setClassicNotify(enabled: Boolean) {
-    settingPrefs.classicNotify = enabled
-    _settingsState.update { it.copy(notification = it.notification.copy(classicNotify = enabled)) }
-  }
-
-  fun setNotifyUseSystemBackground(enabled: Boolean) {
-    settingPrefs.notifyUseSystemBackground = enabled
-    _settingsState.update {
-      it.copy(notification = it.notification.copy(notifyUseSystemBackground = enabled))
-    }
-  }
-
-  private val _addSongToPlayListState =
-    MutableStateFlow(ImportPlayListState(DialogState(false), DialogState(false)))
-  val addSongToPlayListState = _addSongToPlayListState.asStateFlow()
-
-  fun showAddSongToPlayListDialog(songIds: List<Long>, initialText: String = "") {
-    _addSongToPlayListState.updateIf(
-      condition = { !it.rootDialogState.isOpen },
-      transform = {
-        it.rootDialogState.show()
-        it.copy(
-          inputText = initialText,
-          songIds = songIds
-        )
-      }
-    )
-  }
-
-  fun updateImportPlayListState(text: String) {
-    _addSongToPlayListState.update {
-      it.copy(inputText = text)
-    }
   }
 
   private val _deleteSongState =

@@ -167,10 +167,6 @@ fun PlayingDropDownMenu(
               settingVM.showSongDetailDialog(song)
             }
 
-            R.string.add_to_playlist -> {
-              settingVM.showAddSongToPlayListDialog(listOf(song.id))
-            }
-
             R.string.sleep_timer -> {
               timerVM.showTimerDialog()
             }
