@@ -24,6 +24,7 @@ import org.jaudiotagger.audio.AudioFileIO
 import org.jaudiotagger.audio.AudioHeader
 import remix.myplayer.R
 import remix.myplayer.data.model.audio.Song
+import remix.myplayer.ui.nav.MessageNotifier
 import remix.myplayer.ui.theme.LocalTheme
 import remix.myplayer.util.Constants.MB
 import remix.myplayer.util.Util
@@ -85,8 +86,12 @@ fun SongDetailDialog() {
 
   LaunchedEffect(song) {
     if (song.id > 0 && song.isLocal()) {
-      audioHeader = withContext(Dispatchers.IO) {
-        AudioFileIO.read(File(song.data)).audioHeader
+      try {
+        audioHeader = withContext(Dispatchers.IO) {
+          AudioFileIO.read(File(song.data)).audioHeader
+        }
+      } catch (e: Exception) {
+        MessageNotifier.show("$e")
       }
     }
   }

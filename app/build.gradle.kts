@@ -212,7 +212,6 @@ androidComponents {
 
 baselineProfile {
   saveInSrc = true
-  automaticGenerationDuringBuild = true
 
   warnings {
     disabledVariants = false

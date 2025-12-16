@@ -479,7 +479,8 @@
   <string name="play_cross_fade">Fade in and out</string>
   <string name="play_cross_fade_tip">Use fade-in and fade-out effects when playing and pausing</string>
 
-  <string name="split">split</string>
+  <string name="split">Split</string>
+  <string name="file_name">File name</string>
 
   <plurals name="song_num">
     <item quantity="one">%d song</item>

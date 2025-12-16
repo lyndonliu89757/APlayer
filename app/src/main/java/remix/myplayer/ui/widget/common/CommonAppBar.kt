@@ -52,7 +52,7 @@ fun CommonAppBar(
           }
         }) {
           Icon(
-            painter = painterResource(R.drawable.ic_arrow_back_white_24dp),
+            painter = painterResource(R.drawable.ic_back),
             contentDescription = "Back"
           )
         }

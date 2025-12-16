@@ -48,7 +48,7 @@ internal fun PlayingTopBar(song: Song, swatch: Palette.Swatch) {
         }
     ) {
       Image(
-        painter = painterResource(R.drawable.icon_player_back),
+        painter = painterResource(R.drawable.ic_back),
         colorFilter = ColorFilter.tint(titleColor),
         contentDescription = "PlayingBack"
       )

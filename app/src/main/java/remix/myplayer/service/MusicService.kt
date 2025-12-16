@@ -1230,7 +1230,7 @@ class MusicService : BaseService(),
         PlaybackStateCompat.CustomAction.Builder(
           if (desktopLyricLock) ACTION_UNLOCK_DESKTOP_LYRIC else ACTION_TOGGLE_DESKTOP_LYRIC,
           getString(if (desktopLyricLock) R.string.desktop_lyric__unlock else R.string.desktop_lyric_lock),
-          if (desktopLyricLock) R.drawable.ic_unlock else R.drawable.ic_lock
+          if (desktopLyricLock) R.drawable.ic_unlock else R.drawable.ic_lyric
         ).build()
       )
     }
