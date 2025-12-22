@@ -4,20 +4,26 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.aspectRatio
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardColors
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.ElevatedCard
+import androidx.compose.material3.Text
 import androidx.compose.material3.ripple
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import remix.myplayer.data.model.audio.APlayerModel
 import remix.myplayer.ui.theme.LocalTheme
@@ -36,46 +42,44 @@ fun GridItem(
   onLongClick: () -> Unit
 ) {
   val theme = LocalTheme.current
-  Column(
+
+  Box(
     modifier = Modifier
-      .padding(start = 3.dp, top = 4.dp, end = 3.dp, bottom = 4.dp)
       .fillMaxWidth()
-      .combinedClickable(
-        interactionSource = remember { MutableInteractionSource() },
-        indication = ripple(color = theme.ripple),
-        onClick = { onClick() },
-        onLongClick = { onLongClick() }
-      )
-      .background(if (selected) theme.select else theme.mainBackground)
+      .padding(8.dp)
+      .background(Color.Transparent)
   ) {
-    GlideCover(
+    ElevatedCard(
       modifier = Modifier
         .fillMaxWidth()
-        .aspectRatio(1f)
-        .clip(RoundedCornerShape(2.dp)),
-      model = model,
-      circle = false
-    )
-
-    Row(
-      modifier = Modifier
-        .height(58.dp),
-      verticalAlignment = Alignment.CenterVertically
+        .combinedClickable(
+          interactionSource = remember { MutableInteractionSource() },
+          indication = ripple(color = theme.ripple),
+          onClick = { onClick() },
+          onLongClick = { onLongClick() }
+        ),
+      colors = CardDefaults.cardColors().copy(containerColor = if (selected) theme.select else theme.container)
     ) {
-      Column(
+      GlideCover(
         modifier = Modifier
-          .padding(start = 10.dp)
-          .fillMaxHeight()
-          .weight(1f),
-        verticalArrangement = Arrangement.Center
-      ) {
-        TextPrimary(text = text1)
-        if (text2 != null) {
-          TextSecondary(text2)
-        }
-      }
+          .fillMaxWidth()
+          .aspectRatio(1f),
+        model = model,
+        circle = false
+      )
 
-      LibraryItemPopupButton(model = model)
+      Row(verticalAlignment = Alignment.CenterVertically) {
+        Column(
+          modifier = Modifier
+            .padding(start = 10.dp, top = 6.dp, bottom = 6.dp)
+            .weight(1f)
+        ) {
+          TextPrimary(text = text1, maxLine = 2)
+          TextSecondary(text2 ?: "")
+        }
+
+        LibraryItemPopupButton(model = model)
+      }
     }
   }
 }

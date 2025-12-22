@@ -7,7 +7,6 @@ import android.os.Build
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.RowScope
@@ -25,7 +24,6 @@ import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
@@ -44,8 +42,8 @@ import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import remix.myplayer.R
 import remix.myplayer.misc.CenterInBox
-import remix.myplayer.misc.clickWithRipple
 import remix.myplayer.service.playback.PlaybackUiState
+import remix.myplayer.ui.clickWithRipple
 import remix.myplayer.ui.widget.common.LineSlider
 import remix.myplayer.ui.widget.common.defaultLineSliderProperties
 
@@ -55,8 +53,9 @@ internal fun PlayingBottomBar(
   swatch: Palette.Swatch
 ) {
   Column(
-    modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp),
-    verticalArrangement = Arrangement.spacedBy(6.dp),
+    modifier = Modifier
+      .fillMaxWidth()
+      .padding(horizontal = 16.dp),
   ) {
     val swatchColor = Color(swatch.rgb)
 
@@ -64,10 +63,7 @@ internal fun PlayingBottomBar(
 
     // 展示下一首歌
     CenterInBox(
-      modifier = Modifier
-        .padding(horizontal = 10.dp)
-        .fillMaxWidth()
-        .background(swatchColor.copy(0.1f), shape = RoundedCornerShape(2.dp))
+      modifier = Modifier.fillMaxWidth()
     ) {
       Text(
         text = stringResource(R.string.next_song, musicState.nextSong.title),
@@ -78,7 +74,6 @@ internal fun PlayingBottomBar(
         textAlign = TextAlign.Center,
         maxLines = 1,
         overflow = TextOverflow.Ellipsis,
-        modifier = Modifier.padding(vertical = 8.dp)
       )
     }
   }
@@ -104,7 +99,7 @@ private fun VolumeSeekbar(swatchColor: Color) {
           )
         }) {
       Image(
-        modifier = Modifier.size(24.dp),
+        modifier = Modifier.size(26.dp),
         painter = painterResource(R.drawable.ic_mute),
         contentDescription = "PlayingBottomBarVolumeDown",
         colorFilter = ColorFilter.tint(swatchColor.copy(0.6f))
@@ -124,7 +119,7 @@ private fun VolumeSeekbar(swatchColor: Color) {
           )
         }) {
       Image(
-        modifier = Modifier.size(24.dp),
+        modifier = Modifier.size(26.dp),
         painter = painterResource(R.drawable.ic_voice),
         contentDescription = "PlayingBottomBarVolumeUp",
         colorFilter = ColorFilter.tint(swatchColor.copy(0.8f))
@@ -165,12 +160,12 @@ private fun RowScope.VolumeSeekBar(
       .height(48.dp)
       .weight(1f),
     properties = defaultLineSliderProperties.copy(
-      trackHeight = 2.dp,
+      trackHeight = 4.dp,
       trackBackgroundColor = playingTrackBackgroundColor,
       trackProgressColor = swatchColor,
       thumbColor = swatchColor,
-      thumbWidth = 2.dp,
-      thumbHeight = 6.dp,
+      thumbWidth = 4.dp,
+      thumbHeight = 4.dp,
       thumbShape = RectangleShape
     )
   )

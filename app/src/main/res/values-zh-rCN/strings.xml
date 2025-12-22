@@ -212,7 +212,7 @@
 
   <string name="write_something">每当想起这首歌的时候</string>
   <string name="song_sheet">歌单</string>
-  <string name="play_failed">播放失败:</string>
+  <string name="play_failed">播放失败: %s</string>
   <string name="cant_request_audio_focus">无法获得音频焦点</string>
   <string name="float_lrc">桌面歌词</string>
   <string name="closed_desktop_lrc">已关闭桌面歌词</string>
@@ -406,8 +406,7 @@
   <string name="md_presets_label">预设</string>
 
   <string name="init_failed">初始化失败：%s</string>
-  <string name="select_language">选择软件语言</string>
-  <string name="select_language_tips">将强制设置软件的语言</string>
+  <string name="select_language">语言</string>
 
   <string name="auto">跟随系统</string>
   <string name="zh_simple">简体中文</string>

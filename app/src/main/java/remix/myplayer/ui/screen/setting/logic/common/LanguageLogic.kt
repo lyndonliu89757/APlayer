@@ -22,6 +22,7 @@ private val itemRes = listOf(
   R.string.english,
   R.string.japanese,
 )
+
 @Composable
 fun LanguageLogic() {
   val context = LocalContext.current
@@ -31,7 +32,6 @@ fun LanguageLogic() {
   val state = rememberDialogState(false)
   NormalPreference(
     stringResource(R.string.select_language),
-    stringResource(R.string.select_language_tips)
   ) {
     state.show()
   }

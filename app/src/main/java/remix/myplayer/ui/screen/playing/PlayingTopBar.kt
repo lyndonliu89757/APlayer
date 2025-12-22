@@ -27,7 +27,7 @@ import androidx.compose.ui.unit.sp
 import androidx.palette.graphics.Palette
 import remix.myplayer.R
 import remix.myplayer.data.model.audio.Song
-import remix.myplayer.misc.clickWithRipple
+import remix.myplayer.ui.clickWithRipple
 import remix.myplayer.ui.nav.LocalNavController
 
 @Composable
@@ -48,6 +48,7 @@ internal fun PlayingTopBar(song: Song, swatch: Palette.Swatch) {
         }
     ) {
       Image(
+        modifier = Modifier.size(24.dp),
         painter = painterResource(R.drawable.ic_back),
         colorFilter = ColorFilter.tint(titleColor),
         contentDescription = "PlayingBack"
@@ -82,7 +83,8 @@ internal fun PlayingTopBar(song: Song, swatch: Palette.Swatch) {
         }
     ) {
       Image(
-        painter = painterResource(R.drawable.icon_player_more),
+        modifier = Modifier.size(30.dp),
+        painter = painterResource(R.drawable.ic_more),
         colorFilter = ColorFilter.tint(titleColor),
         contentDescription = "PlayingMore"
       )

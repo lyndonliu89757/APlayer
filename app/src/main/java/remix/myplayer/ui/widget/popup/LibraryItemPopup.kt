@@ -19,6 +19,7 @@ import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -29,7 +30,7 @@ import remix.myplayer.data.model.audio.Album
 import remix.myplayer.data.model.audio.Artist
 import remix.myplayer.data.model.audio.Folder
 import remix.myplayer.data.model.audio.type
-import remix.myplayer.misc.clickWithRipple
+import remix.myplayer.ui.clickWithRipple
 import remix.myplayer.misc.helper.MusicServiceRemote.setPlayQueue
 import remix.myplayer.service.Command
 import remix.myplayer.service.MusicService.Companion.EXTRA_POSITION
@@ -55,7 +56,7 @@ fun LibraryItemPopupButton(
       .clickWithRipple {
         expanded = !expanded
       }
-      .size(dimensionResource(id = R.dimen.item_list_btn_size))
+      .size(40.dp)
   ) {
 
     LibraryItemDropdownMenu(expanded, model) {
@@ -63,7 +64,8 @@ fun LibraryItemPopupButton(
     }
 
     Image(
-      painter = painterResource(R.drawable.icon_player_more),
+      modifier = Modifier.size(24.dp),
+      painter = painterResource(R.drawable.ic_more),
       contentDescription = "PopupButton",
       colorFilter = ColorFilter.tint(LocalTheme.current.popupButton())
     )

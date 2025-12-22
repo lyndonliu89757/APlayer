@@ -18,7 +18,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import remix.myplayer.R
-import remix.myplayer.misc.clickWithRipple
+import remix.myplayer.ui.clickWithRipple
 import remix.myplayer.ui.theme.LocalTheme
 import remix.myplayer.ui.theme.popupButton
 
@@ -54,7 +54,7 @@ fun PopupButton(menu: List<Int>, contentDescription: String? = null, onMenuClick
     }
 
     Image(
-      painter = painterResource(R.drawable.icon_player_more),
+      painter = painterResource(R.drawable.ic_more),
       contentDescription = contentDescription,
       colorFilter = ColorFilter.tint(LocalTheme.current.popupButton())
     )

@@ -212,7 +212,7 @@
 
   <string name="write_something">この曲を聴くたびにこう思うんだ ...</string>
   <string name="song_sheet">プレイリスト</string>
-  <string name="play_failed">再生できません:</string>
+  <string name="play_failed">再生できません: %s</string>
   <string name="cant_request_audio_focus">オーディオフォーカスが拒否されました</string>
   <string name="float_lrc">デスクトップ歌詞</string>
   <string name="closed_desktop_lrc">デスクトップ歌詞は オフ です</string>
@@ -406,8 +406,7 @@
   <string name="md_presets_label">プリセット</string>
 
   <string name="init_failed">初期化できません: %s</string>
-  <string name="select_language">APlayerの言語を設定</string>
-  <string name="select_language_tips">強制的にAPlayerの言語を変更します</string>
+  <string name="select_language">の言語を設定</string>
 
   <string name="auto">自動</string>
   <string name="zh_simple">中国語 (簡体)</string>

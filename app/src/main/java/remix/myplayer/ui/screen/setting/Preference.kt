@@ -2,14 +2,11 @@ package remix.myplayer.ui.screen.setting
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.wrapContentHeight
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Switch
 import androidx.compose.material3.SwitchDefaults
@@ -24,7 +21,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import remix.myplayer.R
-import remix.myplayer.misc.clickWithRipple
+import remix.myplayer.ui.clickWithRipple
 import remix.myplayer.ui.theme.LocalTheme
 import remix.myplayer.ui.widget.common.TextPrimary
 import remix.myplayer.ui.widget.common.TextSecondary
@@ -42,18 +39,8 @@ fun ArrowPreference(res: Int, onClick: () -> Unit) {
 }
 
 @Composable
-fun NormalPreference(title: String, content: String = "", onClick: () -> Unit) {
+fun NormalPreference(title: String, content: String? = null, onClick: () -> Unit) {
   Preference(onClick = onClick, title, content)
-}
-
-@Composable
-fun ThemePreference(title: String, content: String, primary: Boolean = true, onClick: () -> Unit) {
-  Preference(onClick = onClick, title, content) {
-    Box(modifier = Modifier
-      .size(32.dp)
-      .background(if (primary) LocalTheme.current.primary else LocalTheme.current.secondary,
-        CircleShape))
-  }
 }
 
 @Composable
@@ -103,7 +90,7 @@ fun Preference(
       verticalArrangement = Arrangement.Center
     ) {
       TextPrimary(title, modifier = Modifier.padding(bottom = 4.dp), fontSize = 16.sp)
-      if (content != null) {
+      if (!content.isNullOrBlank()) {
         TextSecondary(content, fontSize = 14.sp, maxLine = Int.MAX_VALUE)
       }
     }

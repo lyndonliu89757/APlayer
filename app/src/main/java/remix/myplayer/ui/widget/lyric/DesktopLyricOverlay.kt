@@ -1,5 +1,6 @@
 package remix.myplayer.ui.widget.lyric
 
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.detectVerticalDragGestures
@@ -10,6 +11,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.DividerDefaults
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
@@ -26,6 +28,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shadow
@@ -36,7 +39,9 @@ import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -47,8 +52,8 @@ import remix.myplayer.data.prefs.DesktopLyricPrefs.Companion.HIDE_PANEL_DELAY
 import remix.myplayer.lyric.CurrentNextLyricsLine
 import remix.myplayer.lyric.LyricManager
 import remix.myplayer.misc.CenterInBox
-import remix.myplayer.misc.clickWithRipple
-import remix.myplayer.misc.clickableWithoutRipple
+import remix.myplayer.ui.clickWithRipple
+import remix.myplayer.ui.clickableWithoutRipple
 import remix.myplayer.service.Command
 import remix.myplayer.ui.dialog.ColorSpace
 import remix.myplayer.util.MusicUtil.makeCmdIntent
@@ -139,13 +144,10 @@ fun DesktopLyricOverlay(
       contentDescription = "DkpClose"
     )
 
-    // 歌词内容
-    Column(
-      modifier = Modifier.fillMaxWidth(),
-      horizontalAlignment = Alignment.CenterHorizontally,
-      verticalArrangement = Arrangement.spacedBy(4.dp)
-    ) {
-      val currentLyric = uiState.currentLyricLine
+    val currentLyric = uiState.currentLyricLine
+
+    @Composable
+    fun currLine() {
       LyricSingleLine(
         sungColor,
         unSungColor,
@@ -153,7 +155,10 @@ fun DesktopLyricOverlay(
         currentLyric.currentLineProgress,
         currentLyric.currentLine
       )
+    }
 
+    @Composable
+    fun nextLine() {
       val isTranslation = !currentLyric.currentLine?.translation.isNullOrBlank()
       Text(
         text = if (isTranslation) {
@@ -165,16 +170,33 @@ fun DesktopLyricOverlay(
         style = TextStyle(
           color = if (isTranslation) translationColor else unSungColor,
           fontSize = secondLineSize.sp,
+          fontWeight = FontWeight.Bold,
           shadow = Shadow(
-            color = Color.Black,
-            offset = Offset(1f, 1f),
-            blurRadius = 2f
-          )
+            color = Color(0xFF00008B.toInt()),
+            offset = Offset(0.5f, 0.5f),
+            blurRadius = 10f
+          ),
         ),
         maxLines = 1,
         overflow = TextOverflow.Ellipsis,
-        softWrap = false
+        softWrap = false,
+        modifier = Modifier.clip(RoundedCornerShape(8.dp))
       )
+    }
+
+    // 歌词内容
+    Column(
+      modifier = Modifier.fillMaxWidth(),
+      horizontalAlignment = Alignment.CenterHorizontally,
+    ) {
+      val isEvenIndex = (currentLyric.currentLineIndex ?: 0) % 2 == 0
+      if (isEvenIndex) {
+        currLine()
+        nextLine()
+      } else {
+        nextLine()
+        currLine()
+      }
     }
 
     if (showPanel) {

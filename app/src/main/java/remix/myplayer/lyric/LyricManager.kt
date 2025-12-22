@@ -348,7 +348,7 @@ class LyricManager @Inject constructor(
     lyrics: List<LyricLine>, offset: Long, progress: Long, duration: Long
   ): CurrentNextLyricsLine {
     if (lyrics.isEmpty()) {
-      return CurrentNextLyricsLine(LyricLine.LYRICS_LINE_NO_LRC, null, null)
+      return CurrentNextLyricsLine(LyricLine.LYRICS_LINE_NO_LRC, null, null, null)
     }
     val progressWithOffset = progress + offset
     val index = lyrics.binarySearchBy(progressWithOffset) { it.time }.let {
@@ -356,13 +356,13 @@ class LyricManager @Inject constructor(
     }
     if (index < 0) {
       check(index == -1)
-      return CurrentNextLyricsLine(null, null, lyrics[0])
+      return CurrentNextLyricsLine(null, null, index, lyrics[0])
     }
     check(index < lyrics.size)
     val cur = lyrics[index]
     val nxt = lyrics.getOrNull(index + 1)
     return CurrentNextLyricsLine(
-      cur, getProgressOfLine(cur, progressWithOffset, nxt?.time ?: (duration + offset)), nxt
+      cur, getProgressOfLine(cur, progressWithOffset, nxt?.time ?: (duration + offset)), index, nxt
     )
   }
 

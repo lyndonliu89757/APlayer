@@ -1,6 +1,7 @@
 package remix.myplayer.ui.screen.setting.logic.lyric
 
 import android.app.Activity
+import android.content.ActivityNotFoundException
 import android.content.Context
 import android.content.Intent
 import android.os.Build
@@ -23,7 +24,6 @@ import remix.myplayer.R
 import remix.myplayer.misc.floatpermission.FloatWindowManager
 import remix.myplayer.ui.nav.MessageNotifier
 import remix.myplayer.ui.screen.setting.SwitchPreference
-import remix.myplayer.util.Util
 import remix.myplayer.util.Util.startActivitySafely
 import remix.myplayer.viewmodel.settingViewModel
 

@@ -34,7 +34,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import remix.myplayer.R
 import remix.myplayer.misc.CenterInBox
-import remix.myplayer.misc.clickWithRipple
+import remix.myplayer.ui.clickWithRipple
 import remix.myplayer.misc.helper.EQHelper
 import remix.myplayer.misc.helper.MusicServiceRemote
 import remix.myplayer.ui.nav.LocalNavController

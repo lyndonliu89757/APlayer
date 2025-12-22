@@ -18,7 +18,6 @@ class DesktopLyricPrefs @Inject constructor(@ApplicationContext context: Context
   var firstLineSize by PrefsDelegate(sp, FIRST_LINE_SIZE, DEFAULT_FIRST_LINE_SIZE)
   var secondLineSize by PrefsDelegate(sp, SECOND_LINE_SIZE, DEFAULT_SECOND_LINE_SIZE)
   var sungColor by PrefsDelegate(sp, SUNG_COLOR, DEFAULT_SUNG_COLOR)
-
   var unSungColor by PrefsDelegate(sp, UNSUNG_COLOR, DEFAULT_UNSUNG_COLOR)
   var translationColor by PrefsDelegate(sp, TRANSLATION_COLOR, DEFAULT_TRANSLATION_COLOR)
 
@@ -29,10 +28,10 @@ class DesktopLyricPrefs @Inject constructor(@ApplicationContext context: Context
     internal const val HIDE_PANEL_DELAY = 3000L
 
     internal const val DEFAULT_FIRST_LINE_SIZE = 18f
-    internal const val DEFAULT_SECOND_LINE_SIZE = 16f
+    internal const val DEFAULT_SECOND_LINE_SIZE = 18f
 
     @ColorInt
-    internal const val DEFAULT_SUNG_COLOR = Color.TRANSPARENT
+    internal const val DEFAULT_SUNG_COLOR = 0xfff5b0f4.toInt()
 
     @ColorInt
     internal const val DEFAULT_UNSUNG_COLOR = 0xffffffff.toInt()

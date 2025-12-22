@@ -25,7 +25,7 @@ import androidx.compose.ui.unit.dp
 import remix.myplayer.R
 import remix.myplayer.data.model.audio.APlayerModel
 import remix.myplayer.data.model.audio.Song
-import remix.myplayer.misc.clickWithRipple
+import remix.myplayer.ui.clickWithRipple
 import remix.myplayer.service.Command
 import remix.myplayer.service.MusicService.Companion.EXTRA_SONG
 import remix.myplayer.ui.activity.base.BaseActivity
@@ -57,8 +57,8 @@ fun SongPopupButton(
     }
 
     Image(
-      modifier = Modifier.size(20.dp),
-      painter = painterResource(R.drawable.icon_player_more),
+      modifier = Modifier.size(24.dp),
+      painter = painterResource(R.drawable.ic_more),
       contentDescription = "song button",
       colorFilter = ColorFilter.tint(Color.Gray)
     )

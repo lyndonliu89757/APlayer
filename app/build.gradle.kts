@@ -36,7 +36,7 @@ android {
   namespace = "remix.myplayer"
 
   compileSdk = 35
-  buildToolsVersion = "34.0.0"
+  buildToolsVersion = "35.0.0"
   ndkVersion = "25.2.9519653"
 
   defaultConfig {
@@ -44,8 +44,8 @@ android {
     minSdk = 21
     targetSdk = 33
 
-    versionCode = 20000
-    versionName = "2.0.0"
+    versionCode = 202
+    versionName = "2.0.2"
 
     vectorDrawables.useSupportLibrary = true
     multiDexEnabled = true
@@ -62,22 +62,12 @@ android {
     )
     buildConfigField(
       "String",
-      "BUGLY_APPID",
-      "\"${properties.getProperty("BUGLY_APPID")}\""
-    )
-    buildConfigField(
-      "String",
       "GITHUB_SHA",
       "\"${System.getenv("GITHUB_SHA")}\""
     )
 
     ndk {
-      abiFilters += listOf(
-        "armeabi-v7a",
-        "arm64-v8a",
-        "x86",
-        "x86_64"
-      )
+      abiFilters += "arm64-v8a"
     }
 
     setProperty("archivesBaseName", "APlayer-v${versionName}")
@@ -109,10 +99,8 @@ android {
 
   buildTypes {
     debug {
-      signingConfig = signingConfigs["debugConfig"]
       isDebuggable = true
       isMinifyEnabled = false
-
       applicationIdSuffix = ".debug"
       versionNameSuffix = "-DEBUG"
     }
@@ -122,11 +110,9 @@ android {
       isDebuggable = false
       isMinifyEnabled = true
       isShrinkResources = true
-      setProguardFiles(
-        listOf(
-          getDefaultProguardFile("proguard-android-optimize.txt"),
-          "proguard-rules.pro"
-        )
+      proguardFiles(
+        getDefaultProguardFile("proguard-android-optimize.txt"),
+        "proguard-rules.pro"
       )
     }
   }
@@ -247,7 +233,6 @@ dependencies {
   implementation(libs.room.runtime)
 
   implementation(libs.image.cropper)
-  implementation(libs.bugly)
   implementation(libs.logback.android)
   implementation(libs.xxpermissions)
   implementation(libs.sardine.android) {
@@ -285,51 +270,4 @@ dependencies {
 
   implementation(libs.androidx.profileinstaller)
   "baselineProfile"(project(":baselineprofile"))
-}
-
-// 上传mapping文件
-if (properties.getProperty("BUGLY_UPLOAD") == "1") {
-  val uploadMapping by tasks.registering(Exec::class) {
-    val jarFile = File(properties.getProperty("BUGLY_JAR") ?: "")
-    if (!jarFile.exists()) {
-      logger.warn("jarFile: ${jarFile.absolutePath} don't exist")
-      return@registering
-    }
-
-    val appId = properties.getProperty("BUGLY_APPID")
-    val appKey = properties.getProperty("BUGLY_APPKEY")
-    if (appId.isNullOrEmpty() || appKey.isNullOrEmpty()) {
-      logger.warn("appId or appKey for bugly is invalid")
-      return@registering
-    }
-
-    val mappingFile =
-      file("${project.layout.buildDirectory.asFile.get()}/outputs/mapping/nonGoogleWithUpdaterRelease/mapping.txt")
-    val args = listOf(
-      "-appid",
-      appId,
-      "-appkey",
-      appKey,
-      "-bundleid",
-      android.defaultConfig.applicationId,
-      "-version",
-      android.defaultConfig.versionName,
-      "-buildNo",
-      android.defaultConfig.versionCode.toString(),
-      "-platform",
-      "Android",
-      "-inputMapping",
-      mappingFile.absolutePath
-    )
-
-    commandLine = listOf("java", "-jar", jarFile.absolutePath) + args
-    standardOutput = System.out
-    errorOutput = System.out
-  }
-
-  tasks.whenTaskAdded {
-    if (name == "assembleNonGoogleWithUpdaterRelease") {
-      finalizedBy(uploadMapping)
-    }
-  }
 }

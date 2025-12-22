@@ -72,20 +72,11 @@
         android:src="@drawable/ic_next"
         android:tint="@color/ate_secondary_text_light"/>
       <ImageButton
-        android:id="@+id/notify_lyric"
-        android:layout_width="@dimen/d32_size"
-        android:layout_height="match_parent"
-        android:background="?android:attr/selectableItemBackground"
-        android:src="@drawable/icon_notify_lyric"
-        android:tint="@color/ate_secondary_text_light"/>
-
-      <ImageButton
         android:layout_width="@dimen/d32_size"
         android:layout_height="match_parent"
         android:id="@+id/notify_close"
-        android:src="@drawable/icon_notify_btn_close_white"
+        android:src="@drawable/ic_close"
         android:background="?android:attr/selectableItemBackground"/>
     </LinearLayout>
   </LinearLayout>
 </FrameLayout>
-

@@ -49,7 +49,7 @@ import kotlinx.coroutines.delay
 import remix.myplayer.R
 import remix.myplayer.lyric.LyricLine
 import remix.myplayer.lyric.PerWordLyricLine
-import remix.myplayer.misc.clickWithRipple
+import remix.myplayer.ui.clickWithRipple
 import remix.myplayer.ui.theme.LocalTheme
 import remix.myplayer.ui.widget.common.TextSecondary
 import remix.myplayer.ui.widget.lyric.LyricMultiLine
@@ -72,6 +72,7 @@ internal fun LyricContainer(
   offset: Long,
   fontScale: Float
 ) {
+  val theme = LocalTheme.current
   val seekBarUiState by playbackViewModel.seekBarUiState.collectAsStateWithLifecycle()
   val progress = (seekBarUiState.uiProgress ?: rawProgress) + offset
   val duration = rawDuration + offset
@@ -127,7 +128,7 @@ internal fun LyricContainer(
           }
         })
         .verticalScroll(scrollState),
-      verticalArrangement = Arrangement.spacedBy(8.dp),
+      verticalArrangement = Arrangement.spacedBy(10.dp),
       horizontalAlignment = Alignment.CenterHorizontally
     ) {
       // 顶部占位，保证高亮行有空间滚动到视口中间
@@ -157,8 +158,8 @@ internal fun LyricContainer(
             val endTime = max(line.time, lyrics.getOrNull(index + 1)?.time ?: duration)
 
             LyricMultiLine(
-              LocalTheme.current.textPrimary,
-              LocalTheme.current.textSecondary,
+              theme.textPrimary,
+              theme.textSecondary,
               fontSize = fontSize,
               // 如果是逐行歌词并且允许更新进度则分开绘制，否则只绘制已唱
               if (allowProgressUpdates && line is PerWordLyricLine) {
@@ -212,7 +213,7 @@ internal fun LyricContainer(
               },
             painter = painterResource(R.drawable.ic_play),
             contentDescription = "LyricPlayFromLine",
-            colorFilter = ColorFilter.tint(LocalTheme.current.textSecondary)
+            colorFilter = ColorFilter.tint(theme.textSecondary)
           )
 
           HorizontalDivider(

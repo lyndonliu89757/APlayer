@@ -152,7 +152,7 @@ class DownloadWorker(private val context: Context, params: WorkerParameters) :
       .setContentIntent(null)
       .setContentTitle(context.getString(R.string.downloading))
       .setProgress(totalSize.toInt(), downloadSize.toInt(), false)
-      .setSmallIcon(R.drawable.icon_notifbar)
+      .setSmallIcon(R.drawable.icon_notifibar)
       .setAutoCancel(false)
       .setShowWhen(false)
       .setOngoing(true)

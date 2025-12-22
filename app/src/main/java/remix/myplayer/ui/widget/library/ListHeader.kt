@@ -28,7 +28,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import remix.myplayer.R
 import remix.myplayer.data.model.audio.Song
 import remix.myplayer.data.prefs.SettingPrefs
-import remix.myplayer.misc.clickableWithoutRipple
+import remix.myplayer.ui.clickableWithoutRipple
 import remix.myplayer.misc.helper.MusicServiceRemote.setPlayQueue
 import remix.myplayer.service.Command
 import remix.myplayer.ui.nav.MessageNotifier
@@ -48,7 +48,6 @@ fun SongListHeader(songSize: Int, scrollToTop: () -> Unit = {}, scrollToCurrent:
 
   Row(
     modifier = Modifier
-      .height(40.dp)
       .fillMaxWidth()
       .background(LocalTheme.current.background)
       .padding(horizontal = 20.dp),
@@ -99,41 +98,10 @@ fun SongListHeader(songSize: Int, scrollToTop: () -> Unit = {}, scrollToCurrent:
             .clickableWithoutRipple(interactionSource) {
               scrollToCurrent()
             },
-          painter = painterResource(R.drawable.ic_my_location_24dp),
+          painter = painterResource(R.drawable.ic_location),
           contentDescription = "ListHeaderIcon"
         )
       }
     }
-  }
-}
-
-@Composable
-fun ModeHeader(grid: Boolean, onClick: (mode: Int) -> Unit) {
-  Row(
-    modifier = Modifier
-      .fillMaxWidth()
-      .heightIn(min = 48.dp)
-      .background(LocalTheme.current.background),
-    horizontalArrangement = Arrangement.End,
-    verticalAlignment = Alignment.CenterVertically
-  ) {
-    Icon(
-      modifier = Modifier.clickableWithoutRipple(interactionSource = remember { MutableInteractionSource() }) {
-        onClick(SettingPrefs.GRID_MODE)
-      },
-      painter = painterResource(R.drawable.ic_apps_white_24dp),
-      contentDescription = "ModeGrid",
-      tint = Color(if (grid) LocalTheme.current.secondary.toArgb() else ColorUtil.getColor(R.color.default_model_button_color))
-    )
-    Icon(
-      modifier = Modifier
-        .padding(horizontal = 18.dp)
-        .clickableWithoutRipple(interactionSource = remember { MutableInteractionSource() }) {
-          onClick(SettingPrefs.LIST_MODE)
-        },
-      painter = painterResource(R.drawable.ic_format_list_bulleted_white_24dp),
-      contentDescription = "ModeList",
-      tint = Color(if (!grid) LocalTheme.current.secondary.toArgb() else ColorUtil.getColor(R.color.default_model_button_color))
-    )
   }
 }

@@ -33,7 +33,7 @@ import kotlinx.coroutines.withContext
 import remix.myplayer.R
 import remix.myplayer.data.db.room.entity.PlayList
 import remix.myplayer.data.model.audio.Song
-import remix.myplayer.misc.clickableWithoutRipple
+import remix.myplayer.ui.clickableWithoutRipple
 import remix.myplayer.misc.helper.SortOrder
 import remix.myplayer.ui.nav.LocalNavController
 import remix.myplayer.ui.theme.LocalTheme
@@ -103,7 +103,7 @@ fun CustomSortScreen(id: Long) {
     LazyColumn(
       modifier = Modifier
         .padding(padding)
-        .background(LocalTheme.current.libraryBackground),
+        .background(LocalTheme.current.background),
       state = lazyListState
     ) {
       itemsIndexed(songs, key = { _, song -> song.id }) { index, song ->

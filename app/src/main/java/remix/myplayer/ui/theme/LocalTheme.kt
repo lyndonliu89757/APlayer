@@ -13,8 +13,8 @@ import remix.myplayer.util.ColorUtil
 
 val LocalTheme = compositionLocalOf<AppTheme> {
     return@compositionLocalOf AppTheme(
-        primary = Color(0xff698cf6),
-        secondary = Color(0xff698cf6)
+        primary = Color(0xff1da57a),
+        secondary = Color(0xaa1da57a)
     )
 }
 
@@ -24,8 +24,8 @@ data class AppTheme(
     var coloredNaviBar: Boolean = false
 ) {
 
-    val background: Color = Color(0xF6F8FaFF)
-    val container: Color = Color(0xFFFEFFFF)
+    val background: Color = Color(0xFFF2F3F5)
+    val container: Color = Color(0xFFFFFEFF)
 
     val textPrimary
         @Composable
@@ -56,11 +56,6 @@ data class AppTheme(
         @Composable
         @ReadOnlyComposable
         get() = colorResource(R.color.light_background_color_dialog)
-
-    val libraryBackground
-        @Composable
-        @ReadOnlyComposable
-        get() = colorResource(R.color.light_library_color)
 
     val albumPlaceHolder: Int
         @Composable

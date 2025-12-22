@@ -30,8 +30,6 @@ class SettingPrefs @Inject constructor(
 
   var firstLoad by PrefsDelegate(sp, PrefKeys.Setting.FIRST_LOAD, true)
 
-  var libraryJson by PrefsDelegate(sp, PrefKeys.Setting.LIBRARY, "")
-
   var scanSize by PrefsDelegate(sp, PrefKeys.Setting.SCAN_SIZE, MB)
   var forceSort by PrefsDelegate(sp, PrefKeys.Setting.FORCE_SORT, false)
 
@@ -76,18 +74,13 @@ class SettingPrefs @Inject constructor(
     SortOrder.SONG_A_Z
   )
 
-  var albumMode by PrefsDelegate(sp, PrefKeys.Setting.MODE_FOR_ALBUM, GRID_MODE)
-  var artistMode by PrefsDelegate(sp, PrefKeys.Setting.MODE_FOR_ARTIST, GRID_MODE)
-  var genreMode by PrefsDelegate(sp, PrefKeys.Setting.MODE_FOR_GENRE, GRID_MODE)
-  var playlistMode by PrefsDelegate(sp, PrefKeys.Setting.MODE_FOR_PLAYLIST, GRID_MODE)
-
   var manualScanFolder by PrefsDelegate(sp, PrefKeys.Setting.MANUAL_SCAN_FOLDER, "")
   var deleteIds by PrefsDelegate(sp, PrefKeys.Setting.BLACKLIST_SONG, emptySet<String>())
   var blacklist by PrefsDelegate(sp, PrefKeys.Setting.BLACKLIST, emptySet<String>())
   var deleteSource by PrefsDelegate(sp, PrefKeys.Setting.DELETE_SOURCE, false)
 
   var language by PrefsDelegate(sp, PrefKeys.Setting.LANGUAGE, AUTO)
-  var playAtBreakPoint by PrefsDelegate(sp, PrefKeys.Setting.PLAY_AT_BREAKPOINT, false)
+  var playAtBreakPoint by PrefsDelegate(sp, PrefKeys.Setting.PLAY_AT_BREAKPOINT, true)
   var showDisplayName by PrefsDelegate(sp, PrefKeys.Setting.SHOW_DISPLAYNAME, false)
 
   var ignoreAudioFocus by PrefsDelegate(sp, PrefKeys.Setting.AUDIO_FOCUS, false)
@@ -104,7 +97,7 @@ class SettingPrefs @Inject constructor(
     PrefKeys.Setting.PLAYER_BACKGROUND,
     BACKGROUND_ADAPTIVE_COLOR
   )
-  var keepScreenOn by PrefsDelegate(sp, PrefKeys.Setting.SCREEN_ALWAYS_ON, false)
+  var keepScreenOn by PrefsDelegate(sp, PrefKeys.Setting.SCREEN_ALWAYS_ON, true)
 
   var ignoreMediaStore by PrefsDelegate(sp, PrefKeys.Setting.IGNORE_MEDIA_STORE, false)
   var autoDownloadCover by PrefsDelegate(
@@ -152,38 +145,5 @@ class SettingPrefs @Inject constructor(
     // 封面下载源
     const val DOWNLOAD_LASTFM = 0
     const val DOWNLOAD_NETEASE = 1
-
-    const val LIST_MODE = 0
-    const val GRID_MODE = 1
   }
-}
-
-fun SettingPrefs.playlistSortOrderFlow(): Flow<String> {
-  return callbackFlow {
-    trySend(playlistSortOrder)
-    val listener = SharedPreferences.OnSharedPreferenceChangeListener { _, key ->
-      if (key == PrefKeys.Setting.PLAYLIST_SORT_ORDER) {
-        trySend(playlistSortOrder)
-      }
-    }
-    sp.registerOnSharedPreferenceChangeListener(listener)
-    awaitClose {
-      sp.unregisterOnSharedPreferenceChangeListener(listener)
-    }
-  }.distinctUntilChanged()
-}
-
-fun SettingPrefs.historySortOrderFlow(): Flow<String> {
-  return callbackFlow {
-    trySend(historySortOrder)
-    val listener = SharedPreferences.OnSharedPreferenceChangeListener { _, key ->
-      if (key == PrefKeys.Setting.HISTORY_SORT_ORDER) {
-        trySend(historySortOrder)
-      }
-    }
-    sp.registerOnSharedPreferenceChangeListener(listener)
-    awaitClose {
-      sp.unregisterOnSharedPreferenceChangeListener(listener)
-    }
-  }.distinctUntilChanged()
 }

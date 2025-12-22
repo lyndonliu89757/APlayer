@@ -31,7 +31,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import remix.myplayer.R
-import remix.myplayer.misc.clickableWithoutRipple
+import remix.myplayer.ui.clickableWithoutRipple
 import remix.myplayer.misc.isPortraitOrientation
 import remix.myplayer.ui.nav.MessageNotifier
 import remix.myplayer.ui.theme.LocalTheme
@@ -204,7 +204,7 @@ fun TimerDialog() {
         }
       }
     },
-    onDismissRequest = {
+    onDismiss = {
       timerVM.cancelUpdateProgress()
     }
   )

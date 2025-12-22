@@ -2,18 +2,19 @@ package remix.myplayer.ui.widget.app
 
 import android.content.Intent
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.gestures.detectHorizontalDragGestures
 import androidx.compose.foundation.gestures.detectVerticalDragGestures
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -32,10 +33,10 @@ import androidx.compose.ui.unit.sp
 import androidx.core.graphics.toColorInt
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import remix.myplayer.R
-import remix.myplayer.misc.clickableWithoutRipple
 import remix.myplayer.service.Command
 import remix.myplayer.service.MusicService
 import remix.myplayer.service.MusicService.Companion.EXTRA_CONTROL
+import remix.myplayer.ui.clickableWithoutRipple
 import remix.myplayer.ui.nav.LocalNavController
 import remix.myplayer.ui.nav.RoutePlayingScreen
 import remix.myplayer.ui.theme.LocalTheme
@@ -50,7 +51,7 @@ import kotlin.math.absoluteValue
 private const val triggerThreshold = 10
 
 @Composable
-fun BottomBar(modifier: Modifier = Modifier, vm: PlaybackViewModel = playbackViewModel) {
+fun BottomBar(vm: PlaybackViewModel = playbackViewModel) {
   val playbackState by vm.playbackUiState.collectAsStateWithLifecycle()
   val nav = LocalNavController.current
   val interactionSource = remember { MutableInteractionSource() }
@@ -99,34 +100,30 @@ fun BottomBar(modifier: Modifier = Modifier, vm: PlaybackViewModel = playbackVie
   }
 
   Row(
-    modifier = modifier
+    modifier = Modifier
+      .height(56.dp)
       .fillMaxWidth()
-      .height(66.dp)
       .background(LocalTheme.current.container)
+      .padding(top = 6.dp, start = 16.dp, end = 16.dp)
       .semantics { contentDescription = "BottomBar" }
       .then(interactionModifiers),
     verticalAlignment = Alignment.CenterVertically,
+    horizontalArrangement = Arrangement.spacedBy(8.dp)
   ) {
     GlideCover(
       model = playbackState.song,
-      modifier = Modifier
-        .padding(start = 16.dp, end = 8.dp)
-        .size(52.dp)
+      modifier = Modifier.size(52.dp)
     )
     Column(
-      verticalArrangement = Arrangement.Center,
-      modifier = Modifier
-        .weight(1f)
-        .fillMaxHeight()
-        .padding(horizontal = 4.dp)
+      modifier = Modifier.weight(1f),
+      verticalArrangement = Arrangement.spacedBy(4.dp),
     ) {
       TextPrimary(playbackState.song.showName, fontSize = 16.sp)
-      Spacer(modifier = Modifier.height(4.dp))
-      TextSecondary(text = String.format("%s《%s》", playbackState.song.artist, playbackState.song.album), fontSize = 12.sp)
+      if (playbackState.song.artist.isNotEmpty())
+        TextSecondary(text = String.format("%s《%s》", playbackState.song.artist, playbackState.song.album), fontSize = 12.sp)
     }
 
     Row(
-      modifier = Modifier.padding(end = 26.dp),
       verticalAlignment = Alignment.CenterVertically,
       horizontalArrangement = Arrangement.spacedBy(10.dp)
     ) {

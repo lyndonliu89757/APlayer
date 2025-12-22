@@ -7,11 +7,6 @@
 
 -keep class remix.myplayer.bean.** { *; }
 
-# bugly
-# https://bugly.qq.com/docs/user-guide/instruction-manual-android/
--keep public class com.tencent.bugly.** { *; }
--dontwarn com.tencent.bugly.**
-
 # gson
 # https://r8.googlesource.com/r8/+/refs/heads/master/compatibility-faq.md
 -keep class com.google.gson.reflect.TypeToken { *; }

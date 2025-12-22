@@ -1,13 +1,19 @@
 package remix.myplayer.ui.screen.setting
 
 import androidx.activity.compose.LocalActivity
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.material3.Scaffold
+import androidx.compose.foundation.lazy.items
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import remix.myplayer.R
@@ -24,7 +30,6 @@ import remix.myplayer.ui.screen.setting.logic.common.ShowDisplayNameLogic
 import remix.myplayer.ui.screen.setting.logic.cover.AutoDownloadLogic
 import remix.myplayer.ui.screen.setting.logic.cover.DownloadSourceLogic
 import remix.myplayer.ui.screen.setting.logic.cover.IgnoreMediaStoreLogic
-import remix.myplayer.ui.screen.setting.logic.library.LibraryLogic
 import remix.myplayer.ui.screen.setting.logic.lyric.DesktopLyricLogic
 import remix.myplayer.ui.screen.setting.logic.lyric.LyricPriorityLogic
 import remix.myplayer.ui.screen.setting.logic.lyric.StatusBarLyricLogic
@@ -36,34 +41,30 @@ import remix.myplayer.ui.screen.setting.logic.play.PlayFadeLogic
 import remix.myplayer.ui.screen.setting.logic.playingscreen.KeepScreenOnLogic
 import remix.myplayer.ui.screen.setting.logic.playingscreen.PlayingScreenBackgroundLogic
 import remix.myplayer.ui.theme.LocalTheme
-import remix.myplayer.ui.widget.common.CommonAppBar
 import remix.myplayer.viewmodel.mainViewModel
 
 @Composable
 fun SettingScreen() {
-  Scaffold(
-    topBar = { CommonAppBar(title = stringResource(R.string.setting), actions = emptyList()) },
-    containerColor = LocalTheme.current.mainBackground,
-  ) { contentPadding ->
+  val preferenceSections = listOf<@Composable () -> Unit>(
+    { CommonPreferences() },
+    { PlayPreferences() },
+    { PlayingScreenPreferences() },
+    { CoverPreferences() },
+    { LyricPreferences() },
+    { OtherPreferences() }
+  )
 
-    LazyColumn(
-      modifier = Modifier
-        .padding(contentPadding)
-    ) {
-      item {
-        CommonPreferences()
-
-        PlayPreferences()
-
-        LibraryPreferences()
-
-        PlayingScreenPreferences()
-
-        CoverPreferences()
-
-        LyricPreferences()
-
-        OtherPreferences()
+  LazyColumn(
+    modifier = Modifier.padding(horizontal = 10.dp),
+    verticalArrangement = Arrangement.spacedBy(14.dp),
+    contentPadding = PaddingValues(bottom = 10.dp),
+  ) {
+    items(
+      items = preferenceSections,
+      key = { it.hashCode() }
+    ) { preferenceSection ->
+      Card(colors = CardDefaults.cardColors().copy(containerColor = Color(0x331da57a))) {
+        preferenceSection()
       }
     }
   }
@@ -99,13 +100,6 @@ private fun PlayPreferences() {
   PlayFadeLogic()
 
   AutoPlayLogic()
-}
-
-@Composable
-private fun LibraryPreferences() {
-  SettingTitle(R.string.library)
-
-  LibraryLogic()
 }
 
 @Composable
@@ -163,9 +157,9 @@ private fun OtherPreferences() {
 @Composable
 private fun SettingTitle(res: Int) {
   Text(
-    modifier = Modifier.padding(14.dp),
+    modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
     text = stringResource(res),
     fontSize = 16.sp,
-    color = LocalTheme.current.secondary
+    fontWeight = FontWeight.Bold
   )
 }

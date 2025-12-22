@@ -8,7 +8,6 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
@@ -17,11 +16,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.launch
 import remix.myplayer.misc.helper.MusicServiceRemote.setPlayQueue
 import remix.myplayer.service.Command
 import remix.myplayer.service.MusicService
+import remix.myplayer.ui.verticalScrollbar
 import remix.myplayer.ui.widget.library.SongListHeader
 import remix.myplayer.ui.widget.library.list.ListSong
 import remix.myplayer.util.MusicUtil
@@ -31,7 +30,7 @@ import remix.myplayer.viewmodel.mainViewModel
 import remix.myplayer.viewmodel.playbackViewModel
 
 @Composable
-fun SongScreen(scrollToCurrentEvent: SharedFlow<Unit>? = null) {
+fun SongScreen() {
   val libraryVM = libraryViewModel
   val mainVM = mainViewModel
 
@@ -41,15 +40,6 @@ fun SongScreen(scrollToCurrentEvent: SharedFlow<Unit>? = null) {
   val songs by libraryVM.songs.collectAsStateWithLifecycle()
   val context = LocalContext.current
   val coroutineScope = rememberCoroutineScope()
-
-  LaunchedEffect(scrollToCurrentEvent) {
-    scrollToCurrentEvent?.collect {
-      val index = libraryVM.songs.value.indexOfFirst { it.id == playbackState.song.id }
-      if (index != -1) {
-        listState.animateScrollToItem(index)
-      }
-    }
-  }
 
   Box(modifier = Modifier.fillMaxSize()) {
     Column(modifier = Modifier.fillMaxSize()) {
@@ -77,8 +67,12 @@ fun SongScreen(scrollToCurrentEvent: SharedFlow<Unit>? = null) {
         }
       }
 
-      // TODO LocationRecyclerView
-      LazyColumn(state = listState, modifier = Modifier.weight(1f)) {
+      LazyColumn(
+        state = listState,
+        modifier = Modifier
+          .weight(1f)
+          .verticalScrollbar(listState)
+      ) {
         itemsIndexed(songs, key = { _, song ->
           song.id
         }) { pos, song ->

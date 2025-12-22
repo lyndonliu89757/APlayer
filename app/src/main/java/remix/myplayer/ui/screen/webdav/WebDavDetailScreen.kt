@@ -39,7 +39,7 @@ import okhttp3.OkHttpClient
 import remix.myplayer.R
 import remix.myplayer.data.db.room.entity.WebDav
 import remix.myplayer.data.model.audio.Song
-import remix.myplayer.misc.clickWithRipple
+import remix.myplayer.ui.clickWithRipple
 import remix.myplayer.misc.helper.MusicServiceRemote
 import remix.myplayer.misc.isAudio
 import remix.myplayer.service.Command

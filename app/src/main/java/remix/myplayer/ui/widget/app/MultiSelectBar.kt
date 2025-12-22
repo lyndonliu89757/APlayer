@@ -93,7 +93,7 @@ fun MultiSelectBar(
       var morePopupExpand by rememberSaveable {
         mutableStateOf(false)
       }
-      TooltipButton(R.string.more, R.drawable.ic_more_vert_white_24dp, tintColor, extraContent = {
+      TooltipButton(R.string.more, R.drawable.ic_more, tintColor, extraContent = {
         DropdownMenu(
           modifier = Modifier.wrapContentSize(),
           expanded = morePopupExpand,

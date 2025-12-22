@@ -36,10 +36,6 @@ data class LibrarySettings(
   val playListDetailSortOrder: String,
   val genreDetailSortOrder: String,
   val folderDetailSortOrder: String,
-  val albumMode: Int,
-  val artistMode: Int,
-  val genreMode: Int,
-  val playlistMode: Int,
 )
 
 @Stable

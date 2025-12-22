@@ -15,6 +15,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.rememberTextMeasurer
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.TextUnit
+import androidx.compose.ui.unit.sp
 import remix.myplayer.data.prefs.DesktopLyricPrefs.Companion.ELLIPSIS
 import remix.myplayer.lyric.LyricLine
 import remix.myplayer.lyric.PerWordLyricLine
@@ -34,10 +35,10 @@ fun LyricSingleLine(
     fontSize = fontSize,
     fontWeight = FontWeight.Bold,
     shadow = Shadow(
-      color = Color.Black,
-      offset = Offset(1f, 1f),
-      blurRadius = 2f
-    )
+      color = Color(0xFF00008B.toInt()),
+      offset = Offset(0.5f, 0.5f),
+      blurRadius = 10f
+    ),
   )
   val isPerWord = line is PerWordLyricLine
 

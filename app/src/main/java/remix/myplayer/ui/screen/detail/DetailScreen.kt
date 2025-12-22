@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -45,6 +46,7 @@ import remix.myplayer.ui.nav.LocalNavController
 import remix.myplayer.ui.nav.RoutePlayingScreen
 import remix.myplayer.ui.screen.BackPressHandler
 import remix.myplayer.ui.theme.LocalTheme
+import remix.myplayer.ui.verticalScrollbar
 import remix.myplayer.ui.widget.app.BottomBar
 import remix.myplayer.ui.widget.app.MultiSelectBar
 import remix.myplayer.ui.widget.common.CommonAppBar
@@ -118,16 +120,23 @@ fun DetailScreen(model: APlayerModel) {
       modifier = Modifier.padding(contentPadding),
       horizontalAlignment = Alignment.CenterHorizontally
     ) {
+      if (songs.isNotEmpty()) {
+        SongListHeader(songs.size)
+      }
+
       val selectedIds by remember {
         derivedStateOf {
           multiSelectState.selectedModels(MultiSelectState.Where.Detail)
         }
       }
 
-      LazyColumn(modifier = Modifier.weight(1f)) {
-        item {
-          SongListHeader(songs.size)
-        }
+      val state = rememberLazyListState()
+      LazyColumn(
+        state = state,
+        modifier = Modifier
+          .weight(1f)
+          .verticalScrollbar(state)
+      ) {
 
         itemsIndexed(songs, key = { index, song -> "${index}_${song.id}" }) { index, song ->
           val selected = selectedIds.contains(song.getKey())

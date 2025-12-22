@@ -10,7 +10,6 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.aspectRatio
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -45,7 +44,7 @@ import remix.myplayer.data.prefs.SettingPrefs.Companion.MODE_LOOP
 import remix.myplayer.data.prefs.SettingPrefs.Companion.MODE_REPEAT
 import remix.myplayer.data.prefs.SettingPrefs.Companion.MODE_SHUFFLE
 import remix.myplayer.misc.CenterInBox
-import remix.myplayer.misc.clickWithRipple
+import remix.myplayer.ui.clickWithRipple
 import remix.myplayer.misc.isPortraitOrientation
 import remix.myplayer.service.Command
 import remix.myplayer.service.MusicService
@@ -89,7 +88,7 @@ internal fun PlayingControl(
       Util.sendCMDLocalBroadcast(Command.CHANGE_MODEL)
     }) {
       Image(
-        modifier = Modifier.size(30.dp),
+        modifier = Modifier.size(36.dp),
         painter = painterResource(PlayModeMap[playMode]!!.first),
         contentDescription = "PlayingMode",
         colorFilter = ColorFilter.tint(swatchColor.copy(0.6f))
@@ -165,7 +164,7 @@ internal fun PlayingControl(
       }
     }) {
       Image(
-        modifier = Modifier.size(30.dp),
+        modifier = Modifier.size(36.dp),
         painter = painterResource(R.drawable.ic_playlist),
         contentDescription = "PlayingPlayQueue",
         colorFilter = ColorFilter.tint(swatchColor.copy(0.6f))
@@ -239,7 +238,7 @@ private fun PlayQueueDialog(
                 .padding(8.dp)
             ) {
               Image(
-                painter = painterResource(R.drawable.icon_playqueue_delete),
+                painter = painterResource(R.drawable.ic_close),
                 contentDescription = "PlayQueueDelete"
               )
             }

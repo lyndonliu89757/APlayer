@@ -21,7 +21,6 @@ import androidx.compose.ui.unit.sp
 import androidx.core.graphics.toColorInt
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.palette.graphics.Palette
-import remix.myplayer.ui.theme.LocalTheme
 import remix.myplayer.ui.widget.app.ProgressAware
 import remix.myplayer.ui.widget.common.LineSlider
 import remix.myplayer.ui.widget.common.defaultLineSliderProperties
@@ -40,20 +39,6 @@ internal fun PlayingSeekbarWithText(
 
     var time by remember {
       mutableStateOf(Time("00:00", "00:00"))
-    }
-
-    val playingTrackBackgroundColor = playingTrackBackgroundColor
-    val baseProperties = defaultLineSliderProperties
-    val sliderProperties = remember(swatch.rgb) {
-      baseProperties.copy(
-        trackBackgroundColor = playingTrackBackgroundColor,
-        trackProgressColor = Color(swatch.rgb),
-        trackHeight = 2.dp,
-        thumbColor = Color(swatch.rgb),
-        thumbWidth = 2.dp,
-        thumbHeight = 6.dp,
-        thumbShape = RectangleShape
-      )
     }
 
     val textColor = remember {
@@ -91,7 +76,15 @@ internal fun PlayingSeekbarWithText(
         modifier = Modifier
           .height(12.dp)
           .weight(1f),
-        properties = sliderProperties
+        properties = defaultLineSliderProperties.copy(
+          trackHeight = 4.dp,
+          trackBackgroundColor = playingTrackBackgroundColor,
+          trackProgressColor = Color(swatch.rgb),
+          thumbColor = Color(swatch.rgb),
+          thumbWidth = 4.dp,
+          thumbHeight = 4.dp,
+          thumbShape = RectangleShape
+        )
       )
 
       Text(
@@ -118,7 +111,7 @@ internal fun PlayingSeekbarWithText(
 internal val playingTrackBackgroundColor: Color
   @Composable
   get() = Color(
-      "#efeeed".toColorInt()
+    "#efeeed".toColorInt()
   )
 
 private data class Time(val elapsed: String, val remaining: String)

@@ -1,7 +1,5 @@
 package remix.myplayer.data.model.misc
 
-import android.content.Context
-import remix.myplayer.App
 import remix.myplayer.R
 import remix.myplayer.misc.helper.SortOrder
 import java.io.Serializable
@@ -9,8 +7,28 @@ import java.io.Serializable
 @kotlinx.serialization.Serializable
 data class Library(
   val tag: Int,
+  val icon: Int,
   val order: Int = tag
 ) : Serializable {
+
+  companion object {
+
+    const val TAG_SONG = 0
+    const val TAG_ALBUM = 1
+    const val TAG_ARTIST = 2
+    const val TAG_FOLDER = 5
+    const val TAG_REMOTE = 6
+    const val TAG_SETTING = 9
+
+    val allLibraries = listOf(
+      Library(TAG_SONG, R.drawable.ic_music),
+      Library(TAG_ALBUM, R.drawable.ic_album),
+      Library(TAG_ARTIST, R.drawable.ic_singer),
+      Library(TAG_FOLDER, R.drawable.ic_folder),
+      Library(TAG_REMOTE, R.drawable.ic_webdav),
+      Library(TAG_SETTING, R.drawable.ic_setting)
+    )
+  }
 
   val stringRes: Int
     get() = when (tag) {
@@ -19,6 +37,7 @@ data class Library(
       TAG_ARTIST -> R.string.tab_artist
       TAG_FOLDER -> R.string.tab_folder
       TAG_REMOTE -> R.string.tab_remote
+      TAG_SETTING -> R.string.setting
       else -> throw IllegalArgumentException("unknown tag: $tag")
     }
 
@@ -81,34 +100,5 @@ data class Library(
 
       else -> throw IllegalArgumentException("unknown tag: $tag")
     }
-
-  companion object {
-
-    const val TAG_SONG = 0
-    const val TAG_ALBUM = 1
-    const val TAG_ARTIST = 2
-    const val TAG_FOLDER = 5
-    const val TAG_REMOTE = 6
-
-    val allLibraries = listOf(
-      Library(TAG_SONG),
-      Library(TAG_ALBUM),
-      Library(TAG_ARTIST),
-      Library(TAG_FOLDER),
-      Library(TAG_REMOTE)
-    )
-
-    val defaultLibrary = Library(TAG_SONG, 0)
-
-    fun getAllLibraryString(context: Context): List<String> {
-      return listOf(
-        context.resources.getString(R.string.tab_song),
-        context.resources.getString(R.string.tab_album),
-        context.resources.getString(R.string.tab_artist),
-        context.resources.getString(R.string.tab_folder),
-        context.resources.getString(R.string.tab_remote),
-      )
-    }
-  }
 
 }
