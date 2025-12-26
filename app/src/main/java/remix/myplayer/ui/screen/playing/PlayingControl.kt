@@ -3,6 +3,7 @@ package remix.myplayer.ui.screen.playing
 import android.content.Intent
 import android.view.ViewGroup
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxScope
@@ -182,6 +183,7 @@ private fun PlayQueueDialog(
   val scope = rememberCoroutineScope()
   val playbackVM = playbackViewModel
   val songs by playbackVM.playQueueSongs.collectAsStateWithLifecycle()
+  val theme = LocalTheme.current;
 
   BottomSheetDialog(state) {
     Column {
@@ -211,19 +213,21 @@ private fun PlayQueueDialog(
                   .putExtra(EXTRA_POSITION, pos)
               )
               scope.launch { state.hide() }
-            }) {
+            }
+            .background(if (pos % 2 == 0) Color(0xfff5f5f5) else theme.container)) {
+
+          TextPrimary((pos + 1).toString(), modifier = Modifier.padding(horizontal = 16.dp))
+
           Column(
             verticalArrangement = Arrangement.Center,
-            modifier = Modifier
-              .padding(horizontal = 16.dp)
-              .weight(1f)
+            modifier = Modifier.weight(1f)
           ) {
             if (!song.valid()) {
               TextPrimary(stringResource(R.string.song_lose_effect))
             } else {
               TextPrimary(
                 song.title,
-                color = if (song == musicState.song) LocalTheme.current.secondary else LocalTheme.current.textPrimary
+                color = if (song == musicState.song) theme.secondary else theme.textPrimary
               )
               TextSecondary(song.artist)
             }
@@ -235,11 +239,13 @@ private fun PlayQueueDialog(
                 .clickWithRipple {
                   playbackVM.removeFromQueue(song.id)
                 }
-                .padding(8.dp)
+                .padding(horizontal = 16.dp)
             ) {
               Image(
+                modifier = Modifier.size(24.dp),
                 painter = painterResource(R.drawable.ic_close),
-                contentDescription = "PlayQueueDelete"
+                contentDescription = "PlayQueueDelete",
+                colorFilter = ColorFilter.tint(theme.textSecondary)
               )
             }
           }

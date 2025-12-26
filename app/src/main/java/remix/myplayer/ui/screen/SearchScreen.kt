@@ -43,6 +43,9 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.focus.focusTarget
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
@@ -53,6 +56,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.withContext
 import remix.myplayer.R
 import remix.myplayer.data.model.audio.Song
@@ -191,12 +195,18 @@ fun SearchScreen() {
 @Composable
 private fun SongSearchBar(textFieldState: TextFieldState, onSearch: (String) -> Unit) {
   val theme = LocalTheme.current
+  val focusRequester = remember { FocusRequester() }
+
+  LaunchedEffect(Unit) {
+    delay(200)
+    focusRequester.requestFocus()
+  }
 
   CommonAppBar(null, true) {
     Row(
       modifier = Modifier
         .fillMaxWidth()
-        .padding(start = 64.dp),
+        .padding(start = 40.dp),
       horizontalArrangement = Arrangement.SpaceBetween,
       verticalAlignment = Alignment.CenterVertically
     ) {
@@ -210,7 +220,9 @@ private fun SongSearchBar(textFieldState: TextFieldState, onSearch: (String) -> 
           textFieldState.edit { replace(0, length, it) }
           onSearch(textFieldState.text.toString())
         },
-        modifier = Modifier.fillMaxSize(),
+        modifier = Modifier
+          .fillMaxSize()
+          .focusRequester(focusRequester),
         singleLine = true,
         textStyle = TextStyle(fontSize = fontSize),
         keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search),

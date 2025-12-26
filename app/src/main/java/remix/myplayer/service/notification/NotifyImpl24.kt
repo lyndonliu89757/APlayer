@@ -71,7 +71,7 @@ NotifyImpl24(context: MusicService) : Notify(context) {
 
     val notification = NotificationCompat.Builder(service, PLAYING_NOTIFICATION_CHANNEL_ID)
       .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
-      .setSmallIcon(R.drawable.icon_notifibar)
+      .setSmallIcon(R.drawable.ic_album)
       .addAction(
         R.drawable.ic_previous, service.getString(R.string.previous),
         buildPendingIntent(service, Command.SKIP_TO_PREVIOUS)

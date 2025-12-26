@@ -72,7 +72,7 @@ fun MultiSelectBar(
         mainVM.closeMultiSelect()
       }) {
         Icon(
-          painter = painterResource(R.drawable.ic_close_white_24dp),
+          painter = painterResource(R.drawable.ic_close),
           contentDescription = stringResource(R.string.close),
           tint = tintColor
         )

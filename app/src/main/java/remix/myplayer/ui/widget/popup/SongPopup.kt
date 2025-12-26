@@ -50,7 +50,7 @@ fun SongPopupButton(
       .clickWithRipple {
         expanded = !expanded
       }
-      .size(dimensionResource(id = R.dimen.item_list_btn_size))
+      .size(40.dp)
   ) {
     SongDropdownMenu(expanded, song, parent) {
       expanded = false

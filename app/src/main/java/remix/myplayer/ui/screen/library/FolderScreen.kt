@@ -4,8 +4,8 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -86,7 +86,7 @@ fun FolderScreen() {
 fun FolderItem(folder: Folder, selected: Boolean, onClick: () -> Unit, onLongClick: () -> Unit) {
   val theme = LocalTheme.current
 
-  Box(
+  Row(
     modifier = Modifier
       .fillMaxWidth()
       .height(56.dp)
@@ -96,41 +96,33 @@ fun FolderItem(folder: Folder, selected: Boolean, onClick: () -> Unit, onLongCli
         onClick = onClick,
         onLongClick = onLongClick
       )
-      .background(if (selected) theme.select else theme.mainBackground)
+      .background(if (selected) theme.select else theme.background),
+    verticalAlignment = Alignment.CenterVertically
   ) {
     Icon(
       painter = painterResource(id = R.drawable.ic_folder_24dp),
       contentDescription = "Folder Icon",
       tint = theme.icon(),
-      modifier = Modifier
-        .padding(15.dp)
-        .align(Alignment.CenterStart)
-    )
-
-    LibraryItemPopupButton(modifier = Modifier.align(Alignment.CenterEnd), model = folder)
-
-    Text(
-      text = pluralStringResource(R.plurals.song_num, folder.count, folder.count),
-      fontSize = 12.sp,
-      color = Color.Black,
-      modifier = Modifier
-        .align(Alignment.CenterEnd)
-        .padding(end = 78.dp)
+      modifier = Modifier.padding(15.dp)
     )
 
     Column(
       modifier = Modifier
-        .fillMaxHeight()
-        .fillMaxWidth(0.6f)
-        .padding(
-          start = 15.dp + 24.dp + 15.dp,
-        ),
+        .weight(1f)
+        .padding(end = 15.dp),
       verticalArrangement = Arrangement.Center
     ) {
       TextPrimary(text = folder.name ?: "", fontSize = 12.sp)
       TextSecondary(text = folder.path, fontSize = 10.sp)
     }
 
+    Text(
+      text = pluralStringResource(R.plurals.song_num, folder.count, folder.count),
+      fontSize = 12.sp,
+      color = Color.Black,
+    )
+
+    LibraryItemPopupButton(modifier = Modifier.padding(start = 10.dp), model = folder)
   }
 }
 

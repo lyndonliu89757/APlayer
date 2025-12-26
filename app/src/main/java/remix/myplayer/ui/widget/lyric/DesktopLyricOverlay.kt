@@ -140,7 +140,7 @@ fun DesktopLyricOverlay(
         .padding(dimensionResource(R.dimen.desktop_lyrics_slider_icon_padding))
         .align(Alignment.End)
         .alpha(if (showPanel) 1f else 0f),
-      painter = painterResource(R.drawable.ic_close_white_24dp),
+      painter = painterResource(R.drawable.ic_close),
       contentDescription = "DkpClose"
     )
 

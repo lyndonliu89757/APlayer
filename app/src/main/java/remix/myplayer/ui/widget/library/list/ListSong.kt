@@ -97,7 +97,7 @@ fun ListSong(
         horizontalAlignment = Alignment.Start,
         modifier = Modifier
           .weight(1f)
-          .padding(start = 16.dp, end = 8.dp)
+          .padding(start = 16.dp)
       ) {
         TextPrimary(song.displayName)
         Spacer(modifier = Modifier.height(4.dp))

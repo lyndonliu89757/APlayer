@@ -131,7 +131,7 @@ fun WebDavDetailScreen(webDav: WebDav) {
         onBack = {
           handleBack()
         },
-        actions = listOf(AppBarAction(R.drawable.ic_close_white_24dp, "WebDetailClose") {
+        actions = listOf(AppBarAction(R.drawable.ic_close, "WebDetailClose") {
           nav.popBackStack()
         })
       )

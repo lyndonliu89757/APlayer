@@ -100,10 +100,10 @@ abstract class Notify internal constructor(internal var service: MusicService) {
       .setTicker(lrc)
       .setOngoing(playbackState.isPlaying)
       .setContentIntent(contentIntent)
-      .setSmallIcon(R.drawable.icon_notifibar)
+      .setSmallIcon(R.drawable.ic_album)
 
     val notification = builder.build()
-    notification.extras.putInt("ticker_icon", R.drawable.icon_notifibar_lrc)
+    notification.extras.putInt("ticker_icon", R.drawable.ic_album)
     notification.extras.putBoolean("ticker_icon_switch", false)
     notification.flags = notification.flags.or(FLAG_ALWAYS_SHOW_TICKER)
     notification.flags = notification.flags.or(FLAG_ONLY_UPDATE_TICKER)

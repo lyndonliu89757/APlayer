@@ -7,7 +7,6 @@ import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
 import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
@@ -20,7 +19,6 @@ import androidx.compose.foundation.layout.systemBars
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material3.Card
@@ -45,7 +43,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalDensity
@@ -122,6 +119,7 @@ fun HomeScreen() {
                 "v${BuildConfig.VERSION_NAME}",
                 color = theme.textSecondary,
                 textAlign = TextAlign.Center,
+                fontWeight = FontWeight.Bold,
                 modifier = Modifier
                   .fillMaxWidth()
                   .padding(vertical = 16.dp),
@@ -136,9 +134,7 @@ fun HomeScreen() {
                   NavigationDrawerItem(
                     icon = {
                       Icon(
-                        modifier = Modifier
-                          .size(34.dp)
-                          .padding(end = 8.dp),
+                        modifier = Modifier.size(28.dp),
                         painter = painterResource(lab.icon),
                         contentDescription = stringResource(lab.stringRes),
                         tint = Color.Unspecified

@@ -65,7 +65,7 @@ fun SongListHeader(songSize: Int, scrollToTop: () -> Unit = {}, scrollToCurrent:
     ) {
       val playMode = playbackState.playMode
       Icon(
-        modifier = Modifier.size(22.dp),
+        modifier = Modifier.size(24.dp),
         painter = painterResource(PlayModeMap[playMode]!!.first),
         contentDescription = "ListHeaderIcon"
       )
@@ -83,7 +83,7 @@ fun SongListHeader(songSize: Int, scrollToTop: () -> Unit = {}, scrollToCurrent:
       if (scrollToTop != {}) {
         Icon(
           modifier = Modifier
-            .size(20.dp)
+            .size(24.dp)
             .clickableWithoutRipple(interactionSource) {
               scrollToTop()
             },
@@ -94,7 +94,7 @@ fun SongListHeader(songSize: Int, scrollToTop: () -> Unit = {}, scrollToCurrent:
       if (scrollToCurrent != {}) {
         Icon(
           modifier = Modifier
-            .size(20.dp)
+            .size(24.dp)
             .clickableWithoutRipple(interactionSource) {
               scrollToCurrent()
             },
