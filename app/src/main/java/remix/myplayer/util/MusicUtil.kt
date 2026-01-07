@@ -36,8 +36,8 @@ object MusicUtil {
   ).songRepository()
 
   fun makeCmdIntent(cmd: Int, shuffle: Boolean): Intent {
-    return Intent(MusicService.ACTION_CMD).putExtra(MusicService.Companion.EXTRA_CONTROL, cmd)
-      .putExtra(MusicService.Companion.EXTRA_SHUFFLE, shuffle)
+    return Intent(MusicService.ACTION_CMD).putExtra(MusicService.EXTRA_CONTROL, cmd)
+      .putExtra(MusicService.EXTRA_SHUFFLE, shuffle)
   }
 
   fun makeCmdIntent(cmd: Int): Intent {
@@ -107,7 +107,7 @@ object MusicUtil {
 //          .putExtra(MusicService.Companion.EXTRA_POSITION, 0)
 //      )
     } else {
-      MessageNotifier.show(R.string.play_failed)
+      MessageNotifier.show(R.string.play_failed, "")
     }
   }
 

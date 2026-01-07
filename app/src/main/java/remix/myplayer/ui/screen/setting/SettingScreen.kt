@@ -34,13 +34,11 @@ import remix.myplayer.ui.screen.setting.logic.lyric.DesktopLyricLogic
 import remix.myplayer.ui.screen.setting.logic.lyric.LyricPriorityLogic
 import remix.myplayer.ui.screen.setting.logic.lyric.StatusBarLyricLogic
 import remix.myplayer.ui.screen.setting.logic.other.ClearCacheLogic
-import remix.myplayer.ui.screen.setting.logic.other.FeedbackLogic
 import remix.myplayer.ui.screen.setting.logic.play.AutoPlayLogic
 import remix.myplayer.ui.screen.setting.logic.play.IgnoreAudioFocusLogic
 import remix.myplayer.ui.screen.setting.logic.play.PlayFadeLogic
 import remix.myplayer.ui.screen.setting.logic.playingscreen.KeepScreenOnLogic
 import remix.myplayer.ui.screen.setting.logic.playingscreen.PlayingScreenBackgroundLogic
-import remix.myplayer.ui.theme.LocalTheme
 import remix.myplayer.viewmodel.mainViewModel
 
 @Composable
@@ -137,19 +135,12 @@ private fun LyricPreferences() {
 private fun OtherPreferences() {
   SettingTitle(R.string.other)
 
-  val mainViewModel = mainViewModel
   val activity = LocalActivity.current
   val nav = LocalNavController.current
 
   ArrowPreference(R.string.eq_setting) {
     EQHelper.startEqualizer(activity ?: return@ArrowPreference, nav)
   }
-
-  FeedbackLogic()
-
-  Preference(onClick = {
-    mainViewModel.checkInAppUpdate(true)
-  }, title = stringResource(R.string.check_update))
 
   ClearCacheLogic()
 }

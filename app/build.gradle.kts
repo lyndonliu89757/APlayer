@@ -1,4 +1,3 @@
-import java.io.FileInputStream
 import java.util.Properties
 
 plugins {
@@ -12,29 +11,14 @@ plugins {
   alias(libs.plugins.baselineprofile)
 }
 
-fun readProperties(file: File): Properties {
-  val properties = Properties()
-  var stream: FileInputStream? = null
-  try {
-    stream = FileInputStream(file)
-    properties.load(stream)
-  } catch (throwable: Throwable) {
-    logger.warn("Fail to read properties from file $file: $throwable")
-  } finally {
-    stream?.close()
-  }
-  return properties
+val localProperties = Properties().apply {
+  rootProject.file("local.properties").takeIf { it.exists() }?.readText()
 }
 
-val properties = readProperties(rootProject.file("local.properties"))
-
-kotlin {
-  jvmToolchain(17)
-}
+kotlin.jvmToolchain(17)
 
 android {
   namespace = "remix.myplayer"
-
   compileSdk = 35
   buildToolsVersion = "35.0.0"
   ndkVersion = "25.2.9519653"
@@ -43,54 +27,35 @@ android {
     applicationId = "remix.myplayer"
     minSdk = 21
     targetSdk = 33
-
-    versionCode = 203
-    versionName = "2.0.3"
-
+    versionCode = 204
+    versionName = "2.0.4"
     vectorDrawables.useSupportLibrary = true
     multiDexEnabled = true
+    setProperty("archivesBaseName", "APlayer-v$versionName")
 
-    buildConfigField(
-      "String",
-      "LASTFM_API_KEY",
-      "\"${properties.getProperty("LASTFM_API_KEY")}\""
-    )
-    buildConfigField(
-      "String",
-      "GOOGLE_PLAY_LICENSE_KEY",
-      "\"${properties.getProperty("GOOGLE_PLAY_LICENSE_KEY")}\""
-    )
-    buildConfigField(
-      "String",
-      "GITHUB_SHA",
-      "\"${System.getenv("GITHUB_SHA")}\""
-    )
+    buildConfigField("String", "LASTFM_API_KEY", "\"${localProperties.getProperty("LASTFM_API_KEY", "")}\"")
 
-    ndk {
-      abiFilters += "arm64-v8a"
-    }
-
-    setProperty("archivesBaseName", "APlayer-v${versionName}")
+    ndk.abiFilters += "arm64-v8a"
   }
 
   signingConfigs {
     create("debugConfig") {
-      storeFile = project.file("Debug.jks")
+      storeFile = file("Debug.jks")
       storePassword = "123456"
       keyAlias = "Debug"
       keyPassword = "123456"
-
       enableV1Signing = true
       enableV2Signing = true
       enableV3Signing = true
     }
 
     create("releaseConfig") {
-      storeFile = File(properties.getProperty("keystore.storeFile") ?: "")
-      storePassword = properties.getProperty("keystore.storePassword")
-      keyAlias = properties.getProperty("keystore.keyAlias")
-      keyPassword = properties.getProperty("keystore.keyPassword")
-
+      localProperties.apply {
+        getProperty("keystore.storeFile")?.let { storeFile = file(it) }
+        storePassword = getProperty("keystore.storePassword", "")
+        keyAlias = getProperty("keystore.keyAlias", "")
+        keyPassword = getProperty("keystore.keyPassword", "")
+      }
       enableV1Signing = true
       enableV2Signing = true
       enableV3Signing = true
@@ -106,7 +71,7 @@ android {
     }
 
     release {
-      signingConfig = signingConfigs["releaseConfig"]
+      signingConfig = signingConfigs.getByName("releaseConfig")
       isDebuggable = false
       isMinifyEnabled = true
       isShrinkResources = true
@@ -117,17 +82,8 @@ android {
     }
   }
 
-  sourceSets {
-    getByName("main") {
-      java.srcDir("src/third-party/jaudiotagger-android/src")
-    }
-  }
-
-  externalNativeBuild {
-    cmake {
-      path("CMakeLists.txt")
-    }
-  }
+  sourceSets["main"].java.srcDir("src/third-party/jaudiotagger-android/src")
+  externalNativeBuild.cmake.path = File("CMakeLists.txt")
 
   flavorDimensions += listOf("channel", "updater")
   productFlavors {
@@ -135,17 +91,15 @@ android {
       dimension = "channel"
       isDefault = true
     }
-    create("google") {
-      dimension = "channel"
-    }
+    create("google") { dimension = "channel" }
 
     create("withUpdater") {
       dimension = "updater"
-      isDefault = true
       buildConfigField("boolean", "ENABLE_UPDATER", "true")
     }
     create("withoutUpdater") {
       dimension = "updater"
+      isDefault = true
       buildConfigField("boolean", "ENABLE_UPDATER", "false")
     }
   }
@@ -154,10 +108,7 @@ android {
     sourceCompatibility = JavaVersion.VERSION_17
     targetCompatibility = JavaVersion.VERSION_17
   }
-
-  kotlinOptions {
-    jvmTarget = "17"
-  }
+  kotlinOptions.jvmTarget = "17"
 
   lint {
     abortOnError = false
@@ -170,55 +121,35 @@ android {
     viewBinding = true
     compose = true
   }
-  // composeOptions {
-  //     kotlinCompilerExtensionVersion = "1.5.13"
-  // }
-  dependenciesInfo {
-    includeInApk = false
-  }
+  composeOptions.kotlinCompilerExtensionVersion = "1.5.13"
 
-  room {
-    schemaDirectory("$projectDir/schemas")
-  }
+  dependenciesInfo.includeInApk = false
+  room.schemaDirectory("$projectDir/schemas")
 }
 
-androidComponents {
-  beforeVariants { variantBuilder ->
-    if (variantBuilder.productFlavors.containsAll(
-        listOf(
-          "channel" to "google",
-          "updater" to "withUpdater"
-        )
-      )
-    ) {
-      variantBuilder.enable = false
-    }
+androidComponents.beforeVariants { variantBuilder ->
+  if (variantBuilder.productFlavors.all {
+      (it.first == "channel" && it.second == "google") ||
+          (it.first == "updater" && it.second == "withUpdater")
+    }) {
+    variantBuilder.enable = false
   }
 }
 
 baselineProfile {
   saveInSrc = true
-
-  warnings {
-    disabledVariants = false
-  }
-//  variants {
-//      maybeCreate("nonGoogleWithUpdaterRelease").apply {
-//          from(project(":baselineprofile"))
-//      }
-//  }
+  warnings.disabledVariants = false
 }
 
 dependencies {
   implementation(libs.kotlinx.coroutines)
-//    implementation(libs.kotlinx.serialization)
+  implementation(libs.kotlinx.serialization)
 
   implementation(libs.appcompat)
   implementation(libs.media)
   implementation(libs.androidx.media3.exoplayer)
   implementation(libs.multidex)
   implementation(libs.palette.ktx)
-
   implementation(libs.material)
 
   implementation(libs.glide)
@@ -236,9 +167,6 @@ dependencies {
   implementation(libs.logback.android)
   implementation(libs.xxpermissions)
   implementation(libs.sardine.android) {
-    // https://github.com/thegrizzlylabs/sardine-android/issues/70
-    // 上游已经exclude了，但是不知道为什么还是会有
-    // https://github.com/thegrizzlylabs/sardine-android/blob/d0af7ae8e7ee0654a763c4c6f638a5e98b1782e9/build.gradle#L46
     exclude(group = "xpp3", module = "xpp3")
   }
   implementation(libs.slf4j)
@@ -247,8 +175,7 @@ dependencies {
 
   debugImplementation(libs.leakcanary)
 
-  val googleImplementation by configurations
-  googleImplementation(libs.billingclient)
+  "googleImplementation"(libs.billingclient)
 
   implementation(libs.androidx.lifecycle.runtime.ktx)
   implementation(libs.androidx.activity.compose)
@@ -262,7 +189,6 @@ dependencies {
   implementation(libs.androidx.nav)
   implementation(libs.androidx.hilt.navi.compose)
   implementation(libs.reorderable)
-  implementation(libs.kotlinx.serialization)
   implementation(libs.androidx.work.runtime.ktx)
 
   implementation(libs.hilt.android)

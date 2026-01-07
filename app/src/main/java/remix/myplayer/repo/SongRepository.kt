@@ -169,64 +169,12 @@ class SongRepoImpl @Inject constructor(
           )
         }
 
-        is Genre -> {
-          context.contentResolver.query(
-            Genres.Members.getContentUri("external", it.id),
-            baseProjection,
-            null,
-            null,
-            settingPrefs.genreDetailSortOrder
-          )?.use { songCursor ->
-            while (songCursor.moveToNext()) {
-              result.add(resolveSong(songCursor))
-            }
-          }
-        }
-
         is Folder -> {
           result.addAll(getSongs(null, null, settingPrefs.folderDetailSortOrder).filter { song ->
             song.data.substring(0, song.data.lastIndexOf("/")) == it.path
           })
         }
 
-        is PlayList -> {
-          val customSort = settingPrefs.playListDetailSortOrder == SortOrder.PLAYLIST_SONG_CUSTOM
-          val ids = it.audioIds.toList()
-
-          val songs = getSongs(
-            makeInStrQuery(ids),
-            null,
-            if (customSort) null else settingPrefs.playListDetailSortOrder
-          )
-
-          val tempArray: Array<Song> = Array(ids.size) { Song.EMPTY_SONG }
-          songs.forEachIndexed { index, song ->
-            tempArray[if (customSort) ids.indexOf(song.id) else index] = song
-          }
-
-          // remove no longer exist
-          if (songs.size < it.audioIds.size) {
-            val deleteIds = ArrayList<Long>()
-            val existIds = songs.map { it.id }
-
-            for (audioId in it.audioIds) {
-              if (!existIds.contains(audioId)) {
-                deleteIds.add(audioId)
-              }
-            }
-
-            if (deleteIds.isNotEmpty()) {
-              it.audioIds.removeAll(deleteIds)
-              launch {
-                playListDao.update(it)
-              }
-            }
-          }
-
-          result.addAll(
-            tempArray
-              .filter { it.id != Song.EMPTY_SONG.id })
-        }
       }
     }
 

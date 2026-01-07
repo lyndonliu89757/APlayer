@@ -28,13 +28,8 @@ data class LibrarySettings(
   val songSortOrder: String,
   val albumSortOrder: String,
   val artistSortOrder: String,
-  val playlistSortOrder: String,
-  val genreSortOrder: String,
-  val historySortOrder: String,
   val albumDetailSortOrder: String,
   val artistDetailSortOrder: String,
-  val playListDetailSortOrder: String,
-  val genreDetailSortOrder: String,
   val folderDetailSortOrder: String,
 )
 

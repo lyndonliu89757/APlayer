@@ -234,9 +234,9 @@ fun HomeScreen() {
           }
         },
         floatingActionButton = {
-          val selectLibrary by remember {
+          val selectLibrary by remember(libraries) {
             derivedStateOf {
-              libraries[pagerState.currentPage]
+              libraries.getOrElse(pagerState.currentPage) { libraries.first() }
             }
           }
 
@@ -261,7 +261,8 @@ fun HomeScreen() {
             beyondViewportPageCount = 1,
             userScrollEnabled = false,
           ) { page ->
-            when (libraries[page].tag) {
+            val library = libraries.getOrNull(page) ?: return@HorizontalPager
+            when (library.tag) {
               Library.TAG_SONG -> SongScreen()
               Library.TAG_ALBUM -> AlbumScreen()
               Library.TAG_ARTIST -> ArtistScreen()

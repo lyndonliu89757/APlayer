@@ -36,13 +36,14 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import org.jaudiotagger.audio.AudioFileIO
 import org.jaudiotagger.tag.FieldKey
-import remix.myplayer.App
 import remix.myplayer.App.Companion.context
 import remix.myplayer.R
 import remix.myplayer.data.model.audio.Song
 import remix.myplayer.misc.floatpermission.rom.RomUtils
 import remix.myplayer.misc.manager.APlayerActivityManager
+import remix.myplayer.service.MusicService
 import remix.myplayer.ui.activity.base.BaseActivity
+import remix.myplayer.ui.activity.base.BaseMusicActivity
 import remix.myplayer.ui.activity.base.PendingWriteRequest
 import remix.myplayer.ui.nav.MessageNotifier
 import timber.log.Timber
@@ -506,7 +507,7 @@ object Util {
 
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
       // Android 11+ 使用MediaStore API
-      activity.pendingWriteRequest = PendingWriteRequest(song.contentUri, fieldMap)
+      activity.pendingWriteRequest = PendingWriteRequest(song, fieldMap)
       activity.writeSongLauncher.launch(
         IntentSenderRequest.Builder(
           MediaStore.createWriteRequest(
@@ -525,9 +526,10 @@ object Util {
    */
   suspend fun saveAudioTagViaContentResolver(
     context: Context,
-    contentUri: Uri,
+    song: Song,
     fieldMap: EnumMap<FieldKey, String>
   ) = withContext(Dispatchers.IO) {
+    val contentUri = song.contentUri;
     runCatching {
       // 1. 通过 ContentResolver 打开输入流，读取原文件
       context.contentResolver.openInputStream(contentUri)?.use { inputStream ->
@@ -564,7 +566,22 @@ object Util {
 
         // 7. 通知媒体库更新
         context.contentResolver.notifyChange(contentUri, null)
-        MediaScannerConnection.scanFile(context, arrayOf(tempFile.absolutePath), null, null)
+        MediaScannerConnection.scanFile(context, arrayOf(song.data), null, null)
+        sendLocalBroadcast(
+          Intent(MusicService.TAG_CHANGE)
+            .putExtra(BaseMusicActivity.EXTRA_OLD_SONG, song)
+            .putExtra(
+              BaseMusicActivity.EXTRA_NEW_SONG,
+              song.copy(
+                title = fieldMap[FieldKey.TITLE],
+                album = fieldMap[FieldKey.ALBUM],
+                artist = fieldMap[FieldKey.ARTIST],
+                genre = fieldMap[FieldKey.GENRE],
+                year = fieldMap[FieldKey.YEAR],
+                track = fieldMap[FieldKey.TRACK]
+              )
+            )
+        )
 
       } ?: throw IOException("无法从ContentResolver打开文件流")
 
@@ -584,10 +601,12 @@ object Util {
         val mimeType = context.contentResolver.getType(uri)
         MimeTypeMap.getSingleton().getExtensionFromMimeType(mimeType)
       }
+
       "file" -> {
         // 如果是file协议，直接从路径获取
         uri.path?.substringAfterLast('.', "")
       }
+
       else -> null
     }
   }

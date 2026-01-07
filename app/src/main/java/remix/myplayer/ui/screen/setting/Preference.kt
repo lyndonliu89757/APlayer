@@ -80,7 +80,7 @@ fun Preference(
       .clickWithRipple(false) {
         onClick()
       }
-      .background(color = LocalTheme.current.mainBackground, shape = RectangleShape)
+      .background(color = LocalTheme.current.background, shape = RectangleShape)
       .padding(horizontal = 16.dp, vertical = 10.dp),
     verticalAlignment = Alignment.CenterVertically) {
     Column(

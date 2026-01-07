@@ -121,6 +121,9 @@ fun SearchScreen() {
           MultiSelectBar(
             state = multiSelectState,
             scrollBehavior = null,
+            onSelectAll = {
+              mainVM.updateMultiSelectModelsAll(songs)
+            }
           )
         }
       }

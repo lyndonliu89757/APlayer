@@ -42,7 +42,8 @@ import remix.myplayer.viewmodel.settingViewModel
 fun MultiSelectBar(
   state: MultiSelectState,
   scrollBehavior: TopAppBarScrollBehavior?,
-  parent: APlayerModel? = null
+  parent: APlayerModel? = null,
+  onSelectAll: (() -> Unit)? = null
 ) {
   val libraryVM = libraryViewModel
   val mainVM = mainViewModel

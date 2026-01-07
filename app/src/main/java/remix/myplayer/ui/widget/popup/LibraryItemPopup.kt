@@ -56,7 +56,7 @@ fun LibraryItemPopupButton(
       .clickWithRipple {
         expanded = !expanded
       }
-      .size(40.dp)
+      .size(42.dp)
   ) {
 
     LibraryItemDropdownMenu(expanded, model) {
@@ -64,7 +64,7 @@ fun LibraryItemPopupButton(
     }
 
     Image(
-      modifier = Modifier.size(24.dp),
+      modifier = Modifier.size(26.dp),
       painter = painterResource(R.drawable.ic_more),
       contentDescription = "PopupButton",
       colorFilter = ColorFilter.tint(LocalTheme.current.popupButton())

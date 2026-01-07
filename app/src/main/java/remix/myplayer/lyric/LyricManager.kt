@@ -196,7 +196,8 @@ class LyricManager @Inject constructor(
   @UiThread
   private fun ensureDesktopLyric() {
     val shouldShow =
-      isServiceAvailable && isNotifyShowing && isScreenOn && !isAppInForeground && isDesktopLyricEnabled
+      isServiceAvailable && isNotifyShowing && isScreenOn && !isAppInForeground && isDesktopLyricEnabled &&
+          (!isDesktopLyricLocked || isPlaying)
     if (shouldShow != (desktopLyricView != null)) {
       if (shouldShow) {
         createDesktopLyric()
@@ -209,22 +210,24 @@ class LyricManager @Inject constructor(
   var isDesktopLyricLocked: Boolean
     get() = desktopLyricPrefs.locked
     @UiThread set(value) {
+      MessageNotifier.show(if (value) R.string.desktop_lyric__lock_ticker else R.string.desktop_lyric__unlock)
+
       desktopLyricPrefs.locked = value
+      _desktopUiState.value = _desktopUiState.value.copy(locked = value)
 
       desktopLyricView?.run {
-        _desktopUiState.value = _desktopUiState.value.copy(locked = value)
-
-        MessageNotifier.show(if (value) R.string.desktop_lyric__lock_ticker else R.string.desktop_lyric__unlock)
         (layoutParams as WindowManager.LayoutParams).apply {
           applyLockState(this, value)
           windowManager.updateViewLayout(this@run, this)
         }
-
-        MusicServiceRemote.service?.run {
-          updateNotification()
-          updatePlaybackState()
-        }
       }
+
+      MusicServiceRemote.service?.run {
+        updateNotification()
+        updatePlaybackState()
+      }
+
+      ensureDesktopLyric()
     }
 
   @UiThread
@@ -331,16 +334,23 @@ class LyricManager @Inject constructor(
   }
 
   private fun getProgressOfLine(line: LyricLine, time: Long, endTime: Long): Double {
-    try {
-      require(time in line.time..endTime)
-    } catch (e: IllegalArgumentException) {
-      Timber.w("time: $time, endTime: $endTime, line: ${line.time}")
-      throw e
+    if (endTime <= line.time) {
+      Timber.tag(TAG).w("Invalid line range, time=$time, lineTime=${line.time}, endTime=$endTime")
+      return when (line) {
+        is PerWordLyricLine -> if (time > line.time) line.words.size.toDouble() else 0.0
+        else -> if (time > line.time) 1.0 else 0.0
+      }
     }
+
+    val clampedTime = time.coerceIn(line.time, endTime)
+    if (clampedTime != time) {
+      Timber.tag(TAG).w("Clamped time, time=$time, lineTime=${line.time}, endTime=$endTime")
+    }
+
     return if (line is PerWordLyricLine) {
-      line.getProgress(time, endTime)
+      line.getProgress(clampedTime, endTime)
     } else {
-      (time - line.time).toDouble() / (endTime - line.time)
+      (clampedTime - line.time).toDouble() / (endTime - line.time)
     }
   }
 
@@ -392,6 +402,7 @@ class LyricManager @Inject constructor(
           updateProgress()
         }
       }
+      ensureDesktopLyric()
     }
   private var progress: Long = 0
     set(value) {
@@ -431,8 +442,9 @@ class LyricManager @Inject constructor(
     try {
 //      Timber.tag(TAG).d("update progress")
       updateProgressJob?.cancel()
-      progress = MusicStateSource.currentProgressState.position
-      duration = MusicStateSource.currentProgressState.duration
+      val state = MusicStateSource.currentProgressState
+      duration = state.duration
+      progress = state.position
       if (isPlaying) {
         updateProgressJob = launch(Dispatchers.IO) {
           // TODO: should we consider thread create cost?

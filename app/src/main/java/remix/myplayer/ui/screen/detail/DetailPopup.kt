@@ -117,8 +117,6 @@ private fun APlayerModel.detailSortOrder(settingsState: SettingsState): String {
   return when (this) {
     is Album -> settingsState.library.albumDetailSortOrder
     is Artist -> settingsState.library.artistDetailSortOrder
-    is PlayList -> settingsState.library.playListDetailSortOrder
-    is Genre -> settingsState.library.genreDetailSortOrder
     is Folder -> settingsState.library.folderDetailSortOrder
     else -> throw Exception("unknown model: $this")
   }
@@ -135,14 +133,6 @@ private fun APlayerModel.saveDetailSortOrder(
 
     is Artist -> {
       return vm.setSortOrder(SortCategory.ARTIST_DETAIL, newSortOrder)
-    }
-
-    is PlayList -> {
-      return vm.setSortOrder(SortCategory.PLAYLIST_DETAIL, newSortOrder)
-    }
-
-    is Genre -> {
-      return vm.setSortOrder(SortCategory.GENRE_DETAIL, newSortOrder)
     }
 
     is Folder -> {

@@ -39,25 +39,24 @@ import remix.myplayer.viewmodel.settingViewModel
 
 @Composable
 fun SongPopupButton(
-  modifier: Modifier = Modifier,
   song: Song,
   parent: APlayerModel
 ) {
   var expanded by remember { mutableStateOf(false) }
   Box(
     contentAlignment = Alignment.Center,
-    modifier = modifier
+    modifier = Modifier
       .clickWithRipple {
         expanded = !expanded
       }
-      .size(40.dp)
+      .size(42.dp)
   ) {
     SongDropdownMenu(expanded, song, parent) {
       expanded = false
     }
 
     Image(
-      modifier = Modifier.size(24.dp),
+      modifier = Modifier.size(26.dp),
       painter = painterResource(R.drawable.ic_more),
       contentDescription = "song button",
       colorFilter = ColorFilter.tint(Color.Gray)

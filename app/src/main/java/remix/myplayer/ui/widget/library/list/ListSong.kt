@@ -70,8 +70,7 @@ fun ListSong(
     }
 
     Row(
-      modifier = modifier
-        .fillMaxWidth(),
+      modifier = modifier.fillMaxWidth(),
       verticalAlignment = Alignment.CenterVertically
     ) {
       if (num != null) {
@@ -112,7 +111,6 @@ fun ListSong(
       }
 
       SongPopupButton(
-        modifier = Modifier,
         song = song,
         parent = modelParent
       )

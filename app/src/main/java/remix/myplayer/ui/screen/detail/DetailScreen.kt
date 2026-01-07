@@ -199,7 +199,7 @@ fun DetailScreen(model: APlayerModel) {
 
         override fun onServiceDisConnected() {}
 
-        override fun onTagChanged(oldSong: Song, newSong: Song) {}
+        override fun onTagChanged(oldSong: Song?, newSong: Song) {}
       }
       activity.addMusicServiceEventListener(listener)
 

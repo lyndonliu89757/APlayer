@@ -75,8 +75,6 @@ fun CustomSortScreen(id: Long) {
 
             val newIds = songs.map { it.id }
             if (newIds != playList.audioIds) {
-              libraryVM.settingPrefs.playListDetailSortOrder = SortOrder.PLAYLIST_SONG_CUSTOM
-
               libraryVM.updatePlayList(playList.copy(audioIds = ArrayList(newIds)))
 
 //              val previousEntry = nav.previousBackStackEntry

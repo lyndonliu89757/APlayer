@@ -45,7 +45,7 @@ fun ListItem(
         onClick = onClick,
         onLongClick = onLongClick
       )
-      .background(if (selected) theme.select else theme.mainBackground),
+      .background(if (selected) theme.select else theme.background),
     verticalAlignment = Alignment.CenterVertically
   ) {
     GlideCover(

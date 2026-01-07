@@ -19,6 +19,7 @@ import kotlinx.coroutines.launch
 import org.jaudiotagger.tag.FieldKey
 import remix.myplayer.BuildConfig
 import remix.myplayer.R
+import remix.myplayer.data.model.audio.Song
 import remix.myplayer.misc.helper.LanguageHelper.setLocal
 import remix.myplayer.service.MusicService
 import remix.myplayer.ui.nav.MessageNotifier
@@ -58,7 +59,7 @@ open class BaseActivity : ComponentActivity(), CoroutineScope by MainScope() {
           pendingWriteRequest?.let { request ->
             Util.saveAudioTagViaContentResolver(
               this@BaseActivity,
-              request.uri,
+              request.song,
               request.fieldMap
             )
           }
@@ -181,7 +182,7 @@ open class BaseActivity : ComponentActivity(), CoroutineScope by MainScope() {
 
     val NECESSARY_PERMISSIONS =
       if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-        arrayOf(Permission.READ_MEDIA_AUDIO, Permission.READ_MEDIA_IMAGES)
+        arrayOf(Permission.READ_MEDIA_AUDIO)
       } else if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.Q) {
         arrayOf(
           Permission.READ_EXTERNAL_STORAGE,
@@ -194,6 +195,6 @@ open class BaseActivity : ComponentActivity(), CoroutineScope by MainScope() {
 }
 
 data class PendingWriteRequest(
-  val uri: Uri,
+  val song: Song,
   val fieldMap: EnumMap<FieldKey, String>
 )

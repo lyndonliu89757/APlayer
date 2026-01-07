@@ -36,17 +36,6 @@ class SettingPrefs @Inject constructor(
   var songSortOrder by PrefsDelegate(sp, PrefKeys.Setting.SONG_SORT_ORDER, SortOrder.SONG_A_Z)
   var albumSortOrder by PrefsDelegate(sp, PrefKeys.Setting.ALBUM_SORT_ORDER, SortOrder.ALBUM_A_Z)
   var artistSortOrder by PrefsDelegate(sp, PrefKeys.Setting.ARTIST_SORT_ORDER, SortOrder.ARTIST_A_Z)
-  var playlistSortOrder by PrefsDelegate(
-    sp,
-    PrefKeys.Setting.PLAYLIST_SORT_ORDER,
-    SortOrder.PLAYLIST_DATE
-  )
-  var genreSortOrder by PrefsDelegate(sp, PrefKeys.Setting.GENRE_SORT_ORDER, SortOrder.GENRE_A_Z)
-  var historySortOrder by PrefsDelegate(
-    sp,
-    PrefKeys.Setting.HISTORY_SORT_ORDER,
-    SortOrder.PLAY_COUNT_DESC
-  )
 
   var albumDetailSortOrder by PrefsDelegate(
     sp,
@@ -56,16 +45,6 @@ class SettingPrefs @Inject constructor(
   var artistDetailSortOrder by PrefsDelegate(
     sp,
     PrefKeys.Setting.CHILD_ARTIST_SONG_SORT_ORDER,
-    SortOrder.SONG_A_Z
-  )
-  var playListDetailSortOrder by PrefsDelegate(
-    sp,
-    PrefKeys.Setting.CHILD_PLAYLIST_SONG_SORT_ORDER,
-    SortOrder.SONG_A_Z
-  )
-  var genreDetailSortOrder by PrefsDelegate(
-    sp,
-    PrefKeys.Setting.CHILD_GENRE_SONG_SORT_ORDER,
     SortOrder.SONG_A_Z
   )
   var folderDetailSortOrder by PrefsDelegate(
@@ -119,6 +98,7 @@ class SettingPrefs @Inject constructor(
   var enableEq by PrefsDelegate(sp, PrefKeys.Setting.ENABLE_EQ, false)
 
   var checkMigration16600 by PrefsDelegate(sp, "check_migration_16600", false)
+  var checkMigration20100 by PrefsDelegate(sp, "check_migration_20100", false)
 
   companion object {
 

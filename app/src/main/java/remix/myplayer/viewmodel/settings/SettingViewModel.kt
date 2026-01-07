@@ -67,13 +67,8 @@ class SettingViewModel @Inject constructor(
       songSortOrder = settingPrefs.songSortOrder,
       albumSortOrder = settingPrefs.albumSortOrder,
       artistSortOrder = settingPrefs.artistSortOrder,
-      playlistSortOrder = settingPrefs.playlistSortOrder,
-      genreSortOrder = settingPrefs.genreSortOrder,
-      historySortOrder = settingPrefs.historySortOrder,
       albumDetailSortOrder = settingPrefs.albumDetailSortOrder,
       artistDetailSortOrder = settingPrefs.artistDetailSortOrder,
-      playListDetailSortOrder = settingPrefs.playListDetailSortOrder,
-      genreDetailSortOrder = settingPrefs.genreDetailSortOrder,
       folderDetailSortOrder = settingPrefs.folderDetailSortOrder,
     ),
     playingScreen = PlayingScreenSettings(
@@ -160,13 +155,8 @@ class SettingViewModel @Inject constructor(
             SortCategory.SONG -> lib.copy(songSortOrder = order)
             SortCategory.ALBUM -> lib.copy(albumSortOrder = order)
             SortCategory.ARTIST -> lib.copy(artistSortOrder = order)
-            SortCategory.PLAYLIST -> lib.copy(playlistSortOrder = order)
-            SortCategory.GENRE -> lib.copy(genreSortOrder = order)
-            SortCategory.HISTORY -> lib.copy(historySortOrder = order)
             SortCategory.ALBUM_DETAIL -> lib.copy(albumDetailSortOrder = order)
             SortCategory.ARTIST_DETAIL -> lib.copy(artistDetailSortOrder = order)
-            SortCategory.PLAYLIST_DETAIL -> lib.copy(playListDetailSortOrder = order)
-            SortCategory.GENRE_DETAIL -> lib.copy(genreDetailSortOrder = order)
             SortCategory.FOLDER_DETAIL -> lib.copy(folderDetailSortOrder = order)
           }
         )

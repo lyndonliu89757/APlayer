@@ -4,21 +4,16 @@ import remix.myplayer.data.prefs.SettingPrefs
 
 
 enum class SortCategory {
-  SONG, ALBUM, ARTIST, PLAYLIST, GENRE, HISTORY,
-  ALBUM_DETAIL, ARTIST_DETAIL, PLAYLIST_DETAIL, GENRE_DETAIL, FOLDER_DETAIL;
+  SONG, ALBUM, ARTIST,
+  ALBUM_DETAIL, ARTIST_DETAIL, FOLDER_DETAIL;
 
   fun getOrder(settingPrefs: SettingPrefs): String {
     return when (this) {
       SONG -> settingPrefs.songSortOrder
       ALBUM -> settingPrefs.albumSortOrder
       ARTIST -> settingPrefs.artistSortOrder
-      PLAYLIST -> settingPrefs.playlistSortOrder
-      GENRE -> settingPrefs.genreSortOrder
-      HISTORY -> settingPrefs.historySortOrder
       ALBUM_DETAIL -> settingPrefs.albumDetailSortOrder
       ARTIST_DETAIL -> settingPrefs.artistDetailSortOrder
-      PLAYLIST_DETAIL -> settingPrefs.playListDetailSortOrder
-      GENRE_DETAIL -> settingPrefs.genreDetailSortOrder
       FOLDER_DETAIL -> settingPrefs.folderDetailSortOrder
     }
   }
@@ -30,13 +25,8 @@ enum class SortCategory {
         SONG -> settingPrefs.songSortOrder = newOrder
         ALBUM -> settingPrefs.albumSortOrder = newOrder
         ARTIST -> settingPrefs.artistSortOrder = newOrder
-        PLAYLIST -> settingPrefs.playlistSortOrder = newOrder
-        GENRE -> settingPrefs.genreSortOrder = newOrder
-        HISTORY -> settingPrefs.historySortOrder = newOrder
         ALBUM_DETAIL -> settingPrefs.albumDetailSortOrder = newOrder
         ARTIST_DETAIL -> settingPrefs.artistDetailSortOrder = newOrder
-        PLAYLIST_DETAIL -> settingPrefs.playListDetailSortOrder = newOrder
-        GENRE_DETAIL -> settingPrefs.genreDetailSortOrder = newOrder
         FOLDER_DETAIL -> settingPrefs.folderDetailSortOrder = newOrder
       }
       return true

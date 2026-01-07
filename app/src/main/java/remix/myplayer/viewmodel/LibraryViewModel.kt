@@ -147,7 +147,8 @@ class LibraryViewModel @Inject constructor(
   }
 
   override fun onTagChanged(
-    oldSong: Song, newSong: Song
+    oldSong: Song?, newSong: Song
   ) {
+    fetchMedia(true, updateAlbumVersion = true, updatePlayListVersion = true)
   }
 }
