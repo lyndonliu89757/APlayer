@@ -59,6 +59,7 @@ import remix.myplayer.misc.receiver.ExitReceiver
 import remix.myplayer.misc.receiver.HeadsetPlugReceiver
 import remix.myplayer.misc.receiver.MediaButtonReceiver
 import remix.myplayer.misc.tryLaunch
+import remix.myplayer.repo.PlayListRepository
 import remix.myplayer.repo.SongRepository
 import remix.myplayer.repo.usecase.FetchMetaDataUseCase
 import remix.myplayer.service.notification.Notify
@@ -73,6 +74,7 @@ import remix.myplayer.ui.nav.MessageNotifier
 import remix.myplayer.util.Constants.ACTION_EXIT
 import remix.myplayer.util.DensityUtil
 import remix.myplayer.util.PermissionUtil
+import remix.myplayer.util.Util.isAppOnForeground
 import remix.myplayer.util.Util.registerLocalReceiver
 import remix.myplayer.util.Util.unregisterLocalReceiver
 import timber.log.Timber
@@ -104,7 +106,10 @@ class MusicService : BaseService(),
   lateinit var settingPrefs: SettingPrefs
 
   @Inject
-  lateinit var playQueue: PlayQueue
+  lateinit var playQueueStore: PlayQueueStore
+
+  @Inject
+  lateinit var playListRepository: PlayListRepository
 
   @Inject
   lateinit var songRepository: SongRepository
@@ -473,8 +478,8 @@ class MusicService : BaseService(),
       override fun onCustomAction(action: String?, extras: Bundle?) {
         Timber.v("onCustomAction, ac: $action extra: $extras")
         when (action) {
-          ACTION_UNLOCK_DESKTOP_LYRIC -> lyricManager.isDesktopLyricLocked = false
-          ACTION_TOGGLE_DESKTOP_LYRIC -> lyricManager.setDesktopLyricEnabled(!lyricManager.isDesktopLyricEnabled)
+          ACTION_TOGGLE_DESKTOP_LYRIC -> lyricManager.isDesktopLyricEnabled = !lyricManager.isDesktopLyricEnabled
+          ACTION_TOGGLE_DESKTOP_LYRIC_LOCK -> lyricManager.isDesktopLyricLocked = !lyricManager.isDesktopLyricLocked
         }
       }
     })
@@ -661,7 +666,7 @@ class MusicService : BaseService(),
 
     playback.setPlaylist(newQueue)
     updateQueueItem()
-    launch { playQueue.save(newQueue) }
+    launch { playQueueStore.save(newQueue) }
   }
 
   /**
@@ -679,7 +684,7 @@ class MusicService : BaseService(),
     val equals = newQueue == playback.getPlaylist()
     if (!equals) {
       playback.setPlaylist(newQueue)
-      launch { playQueue.save(newQueue) }
+      launch { playQueueStore.save(newQueue) }
     }
     if (shuffle) {
       playModel = MODE_SHUFFLE
@@ -711,7 +716,7 @@ class MusicService : BaseService(),
         indices.forEach { index ->
           playback.removeSong(index)
         }
-        launch { playQueue.save(playback.getPlaylist()) }
+        launch { playQueueStore.save(playback.getPlaylist()) }
 
         updateQueueItem()
         pushPlaybackUiState()
@@ -725,7 +730,7 @@ class MusicService : BaseService(),
   fun insertToQueue(songs: List<Song>) {
     if (songs.isNotEmpty()) {
       playback.addSongs(songs)
-      launch { playQueue.save(playback.getPlaylist()) }
+      launch { playQueueStore.save(playback.getPlaylist()) }
       pushPlaybackUiState()
     }
   }
@@ -906,16 +911,6 @@ class MusicService : BaseService(),
     }
     firstPrepared = false
     when (action) {
-      ACTION_PLAY_FROM_URI -> {
-        val song = commandIntent?.getSerializableExtra(EXTRA_SONG) as? Song ?: return
-        if (song.valid()) {
-          val intent = Intent(ACTION_CMD)
-          intent.putExtra(EXTRA_CONTROL, Command.PLAY_AT)
-          intent.putExtra(EXTRA_POSITION, 0)
-          setPlayQueue(listOf(song), intent)
-        }
-      }
-
       ACTION_SHORTCUT_SHUFFLE -> {
         if (playModel != MODE_SHUFFLE) {
           playModel = MODE_SHUFFLE
@@ -925,8 +920,10 @@ class MusicService : BaseService(),
 
       ACTION_SHORTCUT_MYLOVE -> {
         tryLaunch {
+          val playlist = playListRepository.getFavorite() ?: return@tryLaunch
+
           val songs =
-            withContext(Dispatchers.IO) { songRepository.getSongsByModels(listOf()) }
+            withContext(Dispatchers.IO) { songRepository.getSongsByModels(listOf(playlist)) }
 
           if (songs.isEmpty()) {
             MessageNotifier.show(R.string.list_is_empty)
@@ -1093,34 +1090,45 @@ class MusicService : BaseService(),
       Command.LOVE -> {
         launch {
           playback.currentSong?.let {
+            playListRepository.toggleFavorite(it.id)
             MusicStateSource.updatePlaybackUiState(isFavorite = !playbackState.isFavorite)
           }
         }
       }
       // 桌面歌词
       Command.TOGGLE_DESKTOP_LYRIC -> {
-        lyricManager.setDesktopLyricEnabled(!lyricManager.isDesktopLyricEnabled)
+        lyricManager.isDesktopLyricEnabled = !lyricManager.isDesktopLyricEnabled
       }
       // 临时播放一首歌曲
       Command.PLAY_TEMP -> {
         intent.getSerializableExtra(EXTRA_SONG)?.let {
           lastOp = Command.PLAY_TEMP
           val song = it as Song.Local
-          playback.setPlaylist(listOf(song))
-          launch { playQueue.save(playback.getPlaylist()) }
+
+          if (playback.getPlaylist().isEmpty()) {
+            playback.setPlaylist(listOf(song))
+          } else if (playback.currentSong?.id != song.id) {
+            playback.addToNextSong(song)
+            skipToNext()
+          } else {
+            // 如果是当前歌曲，从头播放
+            seekTo(0)
+          }
+
+          launch { playQueueStore.save(playback.getPlaylist()) }
           start(true)
         }
       }
       // 解锁桌面歌词
-      Command.UNLOCK_DESKTOP_LYRIC -> {
-        lyricManager.isDesktopLyricLocked = false
+      Command.TOGGLE_DESKTOP_LYRIC_LOCK -> {
+        lyricManager.isDesktopLyricLocked = !lyricManager.isDesktopLyricLocked
       }
       // 某一首歌曲添加至下一首播放
       Command.ADD_TO_NEXT_SONG -> {
         val nextSong = intent.getSerializableExtra(EXTRA_SONG) as Song? ?: return
         if (playback.addToNextSong(nextSong)) {
           // 同步更新
-          launch { playQueue.save(playback.getPlaylist()) }
+          launch { playQueueStore.save(playback.getPlaylist()) }
           pushPlaybackUiState()
           MessageNotifier.show(R.string.already_add_to_next_song)
         }
@@ -1206,6 +1214,7 @@ class MusicService : BaseService(),
   }
 
   fun updatePlaybackState() {
+    val isDesktopLyricEnabled = lyricManager.isDesktopLyricEnabled
     val desktopLyricLock = lyricManager.isDesktopLyricLocked
 
     val builder = PlaybackStateCompat.Builder()
@@ -1219,9 +1228,15 @@ class MusicService : BaseService(),
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
       builder.addCustomAction(
         PlaybackStateCompat.CustomAction.Builder(
-          if (desktopLyricLock) ACTION_UNLOCK_DESKTOP_LYRIC else ACTION_TOGGLE_DESKTOP_LYRIC,
-          getString(if (desktopLyricLock) R.string.desktop_lyric__unlock else R.string.desktop_lyric_lock),
-          if (desktopLyricLock) R.drawable.ic_unlock else R.drawable.ic_lyric
+          ACTION_TOGGLE_DESKTOP_LYRIC_LOCK,
+          getString(if (desktopLyricLock) R.string.desktop_lyric_lock else R.string.desktop_lyric_unlock),
+          if (desktopLyricLock) R.drawable.ic_lock else R.drawable.ic_unlock
+        ).build()
+      ).addCustomAction(
+        PlaybackStateCompat.CustomAction.Builder(
+          ACTION_TOGGLE_DESKTOP_LYRIC,
+          getString(if (isDesktopLyricEnabled) R.string.opened_desktop_lrc else R.string.closed_desktop_lrc),
+          if (isDesktopLyricEnabled) R.drawable.ic_lyric else R.drawable.ic_lyric_hide
         ).build()
       )
     }
@@ -1250,6 +1265,8 @@ class MusicService : BaseService(),
     // 第一次启动软件
     if (settingPrefs.firstLoad) {
       settingPrefs.firstLoad = false
+      // 新建我的收藏
+      playListRepository.insertPlayList(getString(R.string.my_favorite))
     }
 
     restorePlayList()
@@ -1260,7 +1277,7 @@ class MusicService : BaseService(),
   private suspend fun restorePlayList() {
     // 读取播放列表
     val (queue, pos) = withContext(Dispatchers.IO) {
-      playQueue.restore()
+      playQueueStore.restore()
     }
 
     if (queue.isNotEmpty()) {
@@ -1377,13 +1394,12 @@ class MusicService : BaseService(),
     const val EXTRA_CONTROL = "control"
     const val EXTRA_SHUFFLE = "shuffle"
     const val EXTRA_PROGRESS = "progress"
-    const val ACTION_PLAY_FROM_URI = "$APLAYER_PACKAGE_NAME.play_from_uri"
     const val ACTION_SHORTCUT_SHUFFLE = "$APLAYER_PACKAGE_NAME.shortcut.shuffle"
     const val ACTION_SHORTCUT_MYLOVE = "$APLAYER_PACKAGE_NAME.shortcut.my_love"
     const val ACTION_SHORTCUT_LASTADDED = "$APLAYER_PACKAGE_NAME.shortcut.last_added"
     const val ACTION_CMD = "$APLAYER_PACKAGE_NAME.cmd"
-    const val ACTION_UNLOCK_DESKTOP_LYRIC = "$APLAYER_PACKAGE_NAME.unlock.desktop_lyric"
     const val ACTION_TOGGLE_DESKTOP_LYRIC = "$APLAYER_PACKAGE_NAME.toggle.desktop_lyric"
+    const val ACTION_TOGGLE_DESKTOP_LYRIC_LOCK = "$APLAYER_PACKAGE_NAME.toggle.desktop_lyric_lock"
 
     private const val MEDIA_SESSION_ACTIONS = (PlaybackStateCompat.ACTION_PLAY
         or PlaybackStateCompat.ACTION_PAUSE

@@ -71,7 +71,7 @@ fun DesktopLyricLogic() {
       }
       // 保存
       isActuallyEnabled != settingState.lyric.desktopLyricEnabled -> {
-        settingVM.setDesktopLyricEnabled(isActuallyEnabled, context as? Activity)
+        settingVM.setDesktopLyricEnabled(isActuallyEnabled)
       }
     }
   }

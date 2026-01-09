@@ -15,6 +15,7 @@ import remix.myplayer.data.model.audio.Song
 import remix.myplayer.data.prefs.SettingPrefs
 import remix.myplayer.misc.helper.MusicServiceRemote
 import remix.myplayer.repo.AbstractRepository.Companion.makeInStrQuery
+import remix.myplayer.repo.PlayListRepository
 import remix.myplayer.repo.PlayQueueRepository
 import remix.myplayer.repo.SongRepository
 import remix.myplayer.ui.activity.base.BaseActivity
@@ -28,6 +29,7 @@ import javax.inject.Singleton
 class DeleteSongUseCase @Inject constructor(
   private val settingPrefs: SettingPrefs,
   private val songRepo: SongRepository,
+  private val playListRepo: PlayListRepository,
   private val playQueueRepo: PlayQueueRepository
 ) {
 
@@ -54,6 +56,8 @@ class DeleteSongUseCase @Inject constructor(
         }
         parent.audioIds.removeAll(audioIds.toSet())
 
+        playListRepo.updatePlayList(parent)
+
         if (!deleteSource) {
           activity.contentResolver.notifyChange(Audio.Media.EXTERNAL_CONTENT_URI, null)
           return@withContext
@@ -65,6 +69,8 @@ class DeleteSongUseCase @Inject constructor(
             MessageNotifier.show(R.string.mylove_cant_edit)
             continue
           }
+
+          playListRepo.deletePlayList(model.id)
         }
 
         if (!deleteSource) {
@@ -87,6 +93,9 @@ class DeleteSongUseCase @Inject constructor(
 
         // remove from playQueue
         MusicServiceRemote.removeFromQueue(songIds)
+
+        // remove from all playLists
+        playListRepo.removeAudioIdsFromAll(songIds)
 
         // delete source if need
         if (deleteSource) {

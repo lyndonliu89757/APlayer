@@ -35,6 +35,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import remix.myplayer.R
+import remix.myplayer.data.db.room.entity.PlayList
 import remix.myplayer.data.model.audio.APlayerModel
 import remix.myplayer.data.model.audio.Song
 import remix.myplayer.misc.helper.MusicEventCallback
@@ -69,6 +70,8 @@ fun DetailScreen(model: APlayerModel) {
   val mainVM = mainViewModel
   val multiSelectState by mainVM.multiSelectState.collectAsStateWithLifecycle()
   val context = LocalContext.current
+
+  val playLists by libraryVM.playLists.collectAsStateWithLifecycle()
 
   val songs = remember {
     mutableStateListOf<Song>()
@@ -178,9 +181,21 @@ fun DetailScreen(model: APlayerModel) {
   }
 
   LaunchedEffect(refreshKey) {
-    withContext(Dispatchers.IO) {
-      songs.clear()
-      songs.addAll(libraryVM.loadSongsByModels(listOf(model)))
+    val result = withContext(Dispatchers.IO) {
+      libraryVM.loadSongsByModels(listOf(model))
+    }
+    songs.clear()
+    songs.addAll(result)
+  }
+
+  if (model is PlayList) {
+    LaunchedEffect(playLists) {
+      val updatedPlayList = playLists.find { it.id == model.id }
+      if (updatedPlayList != null && updatedPlayList.audioIds != model.audioIds) {
+        model.audioIds.clear()
+        model.audioIds.addAll(updatedPlayList.audioIds)
+        refreshKey++
+      }
     }
   }
 

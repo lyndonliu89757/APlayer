@@ -164,7 +164,7 @@ abstract class Notify internal constructor(internal var service: MusicService) {
     } else {
       if (operation != Command.TOGGLE_DESKTOP_LYRIC &&
         operation != Command.CLOSE_NOTIFY &&
-        operation != Command.UNLOCK_DESKTOP_LYRIC
+        operation != Command.TOGGLE_DESKTOP_LYRIC_LOCK
       ) {
         return PendingIntent.getForegroundService(
           context, operation, intent,

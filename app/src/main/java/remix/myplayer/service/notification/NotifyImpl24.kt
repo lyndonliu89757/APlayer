@@ -67,6 +67,7 @@ NotifyImpl24(context: MusicService) : Notify(context) {
     val deleteIntent = Intent(MusicService.ACTION_CMD)
     deleteIntent.putExtra(EXTRA_CONTROL, Command.CLOSE_NOTIFY)
 
+    val isDesktopLyricEnabled = lyricManager.isDesktopLyricEnabled
     val desktopLyricLock = lyricManager.isDesktopLyricLocked
 
     val notification = NotificationCompat.Builder(service, PLAYING_NOTIFICATION_CHANNEL_ID)
@@ -84,14 +85,22 @@ NotifyImpl24(context: MusicService) : Notify(context) {
         R.drawable.ic_next, service.getString(R.string.next),
         buildPendingIntent(service, Command.SKIP_TO_NEXT)
       )
-      //根据当前桌面歌词的状态判断是显示开关桌面歌词还是解锁桌面歌词
-      //当前显示了桌面歌词并且已经锁定,显示解锁的按钮
+      // 桌面歌词是否显示
       .addAction(
-        if (desktopLyricLock) R.drawable.ic_unlock else R.drawable.ic_lyric,
-        service.getString(if (desktopLyricLock) R.string.desktop_lyric__unlock else R.string.desktop_lyric_lock),
+        if (isDesktopLyricEnabled) R.drawable.ic_lyric else R.drawable.ic_lyric_hide,
+        service.getString(if (isDesktopLyricEnabled) R.string.opened_desktop_lrc else R.string.closed_desktop_lrc),
         buildPendingIntent(
           service,
-          if (desktopLyricLock) Command.UNLOCK_DESKTOP_LYRIC else Command.TOGGLE_DESKTOP_LYRIC
+          Command.TOGGLE_DESKTOP_LYRIC
+        )
+      )
+      // 桌面歌词是否锁定
+      .addAction(
+        if (desktopLyricLock) R.drawable.ic_lock else R.drawable.ic_unlock,
+        service.getString(if (desktopLyricLock) R.string.desktop_lyric_lock else R.string.desktop_lyric_unlock),
+        buildPendingIntent(
+          service,
+          Command.TOGGLE_DESKTOP_LYRIC_LOCK
         )
       )
       .setDeleteIntent(buildPendingIntent(service, Command.CLOSE_NOTIFY))

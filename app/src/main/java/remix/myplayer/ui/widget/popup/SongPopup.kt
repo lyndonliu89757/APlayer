@@ -74,7 +74,7 @@ private fun SongDropdownMenu(
   val menuItems =
     listOf(
       R.string.add_to_next_song,
-//      R.string.add_to_play_queue,
+      R.string.add_to_play_queue,
       R.string.song_detail,
       R.string.song_edit,
 //      R.string.set_album_cover,

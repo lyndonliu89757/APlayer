@@ -34,14 +34,12 @@ import remix.myplayer.R
 import remix.myplayer.data.db.room.entity.PlayList
 import remix.myplayer.data.model.audio.Song
 import remix.myplayer.ui.clickableWithoutRipple
-import remix.myplayer.misc.helper.SortOrder
 import remix.myplayer.ui.nav.LocalNavController
 import remix.myplayer.ui.theme.LocalTheme
 import remix.myplayer.ui.widget.common.CommonAppBar
 import remix.myplayer.ui.widget.common.TextPrimary
 import remix.myplayer.ui.widget.common.TextSecondary
 import remix.myplayer.ui.widget.library.GlideCover
-import remix.myplayer.util.Util
 import remix.myplayer.util.Util.vibrate
 import remix.myplayer.viewmodel.libraryViewModel
 import sh.calvin.reorderable.ReorderableItem
@@ -140,9 +138,12 @@ fun CustomSortScreen(id: Long) {
   }
 
   LaunchedEffect(Unit) {
-    withContext(Dispatchers.IO) {
-      songs.addAll(libraryVM.loadSongsByModels(listOf(playList!!)))
-    }
-  }
+    playList = libraryVM.playLists.value.first { it.id == id }
 
+    val result = withContext(Dispatchers.IO) {
+      libraryVM.loadSongsByModels(listOf(playList!!))
+    }
+    songs.clear()
+    songs.addAll(result)
+  }
 }

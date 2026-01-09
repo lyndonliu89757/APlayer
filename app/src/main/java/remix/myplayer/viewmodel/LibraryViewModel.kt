@@ -15,6 +15,7 @@ import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import remix.myplayer.R
 import remix.myplayer.data.db.room.entity.PlayList
@@ -22,6 +23,7 @@ import remix.myplayer.data.model.audio.APlayerModel
 import remix.myplayer.data.model.audio.Album
 import remix.myplayer.data.model.audio.Artist
 import remix.myplayer.data.model.audio.Folder
+import remix.myplayer.data.model.audio.Genre
 import remix.myplayer.data.model.audio.Song
 import remix.myplayer.data.prefs.SettingPrefs
 import remix.myplayer.glide.UriFetcher
@@ -30,8 +32,11 @@ import remix.myplayer.misc.helper.MusicEventCallback
 import remix.myplayer.repo.AlbumRepository
 import remix.myplayer.repo.ArtistRepository
 import remix.myplayer.repo.FolderRepository
+import remix.myplayer.repo.GenreRepository
+import remix.myplayer.repo.PlayListRepository
 import remix.myplayer.repo.SongRepository
 import remix.myplayer.service.MusicService
+import remix.myplayer.ui.dialog.DialogState
 import remix.myplayer.ui.nav.MessageNotifier
 import remix.myplayer.util.PermissionUtil
 import timber.log.Timber
@@ -44,6 +49,8 @@ class LibraryViewModel @Inject constructor(
   private val songRepo: SongRepository,
   private val albumRepo: AlbumRepository,
   private val artistRepo: ArtistRepository,
+  private val genreRepo: GenreRepository,
+  private val playListRepo: PlayListRepository,
   private val folderRepo: FolderRepository,
   private val uriFetcher: UriFetcher,
   val settingPrefs: SettingPrefs,
@@ -60,6 +67,12 @@ class LibraryViewModel @Inject constructor(
   private val _artists = MutableStateFlow<List<Artist>>(emptyList())
   val artists: StateFlow<List<Artist>> = _artists.asStateFlow()
 
+  private val _genres = MutableStateFlow<List<Genre>>(emptyList())
+  val genres: StateFlow<List<Genre>> = _genres.asStateFlow()
+
+  val playLists = playListRepo.allPlayLists()
+    .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
+
   private val _folders = MutableStateFlow<List<Folder>>(emptyList())
   val folders: StateFlow<List<Folder>> = _folders.asStateFlow()
 
@@ -68,6 +81,73 @@ class LibraryViewModel @Inject constructor(
     hasPermission = PermissionUtil.hasNecessaryPermission()
     if (hasPermission) {
       fetchMedia()
+    }
+  }
+
+  private val _createPlaylistState = MutableStateFlow(CreatePlaylistState())
+  val createPlaylistState = _createPlaylistState.asStateFlow()
+
+  fun showCreatePlaylistDialog() {
+    val defaultName = "${context.getString(R.string.local_list)}${playLists.value.size}"
+    _createPlaylistState.update {
+      it.dialogState.show()
+      it.copy(name = defaultName)
+    }
+  }
+
+  fun updateNewPlaylistName(name: String) {
+    _createPlaylistState.update { it.copy(name = name) }
+  }
+
+  fun insertPlayList(name: String, onSuccess: (Long) -> Unit) {
+    viewModelScope.launch {
+      if (playListRepo.checkPlayListExist(name)) {
+        MessageNotifier.show(R.string.playlist_already_exist)
+        return@launch
+      }
+
+      val id = playListRepo.insertPlayList(name)
+      onSuccess(id)
+    }
+  }
+
+  fun addSongsToPlayList(audioIds: List<Long>, playListName: String, createNew: Boolean = false) {
+    viewModelScope.launch {
+      try {
+        if (createNew) {
+          if (playListRepo.checkPlayListExist(playListName)) {
+            MessageNotifier.show(R.string.playlist_already_exist)
+            return@launch
+          }
+
+          playListRepo.insertPlayList(playListName)
+        }
+
+        val count = playListRepo.addSongsToPlayList(audioIds, playListName = playListName)
+        MessageNotifier.show(R.string.add_song_playlist_success, count, playListName)
+      } catch (ignore: Exception) {
+        MessageNotifier.show(R.string.add_song_playlist_error)
+      }
+    }
+  }
+
+  fun updatePlayList(playList: PlayList) {
+    viewModelScope.launch {
+      try {
+        val duplicate = playLists.value.find { it.name == playList.name && it.id != playList.id }
+        if (duplicate != null) {
+          MessageNotifier.show(R.string.playlist_already_exist)
+          return@launch
+        }
+
+        playListRepo.updatePlayList(playList)
+        uriFetcher.updatePlayListVersion()
+        uriFetcher.clearAllCache()
+        Glide.get(context).clearMemory()
+        MessageNotifier.show(R.string.save_success)
+      } catch (e: Exception) {
+        MessageNotifier.show(R.string.save_error)
+      }
     }
   }
 
@@ -80,19 +160,6 @@ class LibraryViewModel @Inject constructor(
       arrayOf("%$key%", "%$key%", "%$key%"),
       settingPrefs.songSortOrder
     )
-  }
-
-  fun updatePlayList(playList: PlayList) {
-    viewModelScope.launch {
-      try {
-        uriFetcher.updatePlayListVersion()
-        uriFetcher.clearAllCache()
-        Glide.get(context).clearMemory()
-        MessageNotifier.show(R.string.save_success)
-      } catch (e: Exception) {
-        MessageNotifier.show(R.string.save_error)
-      }
-    }
   }
 
   fun fetchMedia(
@@ -119,8 +186,9 @@ class LibraryViewModel @Inject constructor(
       _songs.value = async(Dispatchers.IO) { songRepo.allSongs() }.await()
       _albums.value = async(Dispatchers.IO) { albumRepo.allAlbums() }.await()
       _artists.value = async(Dispatchers.IO) { artistRepo.allArtists() }.await()
+      _genres.value = async(Dispatchers.IO) { genreRepo.allGenres() }.await()
       _folders.value = async(Dispatchers.IO) { folderRepo.allFolders() }.await()
-      Timber.v("songCount: ${_songs.value.size} albumCount: ${_albums.value.size} artistCount: ${_artists.value.size} folderCount: ${_folders.value.size}")
+      Timber.v("songCount: ${_songs.value.size} albumCount: ${_albums.value.size} artistCount: ${_artists.value.size} genreCount: ${_genres.value.size} folderCount: ${_folders.value.size}")
     }
   }
 
@@ -152,3 +220,8 @@ class LibraryViewModel @Inject constructor(
     fetchMedia(true, updateAlbumVersion = true, updatePlayListVersion = true)
   }
 }
+
+data class CreatePlaylistState(
+  val dialogState: DialogState = DialogState(),
+  val name: String = ""
+)

@@ -27,8 +27,8 @@ android {
     applicationId = "remix.myplayer"
     minSdk = 21
     targetSdk = 33
-    versionCode = 204
-    versionName = "2.0.4"
+    versionCode = 205
+    versionName = "2.0.5"
     vectorDrawables.useSupportLibrary = true
     multiDexEnabled = true
     setProperty("archivesBaseName", "APlayer-v$versionName")

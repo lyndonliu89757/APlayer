@@ -18,11 +18,14 @@ import androidx.core.net.toUri
 import dagger.hilt.android.EntryPointAccessors
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import kotlinx.coroutines.withTimeout
 import remix.myplayer.App
 import remix.myplayer.R
 import remix.myplayer.data.db.room.entity.PlayList
 import remix.myplayer.data.model.audio.Song
+import remix.myplayer.misc.MediaScanner
 import remix.myplayer.repo.SongRepositoryEntryPoint
+import remix.myplayer.service.Command
 import remix.myplayer.service.MusicService
 import remix.myplayer.ui.nav.MessageNotifier
 import remix.myplayer.util.Util.startActivitySafely
@@ -44,7 +47,7 @@ object MusicUtil {
     return makeCmdIntent(cmd, false)
   }
 
-  fun playFromUri(context: Context, uri: Uri) {
+  suspend fun playFromUri(context: Context, uri: Uri) = withContext(Dispatchers.IO) {
     var songs: List<Song>? = null
     if (uri.scheme != null && uri.authority != null) {
       when (uri.scheme) {
@@ -65,7 +68,6 @@ object MusicUtil {
           // 通过displayName查找
           val displayName = uri.lastPathSegment
           if (!displayName.isNullOrEmpty()) {
-
             songs = songRepo.getSongs("${Audio.Media.DISPLAY_NAME} LIKE ?", arrayOf(displayName))
           }
         }
@@ -89,23 +91,29 @@ object MusicUtil {
       }
       if (songFile != null) {
         songs = songRepo.getSongs(Audio.Media.DATA + " = ?", arrayOf(songFile.absolutePath))
+        if (songs.isEmpty()) {
+          // 有可能是刚添加的歌曲，扫描一次再查询
+          withTimeout(2_000) {
+            MediaScanner(context).scanSingleFile(context, songFile)
+          }?.let {
+            context.contentResolver.notifyChange(it, null)
+          }
+
+          songs = songRepo.getSongs(Audio.Media.DATA + " = ?", arrayOf(songFile.absolutePath))
+        }
       }
     }
     if (!songs.isNullOrEmpty()) {
       context.startService(
         Intent(context, MusicService::class.java).run {
-          action = MusicService.ACTION_PLAY_FROM_URI
+          action = MusicService.ACTION_CMD
+          putExtra(MusicService.EXTRA_CONTROL, Command.PLAY_TEMP)
           putExtra(
             MusicService.EXTRA_SONG,
             songs.first()
           )
         }
       )
-//      service.startService()
-//      setPlayQueue(
-//        songs, MusicUtil.makeCmdIntent(Command.PLAYSELECTEDSONG)
-//          .putExtra(MusicService.Companion.EXTRA_POSITION, 0)
-//      )
     } else {
       MessageNotifier.show(R.string.play_failed, "")
     }
@@ -143,32 +151,33 @@ object MusicUtil {
   /**
    * 导出播放列表
    */
-  suspend fun exportPlayListToFile(context: Context, playList: PlayList?, uri: Uri) = withContext(Dispatchers.IO){
-    if (playList == null) {
-      return@withContext
-    }
-
-    val header = "#EXTM3U"
-    val entry = "#EXTINF:"
-    val sep = ","
-
-    val songs = songRepo.getSongsByModels(listOf(playList))
-    try {
-      context.contentResolver.openOutputStream(uri)?.bufferedWriter().use { bw ->
-        if (bw == null) throw IllegalStateException("openOutputStream failed")
-        bw.write(header)
-        for (song in songs) {
-          bw.newLine()
-          bw.write(entry + song.duration + sep + song.artist + " - " + song.title)
-          bw.newLine()
-          bw.write(song.data)
-        }
+  suspend fun exportPlayListToFile(context: Context, playList: PlayList?, uri: Uri) =
+    withContext(Dispatchers.IO) {
+      if (playList == null) {
+        return@withContext
       }
-      MessageNotifier.show(R.string.export_success)
-    } catch (e: Exception) {
-      MessageNotifier.show(R.string.export_fail, e.toString())
+
+      val header = "#EXTM3U"
+      val entry = "#EXTINF:"
+      val sep = ","
+
+      val songs = songRepo.getSongsByModels(listOf(playList))
+      try {
+        context.contentResolver.openOutputStream(uri)?.bufferedWriter().use { bw ->
+          if (bw == null) throw IllegalStateException("openOutputStream failed")
+          bw.write(header)
+          for (song in songs) {
+            bw.newLine()
+            bw.write(entry + song.duration + sep + song.artist + " - " + song.title)
+            bw.newLine()
+            bw.write(song.data)
+          }
+        }
+        MessageNotifier.show(R.string.export_success)
+      } catch (e: Exception) {
+        MessageNotifier.show(R.string.export_fail, e.toString())
+      }
     }
-  }
 
   /**
    * 设置铃声

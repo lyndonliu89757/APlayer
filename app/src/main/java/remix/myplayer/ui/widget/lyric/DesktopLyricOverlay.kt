@@ -134,7 +134,7 @@ fun DesktopLyricOverlay(
     Image(
       modifier = Modifier
         .clickWithRipple(enabled = showPanel) {
-          lyricManager.setDesktopLyricEnabled(false)
+          lyricManager.isDesktopLyricEnabled = false
         }
         .size(dimensionResource(R.dimen.desktop_lyrics_slider_icon_size))
         .padding(dimensionResource(R.dimen.desktop_lyrics_slider_icon_padding))
@@ -338,7 +338,7 @@ private fun resolveControls(
   DesktopLyricControl(R.drawable.ic_next, "DkpNext") {
     sendLocalBroadcast(makeCmdIntent(Command.SKIP_TO_NEXT))
   },
-  DesktopLyricControl(R.drawable.ic_settings_24dp, "DkpSettings") {
+  DesktopLyricControl(R.drawable.ic_setting, "DkpSettings") {
     onClickSetting()
   }
 )

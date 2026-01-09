@@ -26,6 +26,7 @@ import remix.myplayer.service.playback.MusicStateSource
 import remix.myplayer.ui.activity.base.BaseActivity
 import remix.myplayer.ui.dialog.DeleteSongState
 import remix.myplayer.ui.dialog.DialogState
+import remix.myplayer.ui.dialog.ImportPlayListState
 import remix.myplayer.ui.dialog.ReNamePlayListState
 import remix.myplayer.ui.dialog.SongDetailState
 import remix.myplayer.ui.dialog.SongEditState
@@ -67,8 +68,12 @@ class SettingViewModel @Inject constructor(
       songSortOrder = settingPrefs.songSortOrder,
       albumSortOrder = settingPrefs.albumSortOrder,
       artistSortOrder = settingPrefs.artistSortOrder,
+      genreSortOrder = settingPrefs.genreSortOrder,
+      playlistSortOrder = settingPrefs.playlistSortOrder,
       albumDetailSortOrder = settingPrefs.albumDetailSortOrder,
       artistDetailSortOrder = settingPrefs.artistDetailSortOrder,
+      genreDetailSortOrder = settingPrefs.genreDetailSortOrder,
+      playListDetailSortOrder = settingPrefs.playListDetailSortOrder,
       folderDetailSortOrder = settingPrefs.folderDetailSortOrder,
     ),
     playingScreen = PlayingScreenSettings(
@@ -155,8 +160,12 @@ class SettingViewModel @Inject constructor(
             SortCategory.SONG -> lib.copy(songSortOrder = order)
             SortCategory.ALBUM -> lib.copy(albumSortOrder = order)
             SortCategory.ARTIST -> lib.copy(artistSortOrder = order)
+            SortCategory.PLAYLIST -> lib.copy(playlistSortOrder = order)
+            SortCategory.GENRE -> lib.copy(genreSortOrder = order)
             SortCategory.ALBUM_DETAIL -> lib.copy(albumDetailSortOrder = order)
             SortCategory.ARTIST_DETAIL -> lib.copy(artistDetailSortOrder = order)
+            SortCategory.PLAYLIST_DETAIL -> lib.copy(playListDetailSortOrder = order)
+            SortCategory.GENRE_DETAIL -> lib.copy(genreDetailSortOrder = order)
             SortCategory.FOLDER_DETAIL -> lib.copy(folderDetailSortOrder = order)
           }
         )
@@ -195,8 +204,8 @@ class SettingViewModel @Inject constructor(
   }
 
   // -------- Lyric 分组 ----------
-  fun setDesktopLyricEnabled(enabled: Boolean, activity: Activity?) {
-    lyricManager.setDesktopLyricEnabled(enabled, activity)
+  fun setDesktopLyricEnabled(enabled: Boolean) {
+    lyricManager.isDesktopLyricEnabled = enabled
     _settingsState.update { it.copy(lyric = it.lyric.copy(desktopLyricEnabled = enabled)) }
   }
 
@@ -220,6 +229,31 @@ class SettingViewModel @Inject constructor(
       lyricManager.updateLyrics(MusicStateSource.currentPlaybackUiState.song)
     }
     _settingsState.update { it.copy(lyric = it.lyric.copy(generalLyricOrder = orderList)) }
+  }
+
+  // -------- PlayList 分组 ----------
+
+  private val _addSongToPlayListState =
+    MutableStateFlow(ImportPlayListState(DialogState(false), DialogState(false)))
+  val addSongToPlayListState = _addSongToPlayListState.asStateFlow()
+
+  fun showAddSongToPlayListDialog(songIds: List<Long>, initialText: String = "") {
+    _addSongToPlayListState.updateIf(
+      condition = { !it.rootDialogState.isOpen },
+      transform = {
+        it.rootDialogState.show()
+        it.copy(
+          inputText = initialText,
+          songIds = songIds
+        )
+      }
+    )
+  }
+
+  fun updateImportPlayListState(text: String) {
+    _addSongToPlayListState.update {
+      it.copy(inputText = text)
+    }
   }
 
   private val _deleteSongState =

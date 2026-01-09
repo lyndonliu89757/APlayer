@@ -179,6 +179,8 @@ data class MultiSelectState(
     Song,
     Album,
     Artist,
+    Genre,
+    PlayList,
     Folder,
     Detail,
     LastAdded,

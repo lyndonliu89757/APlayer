@@ -16,6 +16,8 @@ data class Library(
     const val TAG_SONG = 0
     const val TAG_ALBUM = 1
     const val TAG_ARTIST = 2
+    const val TAG_GENRE = 3
+    const val TAG_PLAYLIST = 4
     const val TAG_FOLDER = 5
     const val TAG_REMOTE = 6
     const val TAG_SETTING = 9
@@ -24,6 +26,8 @@ data class Library(
       Library(TAG_SONG, R.drawable.ic_music),
       Library(TAG_ALBUM, R.drawable.ic_album),
       Library(TAG_ARTIST, R.drawable.ic_singer),
+      Library(TAG_GENRE, R.drawable.ic_singer),
+      Library(TAG_PLAYLIST, R.drawable.ic_singer),
       Library(TAG_FOLDER, R.drawable.ic_folder),
       Library(TAG_REMOTE, R.drawable.ic_webdav),
       Library(TAG_SETTING, R.drawable.ic_setting)
@@ -35,6 +39,8 @@ data class Library(
       TAG_SONG -> R.string.tab_song
       TAG_ALBUM -> R.string.tab_album
       TAG_ARTIST -> R.string.tab_artist
+      TAG_PLAYLIST -> R.string.tab_playlist
+      TAG_GENRE -> R.string.tab_genre
       TAG_FOLDER -> R.string.tab_folder
       TAG_REMOTE -> R.string.tab_remote
       TAG_SETTING -> R.string.setting
@@ -68,6 +74,17 @@ data class Library(
         R.string.artist_desc
       )
 
+      TAG_PLAYLIST -> listOf(
+        R.string.name,
+        R.string.name_desc,
+        R.string.create_time
+      )
+
+      TAG_GENRE -> listOf(
+        R.string.genre,
+        R.string.genre_desc
+      )
+
       else -> throw IllegalArgumentException("unknown tag: $tag")
     }
 
@@ -96,6 +113,17 @@ data class Library(
       TAG_ARTIST -> listOf(
         SortOrder.ARTIST_A_Z,
         SortOrder.ARTIST_Z_A,
+      )
+
+      TAG_PLAYLIST -> listOf(
+        SortOrder.PLAYLIST_A_Z,
+        SortOrder.PLAYLIST_Z_A,
+        SortOrder.PLAYLIST_DATE
+      )
+
+      TAG_GENRE -> listOf(
+        SortOrder.GENRE_A_Z,
+        SortOrder.GENRE_Z_A
       )
 
       else -> throw IllegalArgumentException("unknown tag: $tag")

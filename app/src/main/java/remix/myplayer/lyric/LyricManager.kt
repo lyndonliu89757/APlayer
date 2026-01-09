@@ -160,31 +160,16 @@ class LyricManager @Inject constructor(
 
   var isDesktopLyricEnabled: Boolean
     get() = lyricPrefs.desktopLyricEnabled
-    @UiThread private set(value) {
+    @UiThread set(value) {
       lyricPrefs.desktopLyricEnabled = value
-      MessageNotifier.show(if (value) R.string.opened_desktop_lrc else R.string.closed_desktop_lrc)
+
+      MusicServiceRemote.service?.run {
+        updateNotification()
+        updatePlaybackState()
+      }
+      
       ensureDesktopLyric()
     }
-
-  // 请求权限要 context，setter 没法多传参所以单独出来
-  // activity 为 null 表示不在 Activity 里，不请求权限只 toast
-  @UiThread
-  fun setDesktopLyricEnabled(enabled: Boolean, activity: Activity? = null) {
-    if (enabled && !XXPermissions.isGranted(context, Permission.SYSTEM_ALERT_WINDOW)) {
-      if (activity != null) {
-        XXPermissions.with(activity)
-          .permission(Permission.SYSTEM_ALERT_WINDOW)
-          .request { _, allGranted ->
-            if (allGranted) {
-              isDesktopLyricLocked = true
-            }
-          }
-      }
-      MessageNotifier.show(R.string.plz_give_float_permission)
-      return
-    }
-    isDesktopLyricEnabled = enabled
-  }
 
   var isStatusBarLyricEnabled: Boolean
     get() = lyricPrefs.statusBarLyricEnabled
@@ -210,8 +195,6 @@ class LyricManager @Inject constructor(
   var isDesktopLyricLocked: Boolean
     get() = desktopLyricPrefs.locked
     @UiThread set(value) {
-      MessageNotifier.show(if (value) R.string.desktop_lyric__lock_ticker else R.string.desktop_lyric__unlock)
-
       desktopLyricPrefs.locked = value
       _desktopUiState.value = _desktopUiState.value.copy(locked = value)
 

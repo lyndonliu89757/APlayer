@@ -33,9 +33,15 @@ class SettingPrefs @Inject constructor(
   var scanSize by PrefsDelegate(sp, PrefKeys.Setting.SCAN_SIZE, MB)
   var forceSort by PrefsDelegate(sp, PrefKeys.Setting.FORCE_SORT, false)
 
-  var songSortOrder by PrefsDelegate(sp, PrefKeys.Setting.SONG_SORT_ORDER, SortOrder.SONG_A_Z)
+  var songSortOrder by PrefsDelegate(sp, PrefKeys.Setting.SONG_SORT_ORDER, SortOrder.DATE_DESC)
   var albumSortOrder by PrefsDelegate(sp, PrefKeys.Setting.ALBUM_SORT_ORDER, SortOrder.ALBUM_A_Z)
   var artistSortOrder by PrefsDelegate(sp, PrefKeys.Setting.ARTIST_SORT_ORDER, SortOrder.ARTIST_A_Z)
+  var playlistSortOrder by PrefsDelegate(
+    sp,
+    PrefKeys.Setting.PLAYLIST_SORT_ORDER,
+    SortOrder.PLAYLIST_DATE
+  )
+  var genreSortOrder by PrefsDelegate(sp, PrefKeys.Setting.GENRE_SORT_ORDER, SortOrder.GENRE_A_Z)
 
   var albumDetailSortOrder by PrefsDelegate(
     sp,
@@ -45,6 +51,16 @@ class SettingPrefs @Inject constructor(
   var artistDetailSortOrder by PrefsDelegate(
     sp,
     PrefKeys.Setting.CHILD_ARTIST_SONG_SORT_ORDER,
+    SortOrder.SONG_A_Z
+  )
+  var playListDetailSortOrder by PrefsDelegate(
+    sp,
+    PrefKeys.Setting.CHILD_PLAYLIST_SONG_SORT_ORDER,
+    SortOrder.SONG_A_Z
+  )
+  var genreDetailSortOrder by PrefsDelegate(
+    sp,
+    PrefKeys.Setting.CHILD_GENRE_SONG_SORT_ORDER,
     SortOrder.SONG_A_Z
   )
   var folderDetailSortOrder by PrefsDelegate(
@@ -126,4 +142,19 @@ class SettingPrefs @Inject constructor(
     const val DOWNLOAD_LASTFM = 0
     const val DOWNLOAD_NETEASE = 1
   }
+}
+
+fun SettingPrefs.playlistSortOrderFlow(): Flow<String> {
+  return callbackFlow {
+    trySend(playlistSortOrder)
+    val listener = SharedPreferences.OnSharedPreferenceChangeListener { _, key ->
+      if (key == PrefKeys.Setting.PLAYLIST_SORT_ORDER) {
+        trySend(playlistSortOrder)
+      }
+    }
+    sp.registerOnSharedPreferenceChangeListener(listener)
+    awaitClose {
+      sp.unregisterOnSharedPreferenceChangeListener(listener)
+    }
+  }.distinctUntilChanged()
 }

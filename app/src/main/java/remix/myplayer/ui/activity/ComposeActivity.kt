@@ -82,10 +82,10 @@ class ComposeActivity : BaseMusicActivity() {
           Timber.v("deepLink")
         }
         else -> {
-          lifecycleScope.launch(Dispatchers.IO) {
+          lifecycleScope.launch() {
             MusicUtil.playFromUri(this@ComposeActivity, it)
-            intent = Intent()
           }
+          intent = Intent()
         }
       }
     }

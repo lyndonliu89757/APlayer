@@ -494,7 +494,8 @@ object Util {
     newArtist: String,
     newGenre: String,
     newYear: String,
-    newTrackNum: String
+    newTrackNum: String,
+    newLyrics: String
   ) {
     val fieldMap = EnumMap<FieldKey, String>(FieldKey::class.java).apply {
       put(FieldKey.TITLE, newTitle)
@@ -503,6 +504,7 @@ object Util {
       put(FieldKey.GENRE, newGenre)
       put(FieldKey.YEAR, newYear)
       put(FieldKey.TRACK, newTrackNum)
+      put(FieldKey.LYRICS, newLyrics)
     }
 
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {

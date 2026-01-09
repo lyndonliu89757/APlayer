@@ -45,7 +45,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
-import androidx.compose.ui.focus.focusTarget
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
@@ -60,7 +59,6 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.withContext
 import remix.myplayer.R
 import remix.myplayer.data.model.audio.Song
-import remix.myplayer.misc.helper.MusicServiceRemote.setPlayQueue
 import remix.myplayer.service.Command
 import remix.myplayer.service.MusicService
 import remix.myplayer.ui.theme.LocalTheme
@@ -70,6 +68,7 @@ import remix.myplayer.ui.widget.common.TextPrimary
 import remix.myplayer.ui.widget.common.TextSecondary
 import remix.myplayer.ui.widget.library.list.ListSong
 import remix.myplayer.util.MusicUtil
+import remix.myplayer.util.Util
 import remix.myplayer.viewmodel.MultiSelectState
 import remix.myplayer.viewmodel.libraryViewModel
 import remix.myplayer.viewmodel.mainViewModel
@@ -170,9 +169,9 @@ fun SearchScreen() {
                   return@ListSong
                 }
 
-                setPlayQueue(
-                  songs, MusicUtil.makeCmdIntent(Command.PLAY_AT)
-                    .putExtra(MusicService.EXTRA_POSITION, pos)
+                Util.sendLocalBroadcast(
+                  MusicUtil.makeCmdIntent(Command.PLAY_TEMP)
+                    .putExtra(MusicService.EXTRA_SONG, song)
                 )
               },
               onLongClickSong = {
@@ -186,12 +185,15 @@ fun SearchScreen() {
   }
 
   LaunchedEffect(searchKey) {
-    withContext(Dispatchers.IO) {
-      songs.clear()
+    val result = withContext(Dispatchers.IO) {
       if (searchKey.isNotEmpty()) {
-        songs.addAll(libraryVM.searchSong(searchKey))
+        libraryVM.searchSong(searchKey)
+      } else {
+        emptyList()
       }
     }
+    songs.clear()
+    songs.addAll(result)
   }
 }
 
