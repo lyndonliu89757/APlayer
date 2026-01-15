@@ -13,7 +13,7 @@ import androidx.compose.ui.graphics.toArgb
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.compose.rememberNavController
 import dagger.hilt.android.AndroidEntryPoint
-import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import remix.myplayer.ui.activity.base.BaseMusicActivity
 import remix.myplayer.ui.nav.AppNav
@@ -24,7 +24,6 @@ import remix.myplayer.ui.theme.LocalTheme
 import remix.myplayer.util.MusicUtil
 import remix.myplayer.util.ThemeUtil
 import remix.myplayer.viewmodel.LibraryViewModel
-import remix.myplayer.viewmodel.MainViewModel
 import remix.myplayer.viewmodel.PlaybackViewModel
 import remix.myplayer.viewmodel.ProvideViewModels
 import timber.log.Timber
@@ -81,8 +80,10 @@ class ComposeActivity : BaseMusicActivity() {
         playingScreenDeepLink.scheme -> {
           Timber.v("deepLink")
         }
+
         else -> {
-          lifecycleScope.launch() {
+          lifecycleScope.launch {
+            delay(500)
             MusicUtil.playFromUri(this@ComposeActivity, it)
           }
           intent = Intent()

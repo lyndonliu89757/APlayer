@@ -26,8 +26,8 @@ data class Library(
       Library(TAG_SONG, R.drawable.ic_music),
       Library(TAG_ALBUM, R.drawable.ic_album),
       Library(TAG_ARTIST, R.drawable.ic_singer),
-      Library(TAG_GENRE, R.drawable.ic_singer),
-      Library(TAG_PLAYLIST, R.drawable.ic_singer),
+      Library(TAG_GENRE, R.drawable.ic_genre),
+      Library(TAG_PLAYLIST, R.drawable.ic_apps_white_24dp),
       Library(TAG_FOLDER, R.drawable.ic_folder),
       Library(TAG_REMOTE, R.drawable.ic_webdav),
       Library(TAG_SETTING, R.drawable.ic_setting)

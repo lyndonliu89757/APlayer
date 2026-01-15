@@ -101,7 +101,7 @@ internal fun PlayingControl(
     ControlButton(onClick = {
       sendLocalBroadcast(
         Intent(MusicService.ACTION_CMD).putExtra(
-          MusicService.EXTRA_CONTROL,
+          MusicService.EXTRA_COMMAND,
           Command.SKIP_TO_PREVIOUS
         )
       )
@@ -118,7 +118,7 @@ internal fun PlayingControl(
     ControlButton(onClick = {
       sendLocalBroadcast(
         Intent(MusicService.ACTION_CMD).putExtra(
-          MusicService.EXTRA_CONTROL,
+          MusicService.EXTRA_COMMAND,
           Command.PLAY_PAUSE
         )
       )
@@ -142,7 +142,7 @@ internal fun PlayingControl(
     ControlButton(onClick = {
       sendLocalBroadcast(
         Intent(MusicService.ACTION_CMD).putExtra(
-          MusicService.EXTRA_CONTROL,
+          MusicService.EXTRA_COMMAND,
           Command.SKIP_TO_NEXT
         )
       )

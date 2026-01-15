@@ -7,10 +7,10 @@ import dagger.hilt.InstallIn
 import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
 import remix.myplayer.data.db.room.AppDatabase
-import remix.myplayer.data.db.room.dao.HistoryDao
 import remix.myplayer.data.db.room.dao.MetaDataCacheDao
 import remix.myplayer.data.db.room.dao.PlayListDao
 import remix.myplayer.data.db.room.dao.PlayQueueDao
+import remix.myplayer.data.db.room.dao.SmbDao
 import remix.myplayer.data.db.room.dao.WebDavDao
 import javax.inject.Singleton
 
@@ -35,13 +35,13 @@ object DatabaseModule {
   }
 
   @Provides
-  fun provideHistoryDao(database: AppDatabase): HistoryDao {
-    return database.historyDao()
+  fun provideWebdavDao(database: AppDatabase): WebDavDao {
+    return database.webDavDao()
   }
 
   @Provides
-  fun provideWebdavDao(database: AppDatabase): WebDavDao {
-    return database.webDavDao()
+  fun provideSmbDao(database: AppDatabase): SmbDao {
+    return database.smbDao()
   }
 
   @Provides

@@ -38,7 +38,6 @@ import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import remix.myplayer.App
-import remix.myplayer.BuildConfig
 import remix.myplayer.R
 import remix.myplayer.data.model.audio.Song
 import remix.myplayer.data.model.audio.Song.Companion.EMPTY_SONG
@@ -314,7 +313,7 @@ class MusicService : BaseService(),
 
   @SuppressLint("CheckResult")
   override fun onStartCommand(commandIntent: Intent?, flags: Int, startId: Int): Int {
-    val control = commandIntent?.getIntExtra(EXTRA_CONTROL, -1)
+    val control = commandIntent?.getIntExtra(EXTRA_COMMAND, -1)
     val action = commandIntent?.action
 
     Timber.v("onStartCommand, control: $control action: $action flags: $flags startId: $startId")
@@ -369,12 +368,20 @@ class MusicService : BaseService(),
     val noisyFilter = IntentFilter()
     noisyFilter.addAction(AudioManager.ACTION_AUDIO_BECOMING_NOISY)
     noisyFilter.addAction(Intent.ACTION_HEADSET_PLUG)
-    registerReceiver(headSetReceiver, noisyFilter)
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+      registerReceiver(headSetReceiver, noisyFilter, RECEIVER_NOT_EXPORTED)
+    } else {
+      registerReceiver(headSetReceiver, noisyFilter)
+    }
 
     val screenFilter = IntentFilter()
     screenFilter.addAction(Intent.ACTION_SCREEN_ON)
     screenFilter.addAction(Intent.ACTION_SCREEN_OFF)
-    App.context.registerReceiver(screenReceiver, screenFilter)
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+      registerReceiver(screenReceiver, screenFilter, RECEIVER_NOT_EXPORTED)
+    } else {
+      registerReceiver(screenReceiver, screenFilter)
+    }
 
     // 监听数据库变化
     contentResolver.registerContentObserver(
@@ -467,7 +474,7 @@ class MusicService : BaseService(),
 
       override fun onStop() {
         pause()
-        notify.cancelPlayingNotify()
+        notify.stopForegroundAndNotification()
         stopSelf()
       }
 
@@ -526,9 +533,8 @@ class MusicService : BaseService(),
 
   override fun onEnded() {
     Timber.v("onEnded")
-    // 理论上应该不会到这?
-    if (BuildConfig.DEBUG) {
-      throw IllegalStateException("onEnded")
+    if (playback.itemCount == 0) {
+      notify.stopForegroundAndNotification()
     }
   }
 
@@ -602,7 +608,7 @@ class MusicService : BaseService(),
     playback.release()
     load = 0
 
-    notify.cancelPlayingNotify()
+    notify.stopForegroundAndNotification()
 
     lyricManager.isServiceAvailable = false
 
@@ -847,7 +853,7 @@ class MusicService : BaseService(),
   private fun playAt(position: Int) {
     Timber.v("playAt, $position")
 
-    if (position == -1 || position >= playback.mediaItemCount) {
+    if (position == -1 || position >= playback.itemCount) {
       MessageNotifier.show(R.string.illegal_arg)
       return
     }
@@ -905,7 +911,7 @@ class MusicService : BaseService(),
   }
 
   private fun handleStartCommandIntent(commandIntent: Intent?, action: String?) {
-    Timber.v("handleStartCommandIntent")
+    Timber.v("handleStartCommandIntent: $commandIntent")
     if (action == null) {
       return
     }
@@ -915,7 +921,7 @@ class MusicService : BaseService(),
         if (playModel != MODE_SHUFFLE) {
           playModel = MODE_SHUFFLE
         }
-        handleCommand(Intent(ACTION_CMD).putExtra(EXTRA_CONTROL, Command.SKIP_TO_NEXT))
+        handleCommand(Intent(ACTION_CMD).putExtra(EXTRA_COMMAND, Command.SKIP_TO_NEXT))
       }
 
       ACTION_SHORTCUT_MYLOVE -> {
@@ -931,7 +937,7 @@ class MusicService : BaseService(),
           }
 
           setPlayQueue(songs, Intent(ACTION_CMD).apply {
-            putExtra(EXTRA_CONTROL, Command.PLAY_AT)
+            putExtra(EXTRA_COMMAND, Command.PLAY_AT)
             putExtra(EXTRA_POSITION, 0)
           })
         }
@@ -948,7 +954,7 @@ class MusicService : BaseService(),
             return@tryLaunch
           }
           val lastedIntent = Intent(ACTION_CMD)
-          lastedIntent.putExtra(EXTRA_CONTROL, Command.PLAY_AT)
+          lastedIntent.putExtra(EXTRA_COMMAND, Command.PLAY_AT)
           lastedIntent.putExtra(EXTRA_POSITION, 0)
           setPlayQueue(songs, lastedIntent)
         }
@@ -989,7 +995,7 @@ class MusicService : BaseService(),
     if (isPlaying || notify.isNotifyShowing || lastOp != -1) {
       updateNotification()
     }
-    updateMediaSession(lastOp)
+    updateMediaSession()
     // 是否需要保存进度
     if (settingPrefs.playAtBreakPoint) {
       startSaveProgress()
@@ -1023,7 +1029,7 @@ class MusicService : BaseService(),
     if (intent == null || intent.extras == null) {
       return
     }
-    val control = intent.getIntExtra(EXTRA_CONTROL, -1)
+    val control = intent.getIntExtra(EXTRA_COMMAND, -1)
     this@MusicService.control = control
     Timber.v("control: $control")
 
@@ -1037,7 +1043,7 @@ class MusicService : BaseService(),
       }
       // 保存控制命令,用于播放界面判断动画
       lastOp = control
-      if (playback.mediaItemCount == 0) {
+      if (playback.itemCount == 0) {
         // 列表为空，尝试读取
         Timber.v("列表为空，尝试读取")
         tryLaunch {
@@ -1055,7 +1061,7 @@ class MusicService : BaseService(),
         pause()
         launch {
           delay(300)
-          notify.cancelPlayingNotify()
+          notify.stopForegroundAndNotification()
         }
       }
       // 播放选中的歌曲
@@ -1167,7 +1173,7 @@ class MusicService : BaseService(),
   /**
    * 更新锁屏
    */
-  private fun updateMediaSession(control: Int) {
+  private fun updateMediaSession() {
     val currentSong = playback.currentSong ?: EMPTY_SONG
     if (currentSong == EMPTY_SONG) {
       return
@@ -1181,7 +1187,9 @@ class MusicService : BaseService(),
       .putLong(MediaMetadataCompat.METADATA_KEY_DURATION, currentSong.duration)
       .putLong(MediaMetadataCompat.METADATA_KEY_TRACK_NUMBER, (playback.currentIndex + 1).toLong())
       .putString(MediaMetadataCompat.METADATA_KEY_TITLE, currentSong.title)
-    builder.putLong(MediaMetadataCompat.METADATA_KEY_NUM_TRACKS, playback.mediaItemCount.toLong())
+      .putString(MediaMetadataCompat.METADATA_KEY_DISPLAY_TITLE, currentSong.title)
+      .putString(MediaMetadataCompat.METADATA_KEY_DISPLAY_SUBTITLE, currentSong.artist)
+    builder.putLong(MediaMetadataCompat.METADATA_KEY_NUM_TRACKS, playback.itemCount.toLong())
 
     mediaSession.setMetadata(builder.build())
     updatePlaybackState()
@@ -1391,7 +1399,7 @@ class MusicService : BaseService(),
     // 歌曲标签变化
     const val TAG_CHANGE = "$APLAYER_PACKAGE_NAME.tag_change"
 
-    const val EXTRA_CONTROL = "control"
+    const val EXTRA_COMMAND = "command"
     const val EXTRA_SHUFFLE = "shuffle"
     const val EXTRA_PROGRESS = "progress"
     const val ACTION_SHORTCUT_SHUFFLE = "$APLAYER_PACKAGE_NAME.shortcut.shuffle"

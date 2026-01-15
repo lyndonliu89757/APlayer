@@ -46,6 +46,7 @@ import remix.myplayer.ui.screen.EQScreen
 import remix.myplayer.ui.screen.HomeScreen
 import remix.myplayer.ui.screen.RemoteScreen
 import remix.myplayer.ui.screen.SearchScreen
+import remix.myplayer.ui.screen.SongChooserScreen
 import remix.myplayer.ui.screen.crop.CropScreen
 import remix.myplayer.ui.screen.detail.DetailScreen
 import remix.myplayer.ui.screen.library.AlbumScreen
@@ -64,10 +65,11 @@ const val RouteArtist = "artist"
 const val RouteFolder = "folder"
 const val RouteRemote = "remote"
 const val RouteSetting = "setting"
+const val RouteSongChoose = "song_choose"
 const val RoutePlayingScreen = "playing_screen"
 const val RouteCustomSort = "custom_sort"
 const val RouteSearch = "search"
-const val RouteWebDav = "webdav"
+const val RouteSmb = "smb"
 const val RouteCrop = "crop"
 const val RouteEq = "eq"
 
@@ -105,6 +107,17 @@ fun AppNav() {
 
         normalAnimatedScreen(RouteSetting) {
           SettingScreen()
+        }
+
+        normalAnimatedScreen(
+          "${RouteSongChoose}/{id}/{name}",
+          arguments = listOf(navArgument("id") {
+            type = NavType.LongType
+          })
+        ) {
+          val id = it.arguments?.getLong("id") ?: return@normalAnimatedScreen
+          val name = Uri.decode(it.arguments?.getString("name") ?: return@normalAnimatedScreen)
+          SongChooserScreen(id, name)
         }
 
         composable<DetailScreenRoute>(
@@ -155,7 +168,7 @@ fun AppNav() {
           SearchScreen()
         }
 
-        normalAnimatedScreen(RouteWebDav) {
+        normalAnimatedScreen(RouteSmb) {
           WebDavScreen()
         }
 

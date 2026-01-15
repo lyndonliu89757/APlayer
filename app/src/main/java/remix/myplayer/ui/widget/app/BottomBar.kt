@@ -35,7 +35,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import remix.myplayer.R
 import remix.myplayer.service.Command
 import remix.myplayer.service.MusicService
-import remix.myplayer.service.MusicService.Companion.EXTRA_CONTROL
+import remix.myplayer.service.MusicService.Companion.EXTRA_COMMAND
 import remix.myplayer.ui.clickableWithoutRipple
 import remix.myplayer.ui.nav.LocalNavController
 import remix.myplayer.ui.nav.RoutePlayingScreen
@@ -87,7 +87,7 @@ fun BottomBar(vm: PlaybackViewModel = playbackViewModel) {
             Util.sendLocalBroadcast(
               Intent(MusicService.ACTION_CMD)
                 .putExtra(
-                  EXTRA_CONTROL,
+                  EXTRA_COMMAND,
                   if (dragAmount < 0) Command.SKIP_TO_NEXT else Command.SKIP_TO_PREVIOUS
                 )
             )
@@ -135,7 +135,7 @@ fun BottomBar(vm: PlaybackViewModel = playbackViewModel) {
           .clickableWithoutRipple(interactionSource) {
             Util.sendLocalBroadcast(
               Intent(MusicService.ACTION_CMD)
-                .putExtra(EXTRA_CONTROL, Command.PLAY_PAUSE)
+                .putExtra(EXTRA_COMMAND, Command.PLAY_PAUSE)
             )
           },
         painter = painterResource(if (playbackState.isPlaying) R.drawable.ic_pause else R.drawable.ic_play),
@@ -148,7 +148,7 @@ fun BottomBar(vm: PlaybackViewModel = playbackViewModel) {
           .clickableWithoutRipple(interactionSource) {
             Util.sendLocalBroadcast(
               Intent(MusicService.ACTION_CMD)
-                .putExtra(EXTRA_CONTROL, Command.SKIP_TO_NEXT)
+                .putExtra(EXTRA_COMMAND, Command.SKIP_TO_NEXT)
             )
           },
         painter = painterResource(R.drawable.ic_next),

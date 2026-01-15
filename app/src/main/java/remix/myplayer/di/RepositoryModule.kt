@@ -16,6 +16,8 @@ import remix.myplayer.repo.PlayListRepoImpl
 import remix.myplayer.repo.PlayListRepository
 import remix.myplayer.repo.PlayQueueRepoImpl
 import remix.myplayer.repo.PlayQueueRepository
+import remix.myplayer.repo.SmbRepoImpl
+import remix.myplayer.repo.SmbRepository
 import remix.myplayer.repo.SongRepoImpl
 import remix.myplayer.repo.SongRepository
 import remix.myplayer.repo.WebDavRepoImpl
@@ -56,4 +58,8 @@ abstract class RepositoryModule {
   @Singleton
   @Binds
   abstract fun bindWebDavRepo(repo: WebDavRepoImpl): WebDavRepository
+
+  @Singleton
+  @Binds
+  abstract fun bindSmbRepo(repo: SmbRepoImpl): SmbRepository
 }

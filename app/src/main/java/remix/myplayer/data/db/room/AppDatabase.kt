@@ -11,16 +11,17 @@ import androidx.sqlite.db.SupportSQLiteDatabase
 import remix.myplayer.data.db.Migrations.migration3to4
 import remix.myplayer.data.db.Migrations.migration4to5
 import remix.myplayer.data.db.Migrations.migration5to6
-import remix.myplayer.data.db.room.dao.HistoryDao
+import remix.myplayer.data.db.Migrations.migration6to7
 import remix.myplayer.data.db.room.dao.MetaDataCacheDao
 import remix.myplayer.data.db.room.dao.PlayListDao
 import remix.myplayer.data.db.room.dao.PlayQueueDao
+import remix.myplayer.data.db.room.dao.SmbDao
 import remix.myplayer.data.db.room.dao.WebDavDao
-import remix.myplayer.data.db.room.entity.History
 import remix.myplayer.data.db.room.entity.MetaDataCache
 import remix.myplayer.data.db.room.entity.PlayList
 import remix.myplayer.data.db.room.entity.PlayQueue
 import remix.myplayer.data.db.room.entity.WebDav
+import remix.myplayer.data.db.room.entity.Smb
 import remix.myplayer.service.MusicService
 import remix.myplayer.ui.activity.base.BaseMusicActivity.Companion.EXTRA_PLAYLIST
 import remix.myplayer.util.Util.sendLocalBroadcast
@@ -33,8 +34,8 @@ import timber.log.Timber
   entities = [
     PlayList::class,
     PlayQueue::class,
-    History::class,
     WebDav::class,
+    Smb::class,
     MetaDataCache::class
   ], version = AppDatabase.VERSION, exportSchema = true
 )
@@ -44,9 +45,9 @@ abstract class AppDatabase : RoomDatabase() {
 
   abstract fun playQueueDao(): PlayQueueDao
 
-  abstract fun historyDao(): HistoryDao
-
   abstract fun webDavDao(): WebDavDao
+
+  abstract fun smbDao(): SmbDao
 
   abstract fun metaDataCacheDao(): MetaDataCacheDao
 
@@ -76,6 +77,7 @@ abstract class AppDatabase : RoomDatabase() {
           .addMigrations(migration3to4)
           .addMigrations(migration4to5)
           .addMigrations(migration5to6)
+          .addMigrations(migration6to7)
           .build()
       database.invalidationTracker.addObserver(object :
         InvalidationTracker.Observer(PlayList.TABLE_NAME, PlayQueue.TABLE_NAME) {

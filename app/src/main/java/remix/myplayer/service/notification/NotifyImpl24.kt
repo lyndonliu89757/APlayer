@@ -15,7 +15,7 @@ import remix.myplayer.R
 import remix.myplayer.data.model.audio.Song
 import remix.myplayer.service.Command
 import remix.myplayer.service.MusicService
-import remix.myplayer.service.MusicService.Companion.EXTRA_CONTROL
+import remix.myplayer.service.MusicService.Companion.EXTRA_COMMAND
 import remix.myplayer.util.DensityUtil
 
 /**
@@ -65,7 +65,7 @@ NotifyImpl24(context: MusicService) : Notify(context) {
       if (playbackState.isPlaying) R.drawable.ic_pause else R.drawable.ic_play
 
     val deleteIntent = Intent(MusicService.ACTION_CMD)
-    deleteIntent.putExtra(EXTRA_CONTROL, Command.CLOSE_NOTIFY)
+    deleteIntent.putExtra(EXTRA_COMMAND, Command.CLOSE_NOTIFY)
 
     val isDesktopLyricEnabled = lyricManager.isDesktopLyricEnabled
     val desktopLyricLock = lyricManager.isDesktopLyricLocked
@@ -117,6 +117,7 @@ NotifyImpl24(context: MusicService) : Notify(context) {
           .setMediaSession(service.mediaSession.sessionToken)
       )
       .build()
-    pushNotify(notification)
+
+    startForegroundOrNotify(notification)
   }
 }

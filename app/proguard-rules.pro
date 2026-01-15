@@ -5,12 +5,7 @@
     <methods>;
 }
 
--keep class remix.myplayer.bean.** { *; }
-
-# gson
-# https://r8.googlesource.com/r8/+/refs/heads/master/compatibility-faq.md
--keep class com.google.gson.reflect.TypeToken { *; }
--keep class * extends com.google.gson.reflect.TypeToken
+-keep class remix.myplayer.data.model.** { *; }
 
 # jaudiotagger
 # Simply keep all classes as they use reflection
@@ -71,11 +66,42 @@
 # With R8 full mode generic signatures are stripped for classes that are not
 # kept. Suspend functions are wrapped in continuations where the type argument
 # is used.
--keep,allowobfuscation,allowshrinking class kotlin.coroutines.Continuation
+-keep,allowoptimization,allowshrinking,allowobfuscation class kotlin.coroutines.Continuation
 
 # R8 full mode strips generic signatures from return types if not kept.
 -if interface * { @retrofit2.http.* public *** *(...); }
 -keep,allowoptimization,allowshrinking,allowobfuscation class <3>
 
 # With R8 full mode generic signatures are stripped for classes that are not kept.
--keep,allowobfuscation,allowshrinking class retrofit2.Response
+-keep,allowoptimization,allowshrinking,allowobfuscation class retrofit2.Response
+
+# prfofile
+-keep class androidx.profileinstaller.ProfileInstallReceiver { *; }
+-keep class androidx.profileinstaller.ProfileInstallerInitializer { *; }
+-keep class androidx.profileinstaller.** { *; }
+-keep class androidx.startup.AppInitializer { *; }
+-keep class androidx.startup.InitializationProvider { *; }
+-keep class androidx.startup.Initializer { *; }
+
+# smbj
+-dontwarn com.hierynomus.**
+-dontwarn org.bouncycastle.**
+-dontwarn org.slf4j.**
+-dontwarn net.engio.mbassy.**
+-dontwarn javax.el.**
+
+-keepclassmembers class * {
+    @net.engio.mbassy.listener.Handler <methods>;
+}
+
+-keep class net.engio.mbassy.dispatch.HandlerInvocation { *; }
+-keep class net.engio.mbassy.dispatch.ReflectiveHandlerInvocation { *; }
+-keep class net.engio.mbassy.subscription.SubscriptionContext { *; }
+-keepclassmembers class * extends net.engio.mbassy.dispatch.HandlerInvocation {
+    <init>(net.engio.mbassy.subscription.SubscriptionContext);
+}
+
+-keep class org.bouncycastle.jce.provider.BouncyCastleProvider { *; }
+
+# 修复Android5.0 VerifyError
+-keepclassmembers class androidx.compose.ui.platform.** { *; }

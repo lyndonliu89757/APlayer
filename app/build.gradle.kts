@@ -17,6 +17,7 @@ val localProperties = Properties().apply {
 
 kotlin.jvmToolchain(17)
 
+val useSmb = false
 android {
   namespace = "remix.myplayer"
   compileSdk = 35
@@ -26,14 +27,16 @@ android {
   defaultConfig {
     applicationId = "remix.myplayer"
     minSdk = 21
-    targetSdk = 33
-    versionCode = 205
-    versionName = "2.0.5"
+    targetSdk = 35
+    versionCode = 206
+    versionName = "2.0.6"
     vectorDrawables.useSupportLibrary = true
     multiDexEnabled = true
     setProperty("archivesBaseName", "APlayer-v$versionName")
 
     buildConfigField("String", "LASTFM_API_KEY", "\"${localProperties.getProperty("LASTFM_API_KEY", "")}\"")
+
+    buildConfigField("boolean", "SUPPORT_SMB", useSmb.toString())
 
     ndk.abiFilters += "arm64-v8a"
   }
@@ -85,22 +88,17 @@ android {
   sourceSets["main"].java.srcDir("src/third-party/jaudiotagger-android/src")
   externalNativeBuild.cmake.path = File("CMakeLists.txt")
 
-  flavorDimensions += listOf("channel", "updater")
+  flavorDimensions += listOf("distribution")
   productFlavors {
-    create("nonGoogle") {
-      dimension = "channel"
+    create("normal") {
+      dimension = "distribution"
       isDefault = true
     }
-    create("google") { dimension = "channel" }
-
-    create("withUpdater") {
-      dimension = "updater"
-      buildConfigField("boolean", "ENABLE_UPDATER", "true")
+    create("foss") {
+      dimension = "distribution"
     }
-    create("withoutUpdater") {
-      dimension = "updater"
-      isDefault = true
-      buildConfigField("boolean", "ENABLE_UPDATER", "false")
+    create("google") {
+      dimension = "distribution"
     }
   }
 
@@ -127,15 +125,6 @@ android {
   room.schemaDirectory("$projectDir/schemas")
 }
 
-androidComponents.beforeVariants { variantBuilder ->
-  if (variantBuilder.productFlavors.all {
-      (it.first == "channel" && it.second == "google") ||
-          (it.first == "updater" && it.second == "withUpdater")
-    }) {
-    variantBuilder.enable = false
-  }
-}
-
 baselineProfile {
   saveInSrc = true
   warnings.disabledVariants = false
@@ -157,7 +146,7 @@ dependencies {
   implementation(libs.glide.compose)
 
   implementation(libs.retrofit)
-  implementation(libs.retrofit.converter.gson)
+  implementation(libs.retrofit.converter.kotlinx.serialization)
 
   ksp(libs.room.compiler)
   implementation(libs.room.ktx)
@@ -168,6 +157,11 @@ dependencies {
   implementation(libs.xxpermissions)
   implementation(libs.sardine.android) {
     exclude(group = "xpp3", module = "xpp3")
+  }
+  if (useSmb) {
+    implementation(libs.smbj)
+  } else {
+    compileOnly(libs.smbj)
   }
   implementation(libs.slf4j)
   implementation(libs.timber)

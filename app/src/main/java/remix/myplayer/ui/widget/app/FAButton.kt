@@ -27,7 +27,7 @@ import remix.myplayer.ui.theme.LocalTheme
 fun FAButton(show: Boolean, onClick: () -> Unit) {
   AnimatedVisibility(
     show,
-    modifier = Modifier.padding(end = 38.dp, bottom = 80.dp),
+    modifier = Modifier.padding(end = 38.dp, bottom = 20.dp),
     enter = scaleIn() + fadeIn(),
     exit = scaleOut() + fadeOut()
   ) {
