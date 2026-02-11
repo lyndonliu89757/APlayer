@@ -31,13 +31,13 @@ import remix.myplayer.data.model.audio.Artist
 import remix.myplayer.data.model.audio.Folder
 import remix.myplayer.data.model.audio.Genre
 import remix.myplayer.data.model.audio.type
-import remix.myplayer.ui.clickWithRipple
-import remix.myplayer.misc.helper.MusicServiceRemote.setPlayQueue
+import remix.myplayer.util.ext.clickWithRipple
+import remix.myplayer.service.MusicServiceRemote.setPlayQueue
 import remix.myplayer.service.Command
 import remix.myplayer.service.MusicService.Companion.EXTRA_POSITION
 import remix.myplayer.ui.nav.LocalNavController
 import remix.myplayer.ui.nav.MessageNotifier
-import remix.myplayer.ui.nav.RouteCrop
+import remix.myplayer.ui.nav.RouteCustomCoverCrop
 import remix.myplayer.ui.theme.LocalTheme
 import remix.myplayer.ui.theme.popupButton
 import remix.myplayer.util.MusicUtil.makeCmdIntent
@@ -142,7 +142,7 @@ fun LibraryItemDropdownMenu(
               }
               // 设置封面
               R.string.set_album_cover, R.string.set_artist_cover, R.string.set_playlist_cover -> {
-                nav.navigate("${RouteCrop}/${model.getKey().toLong()}/${model.type()}")
+                nav.navigate("${RouteCustomCoverCrop}/${model.getKey().toLong()}/${model.type()}")
               }
               // 列表重命名
               R.string.rename -> {

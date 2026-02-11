@@ -20,7 +20,7 @@ import remix.myplayer.data.model.misc.LyricOrder
 import remix.myplayer.data.prefs.LyricPrefs
 import remix.myplayer.data.prefs.SettingPrefs
 import remix.myplayer.lyric.LyricManager
-import remix.myplayer.misc.updateIf
+import remix.myplayer.util.ext.updateIf
 import remix.myplayer.repo.usecase.DeleteSongUseCase
 import remix.myplayer.service.playback.MusicStateSource
 import remix.myplayer.ui.activity.base.BaseActivity

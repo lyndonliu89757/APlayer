@@ -10,8 +10,8 @@ import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.flow.distinctUntilChanged
-import remix.myplayer.misc.helper.LanguageHelper.AUTO
-import remix.myplayer.misc.helper.SortOrder
+import remix.myplayer.helper.LanguageHelper.AUTO
+import remix.myplayer.helper.SortOrder
 import remix.myplayer.util.Constants.MB
 import javax.inject.Inject
 import javax.inject.Singleton

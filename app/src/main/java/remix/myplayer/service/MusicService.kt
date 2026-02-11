@@ -48,16 +48,16 @@ import remix.myplayer.data.prefs.SettingPrefs.Companion.MODE_REPEAT
 import remix.myplayer.data.prefs.SettingPrefs.Companion.MODE_SHUFFLE
 import remix.myplayer.data.prefs.SettingPrefs.Companion.OPEN_SOFTWARE
 import remix.myplayer.lyric.LyricManager
-import remix.myplayer.misc.getPendingIntentFlag
-import remix.myplayer.misc.helper.EQHelper
-import remix.myplayer.misc.helper.LanguageHelper
-import remix.myplayer.misc.helper.MusicEventCallback
-import remix.myplayer.misc.helper.SleepTimer
-import remix.myplayer.misc.observer.MediaStoreObserver
+import remix.myplayer.util.ext.getPendingIntentFlag
+import remix.myplayer.helper.EQHelper
+import remix.myplayer.helper.LanguageHelper
+import remix.myplayer.service.MusicEventCallback
+import remix.myplayer.helper.SleepTimer
+import remix.myplayer.service.MediaStoreObserver
 import remix.myplayer.misc.receiver.ExitReceiver
 import remix.myplayer.misc.receiver.HeadsetPlugReceiver
 import remix.myplayer.misc.receiver.MediaButtonReceiver
-import remix.myplayer.misc.tryLaunch
+import remix.myplayer.util.ext.tryLaunch
 import remix.myplayer.repo.PlayListRepository
 import remix.myplayer.repo.SongRepository
 import remix.myplayer.repo.usecase.FetchMetaDataUseCase
@@ -234,11 +234,6 @@ class MusicService : BaseService(),
   private var progressJob: Job? = null
 
   /**
-   * 更新桌面组件
-   */
-  private var desktopWidgetJob: Job? = null
-
-  /**
    * 准备歌曲
    */
   private var prepareJob: Job? = null
@@ -246,7 +241,7 @@ class MusicService : BaseService(),
   /**
    * 操作类型
    */
-  private var lastOp: Int = -1
+  private var lastCommand: Int = -1
     set(value) {
       field = value
       pushPlaybackUiState()
@@ -562,9 +557,9 @@ class MusicService : BaseService(),
       }
 
       if (playModel == MODE_REPEAT) {
-        lastOp = Command.PLAY
+        lastCommand = Command.PLAY
       } else {
-        lastOp = Command.SKIP_TO_NEXT
+        lastCommand = Command.SKIP_TO_NEXT
       }
     }
 
@@ -798,7 +793,7 @@ class MusicService : BaseService(),
       isFavorite = isFavorite,
       speed = settingPrefs.speedValue,
       playModel = playModel,
-      lastOp = lastOp
+      lastOp = lastCommand
     )
     onPositionChange()
   }
@@ -992,7 +987,7 @@ class MusicService : BaseService(),
     }
 
     // 正在播放、已有通知在显示、用户操作过
-    if (isPlaying || notify.isNotifyShowing || lastOp != -1) {
+    if (isPlaying || notify.isNotifyShowing || lastCommand != -1) {
       updateNotification()
     }
     updateMediaSession()
@@ -1024,37 +1019,34 @@ class MusicService : BaseService(),
     }
   }
 
-  private fun handleCommand(intent: Intent?) {
-    Timber.v("handleCommand: %s", intent)
+  private fun handleCommand(intent: Intent?) = launch {
     if (intent == null || intent.extras == null) {
-      return
+      return@launch
     }
-    val control = intent.getIntExtra(EXTRA_COMMAND, -1)
-    this@MusicService.control = control
-    Timber.v("control: $control")
+    val command = intent.getIntExtra(EXTRA_COMMAND, -1)
+    Timber.v("handleCommand, command: $command")
 
-    if (control == Command.PLAY_AT || control == Command.SKIP_TO_PREVIOUS || control == Command.SKIP_TO_NEXT
-      || control == Command.PLAY_PAUSE || control == Command.PAUSE || control == Command.PLAY
-    ) {
-      // 判断下间隔时间
-      if ((control == Command.SKIP_TO_PREVIOUS || control == Command.SKIP_TO_NEXT) && System.currentTimeMillis() - lastCommandTime < INTERVAL_CONTROL) {
-        Timber.v("间隔小于500ms")
-        return
-      }
-      // 保存控制命令,用于播放界面判断动画
-      lastOp = control
-      if (playback.itemCount == 0) {
-        // 列表为空，尝试读取
-        Timber.v("列表为空，尝试读取")
-        tryLaunch {
-          load()
-        }
-        return
-      }
+    val now = System.currentTimeMillis()
+    if (now - lastCommandTime < INTERVAL_CONTROL) {
+      Timber.w("ignore command")
+      return@launch
     }
-    lastCommandTime = System.currentTimeMillis()
+    lastCommandTime = now
 
-    when (control) {
+    val requiresQueue = command == Command.PLAY_AT
+        || command == Command.SKIP_TO_PREVIOUS
+        || command == Command.SKIP_TO_NEXT
+        || command == Command.PLAY_PAUSE
+        || command == Command.PAUSE
+        || command == Command.PLAY
+
+    if (requiresQueue && playback.itemCount == 0) {
+      load()
+      if (playback.itemCount == 0) return@launch
+    }
+
+    lastCommand = command
+    when (command) {
       // 关闭通知栏
       Command.CLOSE_NOTIFY -> {
         notify.isNotifyShowing = false
@@ -1108,20 +1100,18 @@ class MusicService : BaseService(),
       // 临时播放一首歌曲
       Command.PLAY_TEMP -> {
         intent.getSerializableExtra(EXTRA_SONG)?.let {
-          lastOp = Command.PLAY_TEMP
+          lastCommand = Command.PLAY_TEMP
           val song = it as Song.Local
 
-          if (playback.getPlaylist().isEmpty()) {
-            playback.setPlaylist(listOf(song))
-          } else if (playback.currentSong?.id != song.id) {
-            playback.addToNextSong(song)
-            skipToNext()
-          } else {
+          if (playback.currentSong?.id == song.id) {
             // 如果是当前歌曲，从头播放
             seekTo(0)
+          } else {
+            playback.addToNextSong(song)
+            skipToNext()
           }
 
-          launch { playQueueStore.save(playback.getPlaylist()) }
+          playQueueStore.save(playback.getPlaylist())
           start(true)
         }
       }
@@ -1131,10 +1121,10 @@ class MusicService : BaseService(),
       }
       // 某一首歌曲添加至下一首播放
       Command.ADD_TO_NEXT_SONG -> {
-        val nextSong = intent.getSerializableExtra(EXTRA_SONG) as Song? ?: return
+        val nextSong = intent.getSerializableExtra(EXTRA_SONG) as Song? ?: return@launch
         if (playback.addToNextSong(nextSong)) {
           // 同步更新
-          launch { playQueueStore.save(playback.getPlaylist()) }
+          playQueueStore.save(playback.getPlaylist())
           pushPlaybackUiState()
           MessageNotifier.show(R.string.already_add_to_next_song)
         }
@@ -1298,11 +1288,6 @@ class MusicService : BaseService(),
     }
   }
 
-  private fun stopUpdateAppWidget() {
-    desktopWidgetJob?.cancel()
-    desktopWidgetJob = null
-  }
-
   private fun startSaveProgress() {
     if (progressJob != null) {
       return
@@ -1329,7 +1314,7 @@ class MusicService : BaseService(),
     if (wasPlaying) {
       start(true)
       wasPlaying = false
-      lastOp = Command.PLAY_PAUSE
+      lastCommand = Command.PLAY_PAUSE
     }
     volumeController.directTo(1f)
   }
@@ -1342,7 +1327,7 @@ class MusicService : BaseService(),
       return
     }
     if (isPlaying) {
-      lastOp = Command.PLAY_PAUSE
+      lastCommand = Command.PLAY_PAUSE
       pause()
     }
   }
@@ -1352,7 +1337,7 @@ class MusicService : BaseService(),
     Timber.v("onFocusLostTransient")
     wasPlaying = isPlaying
     if (isPlaying) {
-      lastOp = Command.PLAY_PAUSE
+      lastCommand = Command.PLAY_PAUSE
       pause()
     }
   }
@@ -1373,8 +1358,6 @@ class MusicService : BaseService(),
         screenOn = true
       } else {
         screenOn = false
-        //停止更新桌面部件
-        stopUpdateAppWidget()
       }
     }
   }

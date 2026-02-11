@@ -484,46 +484,6 @@ object Util {
   }
 
   /**
-   * 请求保存音频标签
-   */
-  fun requestSaveAudioTag(
-    activity: BaseActivity,
-    song: Song,
-    newTitle: String,
-    newAlbum: String,
-    newArtist: String,
-    newGenre: String,
-    newYear: String,
-    newTrackNum: String,
-    newLyrics: String
-  ) {
-    val fieldMap = EnumMap<FieldKey, String>(FieldKey::class.java).apply {
-      put(FieldKey.TITLE, newTitle)
-      put(FieldKey.ALBUM, newAlbum)
-      put(FieldKey.ARTIST, newArtist)
-      put(FieldKey.GENRE, newGenre)
-      put(FieldKey.YEAR, newYear)
-      put(FieldKey.TRACK, newTrackNum)
-      put(FieldKey.LYRICS, newLyrics)
-    }
-
-    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-      // Android 11+ 使用MediaStore API
-      activity.pendingWriteRequest = PendingWriteRequest(song, fieldMap)
-      activity.writeSongLauncher.launch(
-        IntentSenderRequest.Builder(
-          MediaStore.createWriteRequest(
-            context.contentResolver,
-            listOf(song.contentUri)
-          ).intentSender
-        ).build()
-      )
-    } else {
-      MessageNotifier.show("Not supported on Android 10 and below.")
-    }
-  }
-
-  /**
    * 新的保存音频标签方法（通过 ContentResolver）
    */
   suspend fun saveAudioTagViaContentResolver(

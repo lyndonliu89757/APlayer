@@ -1,4 +1,4 @@
-package remix.myplayer.misc.observer
+package remix.myplayer.service
 
 import android.annotation.SuppressLint
 import android.content.Intent

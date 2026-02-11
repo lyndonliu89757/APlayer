@@ -49,7 +49,6 @@ fun ListSong(
   Box(
     modifier = modifier
       .fillMaxWidth()
-      .height(IntrinsicSize.Min)
       .combinedClickable(
         interactionSource = remember { MutableInteractionSource() },
         indication = ripple(color = theme.ripple),

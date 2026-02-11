@@ -18,24 +18,27 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
-import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import remix.myplayer.R
 import remix.myplayer.data.model.audio.APlayerModel
 import remix.myplayer.data.model.audio.Song
-import remix.myplayer.ui.clickWithRipple
 import remix.myplayer.service.Command
 import remix.myplayer.service.MusicService.Companion.EXTRA_SONG
 import remix.myplayer.ui.activity.base.BaseActivity
 import remix.myplayer.ui.nav.LocalNavController
+import remix.myplayer.ui.nav.RouteCustomCoverCrop
+import remix.myplayer.ui.nav.RouteTagEdit
 import remix.myplayer.ui.theme.LocalTheme
+import remix.myplayer.util.Constants
 import remix.myplayer.util.MusicUtil
 import remix.myplayer.util.Util
+import remix.myplayer.util.ext.clickWithRipple
 import remix.myplayer.viewmodel.libraryViewModel
 import remix.myplayer.viewmodel.playbackViewModel
 import remix.myplayer.viewmodel.settingViewModel
+import remix.myplayer.viewmodel.tagEditViewModel
 
 @Composable
 fun SongPopupButton(
@@ -85,6 +88,7 @@ private fun SongDropdownMenu(
     )
   val activity = LocalActivity.current as? BaseActivity
   val settingVM = settingViewModel
+  val tagEditVM = tagEditViewModel
   val playbackVM = playbackViewModel
   val libraryVM = libraryViewModel
   val nav = LocalNavController.current
@@ -125,8 +129,13 @@ private fun SongDropdownMenu(
 
             R.string.song_edit -> {
               if (song.isLocal()) {
-                settingVM.showSongEditDialog(song)
+                tagEditVM.startTagEdit(song)
+                nav.navigate(RouteTagEdit)
               }
+            }
+
+            R.string.set_album_cover -> {
+              nav.navigate("${RouteCustomCoverCrop}/${song.albumId}/${Constants.ALBUM}")
             }
 
             R.string.share -> {

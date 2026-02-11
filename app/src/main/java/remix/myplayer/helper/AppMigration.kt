@@ -1,4 +1,4 @@
-package remix.myplayer.misc.helper
+package remix.myplayer.helper
 
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers

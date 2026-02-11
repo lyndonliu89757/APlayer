@@ -19,7 +19,7 @@ import remix.myplayer.R
 import remix.myplayer.ui.nav.DetailScreenRoute
 import remix.myplayer.ui.nav.LocalNavController
 import remix.myplayer.ui.theme.LocalTheme
-import remix.myplayer.ui.verticalScrollbar
+import remix.myplayer.util.ext.verticalScrollbar
 import remix.myplayer.ui.widget.library.list.ListItem
 import remix.myplayer.viewmodel.MultiSelectState
 import remix.myplayer.viewmodel.libraryViewModel

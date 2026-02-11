@@ -1,4 +1,4 @@
-package remix.myplayer.misc.helper
+package remix.myplayer.service
 
 import android.app.Activity
 import android.content.ComponentName

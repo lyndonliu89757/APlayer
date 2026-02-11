@@ -1,6 +1,7 @@
 package remix.myplayer.viewmodel
 
 import android.content.Context
+import android.net.Uri
 import android.provider.MediaStore.Audio
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
@@ -27,18 +28,20 @@ import remix.myplayer.data.model.audio.Genre
 import remix.myplayer.data.model.audio.Song
 import remix.myplayer.data.prefs.SettingPrefs
 import remix.myplayer.glide.UriFetcher
-import remix.myplayer.misc.checkWorkerThread
-import remix.myplayer.misc.helper.MusicEventCallback
 import remix.myplayer.repo.AlbumRepository
 import remix.myplayer.repo.ArtistRepository
 import remix.myplayer.repo.FolderRepository
 import remix.myplayer.repo.GenreRepository
 import remix.myplayer.repo.PlayListRepository
 import remix.myplayer.repo.SongRepository
+import remix.myplayer.repo.usecase.ExportPlayListUseCase
+import remix.myplayer.repo.usecase.PlayFromUriUseCase
+import remix.myplayer.service.MusicEventCallback
 import remix.myplayer.service.MusicService
 import remix.myplayer.ui.dialog.DialogState
 import remix.myplayer.ui.nav.MessageNotifier
 import remix.myplayer.util.PermissionUtil
+import remix.myplayer.util.ext.checkWorkerThread
 import timber.log.Timber
 import javax.inject.Inject
 
@@ -54,6 +57,8 @@ class LibraryViewModel @Inject constructor(
   private val folderRepo: FolderRepository,
   private val uriFetcher: UriFetcher,
   val settingPrefs: SettingPrefs,
+  private val exportPlayListUseCase: ExportPlayListUseCase,
+  private val playFromUriUseCase: PlayFromUriUseCase
 ) : ViewModel(), MusicEventCallback {
 
   private var hasPermission = false
@@ -76,14 +81,6 @@ class LibraryViewModel @Inject constructor(
   private val _folders = MutableStateFlow<List<Folder>>(emptyList())
   val folders: StateFlow<List<Folder>> = _folders.asStateFlow()
 
-  init {
-    // load all media
-    hasPermission = PermissionUtil.hasNecessaryPermission()
-    if (hasPermission) {
-      fetchMedia()
-    }
-  }
-
   private val _createPlaylistState = MutableStateFlow(CreatePlaylistState())
   val createPlaylistState = _createPlaylistState.asStateFlow()
 
@@ -97,6 +94,14 @@ class LibraryViewModel @Inject constructor(
 
   fun updateNewPlaylistName(name: String) {
     _createPlaylistState.update { it.copy(name = name) }
+  }
+
+  init {
+    // load all media
+    hasPermission = PermissionUtil.hasNecessaryPermission()
+    if (hasPermission) {
+      fetchMedia()
+    }
   }
 
   fun insertPlayList(name: String, onSuccess: (Long) -> Unit) {
@@ -131,6 +136,28 @@ class LibraryViewModel @Inject constructor(
     }
   }
 
+  fun loadSongsByModels(models: List<APlayerModel>) = songRepo.getSongsByModels(models)
+
+  fun loadSong(selection: String?, selectionValues: Array<String?>?, sortOrder: String? = null) =
+    songRepo.getSongs(selection, selectionValues, sortOrder)
+
+  fun loadLastAddedSongs() = songRepo.getLastAddedSongs()
+
+  fun searchSong(key: String): List<Song> {
+    checkWorkerThread()
+    val likeKey = "%$key%"
+    return songRepo.getSongs(
+      "(" +
+          Audio.Media.TITLE + " LIKE ? OR " +
+          Audio.ArtistColumns.ARTIST + " LIKE ? OR " +
+          Audio.AlbumColumns.ALBUM + " LIKE ? OR " +
+          Audio.Media.DISPLAY_NAME + " LIKE ?" +
+          ")",
+      arrayOf(likeKey, likeKey, likeKey, likeKey),
+      settingPrefs.songSortOrder
+    )
+  }
+
   fun updatePlayList(playList: PlayList) {
     viewModelScope.launch {
       try {
@@ -151,15 +178,16 @@ class LibraryViewModel @Inject constructor(
     }
   }
 
-  fun loadSongsByModels(models: List<APlayerModel>) = songRepo.getSongsByModels(models)
+  fun exportPlayListToFile(playList: PlayList?, uri: Uri) {
+    viewModelScope.launch {
+      exportPlayListUseCase(playList, uri)
+    }
+  }
 
-  fun searchSong(key: String): List<Song> {
-    checkWorkerThread()
-    return songRepo.getSongs(
-      Audio.Media.TITLE + " LIKE ? OR " + Audio.ArtistColumns.ARTIST + " LIKE ? OR " + Audio.AlbumColumns.ALBUM + " LIKE ?",
-      arrayOf("%$key%", "%$key%", "%$key%"),
-      settingPrefs.songSortOrder
-    )
+  fun playFromUri(uri: Uri) {
+    viewModelScope.launch {
+      playFromUriUseCase(uri)
+    }
   }
 
   fun fetchMedia(

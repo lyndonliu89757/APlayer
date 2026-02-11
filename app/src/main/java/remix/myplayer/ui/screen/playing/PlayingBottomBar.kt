@@ -41,9 +41,9 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import remix.myplayer.R
-import remix.myplayer.misc.CenterInBox
+import remix.myplayer.util.ext.CenterInBox
 import remix.myplayer.service.playback.PlaybackUiState
-import remix.myplayer.ui.clickWithRipple
+import remix.myplayer.util.ext.clickWithRipple
 import remix.myplayer.ui.widget.common.LineSlider
 import remix.myplayer.ui.widget.common.defaultLineSliderProperties
 

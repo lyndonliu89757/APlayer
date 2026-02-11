@@ -1,6 +1,5 @@
 package remix.myplayer.lyric
 
-import android.app.Activity
 import android.app.Service
 import android.content.Context
 import android.graphics.PixelFormat
@@ -40,15 +39,13 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
-import remix.myplayer.R
 import remix.myplayer.data.model.audio.Song
 import remix.myplayer.data.prefs.DesktopLyricPrefs
 import remix.myplayer.data.prefs.LyricPrefs
 import remix.myplayer.data.prefs.delegate
 import remix.myplayer.lyric.provider.ILyricsProvider
-import remix.myplayer.misc.helper.MusicServiceRemote
+import remix.myplayer.service.MusicServiceRemote
 import remix.myplayer.service.playback.MusicStateSource
-import remix.myplayer.ui.nav.MessageNotifier
 import remix.myplayer.ui.widget.lyric.DesktopLyricOverlay
 import remix.myplayer.ui.widget.lyric.DesktopLyricUiState
 import remix.myplayer.util.Util
@@ -167,7 +164,7 @@ class LyricManager @Inject constructor(
         updateNotification()
         updatePlaybackState()
       }
-      
+
       ensureDesktopLyric()
     }
 
@@ -319,10 +316,7 @@ class LyricManager @Inject constructor(
   private fun getProgressOfLine(line: LyricLine, time: Long, endTime: Long): Double {
     if (endTime <= line.time) {
       Timber.tag(TAG).w("Invalid line range, time=$time, lineTime=${line.time}, endTime=$endTime")
-      return when (line) {
-        is PerWordLyricLine -> if (time > line.time) line.words.size.toDouble() else 0.0
-        else -> if (time > line.time) 1.0 else 0.0
-      }
+      return computeLineProgress(line, time, endTime)
     }
 
     val clampedTime = time.coerceIn(line.time, endTime)
@@ -330,11 +324,7 @@ class LyricManager @Inject constructor(
       Timber.tag(TAG).w("Clamped time, time=$time, lineTime=${line.time}, endTime=$endTime")
     }
 
-    return if (line is PerWordLyricLine) {
-      line.getProgress(clampedTime, endTime)
-    } else {
-      (clampedTime - line.time).toDouble() / (endTime - line.time)
-    }
+    return computeLineProgress(line, time, endTime)
   }
 
   private fun getCurrentNextLine(
@@ -475,6 +465,29 @@ class LyricManager @Inject constructor(
   companion object {
 
     private const val TAG = "LyricsManager"
+
+    /**
+     * 计算当前行的播放进度：普通歌词返回 0~1，逐字歌词返回 0~words.size
+     *
+     * @param line 当前歌词行
+     * @param time 当前播放时间
+     * @param endTime 当前行的结束时间
+     */
+    fun computeLineProgress(line: LyricLine, time: Long, endTime: Long): Double {
+      if (endTime <= line.time) {
+        return when (line) {
+          is PerWordLyricLine -> if (time > line.time) line.words.size.toDouble() else 0.0
+          else -> if (time > line.time) 1.0 else 0.0
+        }
+      }
+
+      val clampedTime = time.coerceIn(line.time, endTime)
+      return if (line is PerWordLyricLine) {
+        line.getProgress(clampedTime, endTime)
+      } else {
+        (clampedTime - line.time).toDouble() / (endTime - line.time)
+      }
+    }
 
     const val ACTION_LYRIC = "action_lyric"
 

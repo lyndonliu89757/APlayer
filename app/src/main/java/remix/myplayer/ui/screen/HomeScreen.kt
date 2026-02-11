@@ -74,6 +74,7 @@ import remix.myplayer.ui.theme.LocalTheme
 import remix.myplayer.ui.widget.app.BottomBar
 import remix.myplayer.ui.widget.app.FAButton
 import remix.myplayer.ui.widget.app.MultiSelectBar
+import remix.myplayer.ui.widget.common.BackPressHandler
 import remix.myplayer.ui.widget.common.TextPrimary
 import remix.myplayer.ui.widget.common.defaultAppBarActions
 import remix.myplayer.ui.widget.popup.ScreenPopupButton
@@ -345,31 +346,5 @@ fun HomeScreen() {
         .background(theme.background)
     )
     BottomBar()
-  }
-}
-
-@Composable
-fun BackPressHandler(
-  enabled: Boolean = true,
-  onBackPressed: () -> Unit
-) {
-  val dispatcher = LocalOnBackPressedDispatcherOwner.current?.onBackPressedDispatcher
-  val backCallback = remember {
-    object : OnBackPressedCallback(enabled) {
-      override fun handleOnBackPressed() {
-        onBackPressed()
-      }
-    }
-  }
-
-  LaunchedEffect(enabled) {
-    backCallback.isEnabled = enabled
-  }
-
-  DisposableEffect(dispatcher) {
-    dispatcher?.addCallback(backCallback)
-    onDispose {
-      backCallback.remove()
-    }
   }
 }

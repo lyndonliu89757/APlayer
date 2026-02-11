@@ -17,6 +17,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.core.net.toUri
 import androidx.navigation.NamedNavArgument
 import androidx.navigation.NavBackStackEntry
@@ -34,12 +35,14 @@ import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.serializer
 import remix.myplayer.data.db.room.entity.PlayList
+import remix.myplayer.data.db.room.entity.Smb
 import remix.myplayer.data.db.room.entity.WebDav
 import remix.myplayer.data.model.audio.APlayerModel
 import remix.myplayer.data.model.audio.Album
 import remix.myplayer.data.model.audio.Artist
 import remix.myplayer.data.model.audio.Folder
 import remix.myplayer.data.model.audio.Genre
+import remix.myplayer.misc.cache.DiskCache
 import remix.myplayer.ui.dialog.DialogContainer
 import remix.myplayer.ui.screen.CustomSortScreen
 import remix.myplayer.ui.screen.EQScreen
@@ -47,6 +50,7 @@ import remix.myplayer.ui.screen.HomeScreen
 import remix.myplayer.ui.screen.RemoteScreen
 import remix.myplayer.ui.screen.SearchScreen
 import remix.myplayer.ui.screen.SongChooserScreen
+import remix.myplayer.ui.screen.TagEditScreen
 import remix.myplayer.ui.screen.crop.CropScreen
 import remix.myplayer.ui.screen.detail.DetailScreen
 import remix.myplayer.ui.screen.library.AlbumScreen
@@ -54,8 +58,11 @@ import remix.myplayer.ui.screen.library.ArtistScreen
 import remix.myplayer.ui.screen.library.FolderScreen
 import remix.myplayer.ui.screen.playing.PlayingScreen
 import remix.myplayer.ui.screen.setting.SettingScreen
+import remix.myplayer.ui.screen.smb.SmbDetailScreen
 import remix.myplayer.ui.screen.webdav.WebDavDetailScreen
-import remix.myplayer.ui.screen.webdav.WebDavScreen
+import remix.myplayer.util.Constants
+import remix.myplayer.viewmodel.libraryViewModel
+import java.io.File
 import kotlin.reflect.KClass
 import kotlin.reflect.typeOf
 
@@ -69,8 +76,9 @@ const val RouteSongChoose = "song_choose"
 const val RoutePlayingScreen = "playing_screen"
 const val RouteCustomSort = "custom_sort"
 const val RouteSearch = "search"
-const val RouteSmb = "smb"
-const val RouteCrop = "crop"
+const val RouteTagEdit = "tag_edit"
+const val RouteCustomCoverCrop = "custom_cover_crop"
+const val RouteTagEditCrop = "tag_edit_crop"
 const val RouteEq = "eq"
 
 val playingScreenDeepLink = "aplayer://playingScreen".toUri()
@@ -168,8 +176,8 @@ fun AppNav() {
           SearchScreen()
         }
 
-        normalAnimatedScreen(RouteSmb) {
-          WebDavScreen()
+        normalAnimatedScreen(RouteTagEdit) {
+          TagEditScreen(it)
         }
 
         composable<WebDav>(
@@ -182,15 +190,76 @@ fun AppNav() {
           WebDavDetailScreen(webDav)
         }
 
+        composable<Smb>(
+          enterTransition = enterTransition(),
+          exitTransition = exitTransition(),
+          popEnterTransition = popEnterTransition(),
+          popExitTransition = popExitTransition(),
+        ) {
+          val smb = it.toRoute<Smb>()
+          SmbDetailScreen(smb)
+        }
+
         normalAnimatedScreen(
-          "${RouteCrop}/{id}/{type}",
+          "${RouteCustomCoverCrop}/{id}/{type}",
           arguments = listOf(
             navArgument("id") { type = NavType.LongType },
             navArgument("type") { type = NavType.IntType })
         ) {
           val id = it.arguments?.getLong("id") ?: return@normalAnimatedScreen
           val type = it.arguments?.getInt("type") ?: return@normalAnimatedScreen
-          CropScreen(id, type)
+          val context = LocalContext.current
+          val nav = LocalNavController.current
+          val libraryVM = libraryViewModel
+
+          val destinationUri = remember(id, type) {
+            val cacheDir = DiskCache.getDiskCacheDir(context, "thumbnail")
+            if (!cacheDir.exists() && !cacheDir.mkdir()) {
+              Uri.EMPTY
+            } else {
+              val file = File(cacheDir, "$type-${id}.jpg")
+              Uri.fromFile(file)
+            }
+          }
+
+          CropScreen(
+            destinationUri = destinationUri,
+            onCropSuccess = {
+              libraryVM.fetchMedia(
+                clear = true,
+                updateAlbumVersion = type == Constants.ALBUM,
+                updateArtistVersion = type == Constants.ARTIST,
+                updatePlayListVersion = type == Constants.PLAYLIST,
+              )
+              nav.popBackStack()
+            },
+            onCancel = {
+              nav.popBackStack()
+            }
+          )
+        }
+
+        composable(
+          "$RouteTagEditCrop/{uri}",
+          arguments = listOf(navArgument("uri") { type = NavType.StringType })
+        ) {
+          val uriString = it.arguments?.getString("uri") ?: return@composable
+          val destinationUri = Uri.decode(uriString).toUri()
+          val nav = LocalNavController.current
+
+          CropScreen(
+            destinationUri = destinationUri,
+            onCropSuccess = {
+              nav.previousBackStackEntry?.savedStateHandle?.set(
+                "song_crop_result",
+                System.currentTimeMillis()
+              )
+              nav.popBackStack()
+            },
+            onCancel = {
+              nav.popBackStack()
+            }
+          )
         }
 
         normalAnimatedScreen(RouteEq) {

@@ -16,7 +16,7 @@ import androidx.core.app.ServiceCompat
 import androidx.core.app.TaskStackBuilder
 import com.bumptech.glide.request.target.CustomTarget
 import remix.myplayer.R
-import remix.myplayer.misc.getPendingIntentFlag
+import remix.myplayer.util.ext.getPendingIntentFlag
 import remix.myplayer.service.MusicService
 import remix.myplayer.service.MusicService.Companion.EXTRA_COMMAND
 import remix.myplayer.service.playback.MusicStateSource

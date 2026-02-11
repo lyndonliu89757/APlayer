@@ -36,7 +36,7 @@ import remix.myplayer.R
 import remix.myplayer.service.Command
 import remix.myplayer.service.MusicService
 import remix.myplayer.service.MusicService.Companion.EXTRA_COMMAND
-import remix.myplayer.ui.clickableWithoutRipple
+import remix.myplayer.util.ext.clickableWithoutRipple
 import remix.myplayer.ui.nav.LocalNavController
 import remix.myplayer.ui.nav.RoutePlayingScreen
 import remix.myplayer.ui.theme.LocalTheme

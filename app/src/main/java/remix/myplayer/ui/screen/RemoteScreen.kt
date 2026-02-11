@@ -24,7 +24,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import remix.myplayer.R
 import remix.myplayer.data.db.room.entity.Smb
 import remix.myplayer.data.db.room.entity.WebDav
-import remix.myplayer.ui.clickWithRipple
+import remix.myplayer.util.ext.clickWithRipple
 import remix.myplayer.ui.dialog.AddSmbDialog
 import remix.myplayer.ui.dialog.AddWebDavDialog
 import remix.myplayer.ui.nav.LocalNavController

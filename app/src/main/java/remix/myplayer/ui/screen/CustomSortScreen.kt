@@ -33,7 +33,7 @@ import kotlinx.coroutines.withContext
 import remix.myplayer.R
 import remix.myplayer.data.db.room.entity.PlayList
 import remix.myplayer.data.model.audio.Song
-import remix.myplayer.ui.clickableWithoutRipple
+import remix.myplayer.util.ext.clickableWithoutRipple
 import remix.myplayer.ui.nav.LocalNavController
 import remix.myplayer.ui.theme.LocalTheme
 import remix.myplayer.ui.widget.common.CommonAppBar

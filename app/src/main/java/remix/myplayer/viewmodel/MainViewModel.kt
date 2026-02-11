@@ -18,7 +18,7 @@ import remix.myplayer.data.model.audio.APlayerModel
 import remix.myplayer.data.model.github.Release
 import remix.myplayer.misc.update.DownloadWorker
 import remix.myplayer.misc.update.InAppUpdater
-import remix.myplayer.misc.updateIf
+import remix.myplayer.util.ext.updateIf
 import remix.myplayer.ui.dialog.DialogState
 import remix.myplayer.ui.dialog.runWithLoadingResult
 import remix.myplayer.ui.nav.MessageNotifier

@@ -22,9 +22,9 @@ import remix.myplayer.data.model.audio.Folder
 import remix.myplayer.data.model.audio.Genre
 import remix.myplayer.data.model.audio.Song
 import remix.myplayer.data.prefs.SettingPrefs
-import remix.myplayer.misc.checkWorkerThread
-import remix.myplayer.misc.helper.SortOrder
-import remix.myplayer.util.ItemsSorter
+import remix.myplayer.util.ext.checkWorkerThread
+import remix.myplayer.helper.SortOrder
+import remix.myplayer.helper.ItemsSorter
 import timber.log.Timber
 import java.util.Calendar
 import java.util.Date

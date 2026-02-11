@@ -15,8 +15,8 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import remix.myplayer.data.db.room.entity.WebDav
 import remix.myplayer.data.model.audio.Song
-import remix.myplayer.misc.isAudio
-import remix.myplayer.misc.updateIf
+import remix.myplayer.util.ext.isAudio
+import remix.myplayer.util.ext.updateIf
 import remix.myplayer.repo.WebDavRepository
 import remix.myplayer.repo.usecase.FetchMetaDataUseCase
 import remix.myplayer.ui.dialog.DialogState

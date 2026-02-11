@@ -23,7 +23,7 @@ import remix.myplayer.data.prefs.SettingPrefs.Companion.DOWNLOAD_COVER_WIFI_ONLY
 import remix.myplayer.data.prefs.SettingPrefs.Companion.DOWNLOAD_LASTFM
 import remix.myplayer.lyric.provider.SearchScorer
 import remix.myplayer.misc.cache.DiskCache
-import remix.myplayer.misc.checkWorkerThread
+import remix.myplayer.util.ext.checkWorkerThread
 import remix.myplayer.repo.SongRepository
 import remix.myplayer.repo.usecase.FetchMetaDataUseCase
 import remix.myplayer.request.netease.NetEaseClient

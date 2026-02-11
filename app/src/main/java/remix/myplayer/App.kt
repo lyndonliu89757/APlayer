@@ -6,11 +6,11 @@ import androidx.multidex.MultiDex
 import androidx.multidex.MultiDexApplication
 import com.hjq.permissions.XXPermissions
 import dagger.hilt.android.HiltAndroidApp
-import remix.myplayer.misc.helper.AppMigration
-import remix.myplayer.misc.helper.LanguageHelper.onConfigurationChanged
-import remix.myplayer.misc.helper.LanguageHelper.saveSystemCurrentLanguage
-import remix.myplayer.misc.helper.LanguageHelper.setApplicationLanguage
-import remix.myplayer.misc.helper.LanguageHelper.setLocal
+import remix.myplayer.helper.AppMigration
+import remix.myplayer.helper.LanguageHelper.onConfigurationChanged
+import remix.myplayer.helper.LanguageHelper.saveSystemCurrentLanguage
+import remix.myplayer.helper.LanguageHelper.setApplicationLanguage
+import remix.myplayer.helper.LanguageHelper.setLocal
 import remix.myplayer.misc.manager.APlayerActivityManager
 import timber.log.Timber
 import javax.inject.Inject

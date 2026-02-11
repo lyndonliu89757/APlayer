@@ -31,7 +31,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.graphics.toColorInt
 import remix.myplayer.R
-import remix.myplayer.misc.toHexString
+import remix.myplayer.util.ext.toHexString
 import remix.myplayer.ui.theme.LocalTheme
 import remix.myplayer.ui.widget.common.LineSlider
 import remix.myplayer.ui.widget.common.TextPrimary

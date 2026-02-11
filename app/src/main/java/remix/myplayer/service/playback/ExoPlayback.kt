@@ -33,9 +33,9 @@ import remix.myplayer.data.model.audio.Song
 import remix.myplayer.data.prefs.SettingPrefs.Companion.MODE_LOOP
 import remix.myplayer.data.prefs.SettingPrefs.Companion.MODE_REPEAT
 import remix.myplayer.data.prefs.SettingPrefs.Companion.MODE_SHUFFLE
-import remix.myplayer.misc.checkMainThread
 import remix.myplayer.service.playback.Playback.PlayerCallback
 import remix.myplayer.util.Constants.MB
+import remix.myplayer.util.ext.checkMainThread
 import timber.log.Timber
 import java.io.File
 
@@ -220,6 +220,11 @@ class ExoPlayback(private val context: Context) : Playback {
       return false
     }
 
+    if (player.mediaItemCount == 0) {
+      addSongs(listOf(nextSong), 0)
+      return true
+    }
+
     var existIndex = findIndexOfSong(nextSong.id)
 
     // 无论什么模式，物理上都移动/插入到 currentIndex + 1
@@ -227,11 +232,10 @@ class ExoPlayback(private val context: Context) : Playback {
 
     if (existIndex == C.INDEX_UNSET) {
       addSongs(listOf(nextSong), targetIndex)
-      existIndex = targetIndex
     } else {
       player.moveMediaItem(existIndex, targetIndex)
-      existIndex = if (existIndex < targetIndex) targetIndex - 1 else targetIndex
     }
+    existIndex = targetIndex
 
     // 如果是随机模式，还需要调整 ShuffleOrder 确保逻辑上也是下一首
     if (player.shuffleModeEnabled) {
@@ -290,6 +294,14 @@ class ExoPlayback(private val context: Context) : Playback {
     }
   }
 
+  fun reshuffleWithWeighted() {
+    val length = player.mediaItemCount
+    if (length > 0) {
+      val shuffleOrder = WeightedShuffleOrder(length)
+      player.shuffleOrder = shuffleOrder
+    }
+  }
+
   override fun setMode(mode: Int) {
     checkMainThread()
     when (mode) {
@@ -306,6 +318,7 @@ class ExoPlayback(private val context: Context) : Playback {
       MODE_SHUFFLE -> {
         player.repeatMode = Player.REPEAT_MODE_ALL
         player.shuffleModeEnabled = true
+        reshuffleWithWeighted()
       }
 
       else -> {
@@ -352,6 +365,7 @@ class ExoPlayback(private val context: Context) : Playback {
 
   override fun skipTo(index: Int) {
     checkMainThread()
+    reshuffleWithWeighted()
     player.seekTo(index, C.TIME_UNSET)
     ensurePrepared()
   }

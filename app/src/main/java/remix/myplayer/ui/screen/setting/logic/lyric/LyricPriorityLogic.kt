@@ -22,7 +22,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import remix.myplayer.R
-import remix.myplayer.misc.ShowLyricTipDialog
+import remix.myplayer.util.ext.ShowLyricTipDialog
 import remix.myplayer.ui.dialog.DialogState
 import remix.myplayer.ui.dialog.NormalDialog
 import remix.myplayer.ui.dialog.rememberDialogState

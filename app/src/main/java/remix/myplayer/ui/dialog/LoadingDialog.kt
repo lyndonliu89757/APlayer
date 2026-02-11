@@ -21,7 +21,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import remix.myplayer.R
-import remix.myplayer.misc.updateIf
+import remix.myplayer.util.ext.updateIf
 import remix.myplayer.ui.theme.LocalTheme
 import remix.myplayer.ui.widget.common.TextPrimary
 import timber.log.Timber

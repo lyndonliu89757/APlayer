@@ -15,11 +15,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import remix.myplayer.misc.spanCount
+import remix.myplayer.util.ext.spanCount
 import remix.myplayer.ui.nav.DetailScreenRoute
 import remix.myplayer.ui.nav.LocalNavController
 import remix.myplayer.ui.theme.LocalTheme
-import remix.myplayer.ui.verticalScrollbar
+import remix.myplayer.util.ext.verticalScrollbar
 import remix.myplayer.ui.widget.library.list.GridItem
 import remix.myplayer.viewmodel.MultiSelectState
 import remix.myplayer.viewmodel.libraryViewModel

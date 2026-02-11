@@ -29,6 +29,7 @@ import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SearchBarDefaults
 import androidx.compose.material3.TextFieldDefaults
@@ -36,7 +37,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -63,6 +63,7 @@ import remix.myplayer.service.Command
 import remix.myplayer.service.MusicService
 import remix.myplayer.ui.theme.LocalTheme
 import remix.myplayer.ui.widget.app.MultiSelectBar
+import remix.myplayer.ui.widget.common.BackPressHandler
 import remix.myplayer.ui.widget.common.CommonAppBar
 import remix.myplayer.ui.widget.common.TextPrimary
 import remix.myplayer.ui.widget.common.TextSecondary
@@ -82,10 +83,12 @@ fun SearchScreen() {
 
   val playbackState by playbackViewModel.playbackUiState.collectAsStateWithLifecycle()
   val multiSelectState by mainVM.multiSelectState.collectAsStateWithLifecycle()
+  val librarySongs by libraryVM.songs.collectAsStateWithLifecycle()
   val listState = rememberLazyListState()
-  val songs = remember {
-    mutableStateListOf<Song>()
+  var songs by remember {
+    mutableStateOf(emptyList<Song>())
   }
+  var isLoading by remember { mutableStateOf(false) }
   val context = LocalContext.current
 
   val showMultiSelect = multiSelectState.isShowInSearch()
@@ -134,7 +137,14 @@ fun SearchScreen() {
         .fillMaxSize(),
       contentAlignment = Alignment.TopCenter
     ) {
-      if (songs.isEmpty()) {
+      if (isLoading) {
+        LinearProgressIndicator(
+          modifier = Modifier
+            .fillMaxWidth()
+            .align(Alignment.TopCenter),
+          color = LocalTheme.current.primary
+        )
+      } else if (songs.isEmpty()) {
         TextSecondary(
           modifier = Modifier.padding(top = 64.dp),
           text = stringResource(R.string.no_search_result), fontSize = 16.sp
@@ -184,16 +194,19 @@ fun SearchScreen() {
     }
   }
 
-  LaunchedEffect(searchKey) {
-    val result = withContext(Dispatchers.IO) {
-      if (searchKey.isNotEmpty()) {
-        libraryVM.searchSong(searchKey)
-      } else {
-        emptyList()
-      }
+  LaunchedEffect(searchKey, librarySongs) {
+    if (searchKey.isEmpty()) {
+      songs = emptyList()
+      isLoading = false
+      return@LaunchedEffect
     }
-    songs.clear()
-    songs.addAll(result)
+    isLoading = true
+    delay(300)
+    val result = withContext(Dispatchers.IO) {
+      libraryVM.searchSong(searchKey)
+    }
+    songs = result
+    isLoading = false
   }
 }
 

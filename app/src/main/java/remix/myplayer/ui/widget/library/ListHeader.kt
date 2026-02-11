@@ -28,8 +28,8 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import remix.myplayer.R
 import remix.myplayer.data.model.audio.Song
 import remix.myplayer.data.prefs.SettingPrefs
-import remix.myplayer.ui.clickableWithoutRipple
-import remix.myplayer.misc.helper.MusicServiceRemote.setPlayQueue
+import remix.myplayer.util.ext.clickableWithoutRipple
+import remix.myplayer.service.MusicServiceRemote.setPlayQueue
 import remix.myplayer.service.Command
 import remix.myplayer.ui.nav.MessageNotifier
 import remix.myplayer.ui.screen.playing.PlayModeMap

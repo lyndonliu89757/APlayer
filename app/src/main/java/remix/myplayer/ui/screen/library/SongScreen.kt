@@ -17,10 +17,10 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import kotlinx.coroutines.launch
-import remix.myplayer.misc.helper.MusicServiceRemote.setPlayQueue
+import remix.myplayer.service.MusicServiceRemote.setPlayQueue
 import remix.myplayer.service.Command
 import remix.myplayer.service.MusicService
-import remix.myplayer.ui.verticalScrollbar
+import remix.myplayer.util.ext.verticalScrollbar
 import remix.myplayer.ui.widget.library.SongListHeader
 import remix.myplayer.ui.widget.library.list.ListSong
 import remix.myplayer.util.MusicUtil
